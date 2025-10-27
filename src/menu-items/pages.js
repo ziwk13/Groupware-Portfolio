@@ -16,14 +16,13 @@ const icons = {
 
 const pages = {
   id: 'pages',
-  title: 'pages',
-  caption: 'pages-caption',
+  title: '메뉴',
   icon: icons.IconKey,
   type: 'group',
   children: [
     {
-      id: 'maintenance',
-      title: 'maintenance',
+      id: 'gntaegwanry',
+      title: '근태관리',
       type: 'collapse',
       icon: icons.IconBug,
       children: [
@@ -40,37 +39,73 @@ const pages = {
           type: 'item',
           url: '/pages/500',
           target: true
-        },
+        }
+      ]
+    },{
+      id: 'calendar',
+      title: '캘린더',
+      type: 'collapse',
+      icon: icons.IconBug,
+      children: [
         {
-          id: 'coming-soon',
-          title: 'coming-soon',
-          type: 'collapse',
-          children: [
-            {
-              id: 'coming-soon1',
-              title: 'coming-soon 01',
-              type: 'item',
-              url: '/pages/coming-soon1',
-              target: true
-            },
-            {
-              id: 'coming-soon2',
-              title: 'coming-soon 02',
-              type: 'item',
-              url: '/pages/coming-soon2',
-              target: true
-            }
-          ]
-        },
-        {
-          id: 'under-construction',
-          title: 'under-construction',
+          id: 'error',
+          title: 'error-404',
           type: 'item',
-          url: '/pages/under-construction',
+          url: '/pages/error',
+          target: true
+        },
+        {
+          id: '500',
+          title: 'error-500',
+          type: 'item',
+          url: '/pages/500',
+          target: true
+        }
+      ]
+    }, {
+      id: 'mailham',
+      title: '메일함',
+      type: 'collapse',
+      icon: icons.IconBug,
+      children: [
+        {
+          id: 'error',
+          title: 'error-404',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },
+        {
+          id: '500',
+          title: 'error-500',
+          type: 'item',
+          url: '/pages/500',
+          target: true
+        }
+      ]
+    }, {
+      id: 'upmoo1g',
+      title: '업무일지',
+      type: 'collapse',
+      icon: icons.IconBug,
+      children: [
+        {
+          id: 'error',
+          title: 'error-404',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },
+        {
+          id: '500',
+          title: 'error-500',
+          type: 'item',
+          url: '/pages/500',
           target: true
         }
       ]
     }
+
   ]
 };
 
