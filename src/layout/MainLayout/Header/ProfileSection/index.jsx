@@ -26,7 +26,6 @@ import Box from '@mui/material/Box';
 import { FormattedMessage } from 'react-intl';
 
 // project imports
-import UpgradePlanCard from './UpgradePlanCard';
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
 import useAuth from 'hooks/useAuth';
@@ -143,10 +142,10 @@ export default function ProfileSection() {
                     <Box sx={{ p: 2, pb: 0 }}>
                       <Stack>
                         <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-                          <Typography variant="h4">Good Morning,</Typography>
                           <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
                             {user?.name}
                           </Typography>
+                          <Typography variant="h4">{user?.position}님 안녕하세요.</Typography>
                         </Stack>
                         <Typography variant="subtitle2">Project Admin</Typography>
                       </Stack>
@@ -176,7 +175,6 @@ export default function ProfileSection() {
                         '&::-webkit-scrollbar': { width: 5 }
                       }}
                     >
-                      <UpgradePlanCard />
                       <Divider />
                       <Card sx={{ bgcolor: 'primary.light', ...theme.applyStyles('dark', { bgcolor: 'dark.800' }), my: 2 }}>
                         <CardContent>
