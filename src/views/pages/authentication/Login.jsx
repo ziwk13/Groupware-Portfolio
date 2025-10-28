@@ -64,11 +64,38 @@ export default function Login() {
                   </Link>
                 </Box>
                 <Stack sx={{ alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                  <Typography variant={downMD ? 'h3' : 'h2'} sx={{ color: 'secondary.main' }}>
+                    Hi, Welcome Back
+                  </Typography>
+                  <Typography variant="caption" sx={{ fontSize: '16px', textAlign: { xs: 'center', md: 'inherit' } }}>
+                    Enter your credentials to continue
+                  </Typography>
                 </Stack>
                 <Box sx={{ width: 1 }}>{AuthLoginComponent && <AuthLoginComponent />}</Box>
+                <Divider sx={{ width: 1 }} />
+                <Stack sx={{ alignItems: 'center' }}>
+                  <Typography
+                    component={Link}
+                    to={isLoggedIn ? '/pages/register/register3' : authParam ? `/register?auth=${authParam}` : '/register'}
+                    variant="subtitle1"
+                    sx={{ textDecoration: 'none' }}
+                  >
+                    Don&apos;t have an account?
+                  </Typography>
+                </Stack>
               </Stack>
             </AuthCardWrapper>
-
+            {!isLoggedIn && (
+              <Box
+                sx={{
+                  maxWidth: { xs: 400, lg: 475 },
+                  margin: { xs: 2.5, md: 3 },
+                  '& > *': { flexGrow: 1, flexBasis: '50%' }
+                }}
+              >
+                <LoginProvider currentLoginWith={APP_AUTH} />
+              </Box>
+            )}
           </Box>
         </Stack>
         <Box sx={{ px: 3, my: 3 }}>
