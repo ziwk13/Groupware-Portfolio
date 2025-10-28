@@ -33,7 +33,6 @@ export default function JWTLogin({ ...others }) {
   const { login, isLoggedIn } = useAuth();
   const scriptedRef = useScriptRef();
 
-
   // localStorage에서 'rememberedUsername' 키로 저장된 사용자 이름 가져오기
   const rememberedUsername = localStorage.getItem('rememberedUsername');
 
@@ -85,11 +84,9 @@ export default function JWTLogin({ ...others }) {
           }
         } catch (err) {
           console.error(err);
-          if (scriptedRef.current) {
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
+          setStatus({ success: false });
+          setErrors({ submit: err.message });
+          setSubmitting(false);
         }
       }}
     >
@@ -155,14 +152,16 @@ export default function JWTLogin({ ...others }) {
           </Grid>
 
           {errors.submit && (
-            <Box sx={{ mt: 3 }}>
-              <FormHelperText error>{errors.submit}</FormHelperText>
+            <Box sx={{ mt: 1 }}>
+              <FormHelperText error sx={{ fontSize: '15px' }}>
+                {errors.submit}
+              </FormHelperText>
             </Box>
           )}
           <Box sx={{ mt: 2 }}>
             <AnimateButton>
               <Button color="secondary" disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained">
-               로그인
+                로그인
               </Button>
             </AnimateButton>
           </Box>
