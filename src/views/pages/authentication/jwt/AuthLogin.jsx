@@ -51,21 +51,20 @@ export default function JWTLogin({ ...others }) {
   return (
     <Formik
       initialValues={{
-        email: 'info@codedthemes.com',
-        password: '123456',
+        username: 'newuser',
+        password: 'newuser',
         submit: null
       }}
       validationSchema={Yup.object().shape({
-        email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+        username: Yup.string().max(255).required('아이디는 필수입니다.'),
         password: Yup.string()
-          .required('Password is required')
+          .required('비밀번호는 필수입니다.')
           .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
           .max(10, 'Password must be less than 10 characters')
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
-          const trimmedEmail = values.email.trim();
-          await login?.(trimmedEmail, values.password);
+          await login?.(values.username.trim(), values.password);
 
           if (scriptedRef.current) {
             setStatus({ success: true });
@@ -83,25 +82,25 @@ export default function JWTLogin({ ...others }) {
     >
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
         <form noValidate onSubmit={handleSubmit} {...others}>
-          <CustomFormControl fullWidth error={Boolean(touched.email && errors.email)}>
-            <InputLabel htmlFor="outlined-adornment-email-login">Email Address / Username</InputLabel>
+          <CustomFormControl fullWidth error={Boolean(touched.username && errors.username)}>
+            <InputLabel htmlFor="outlined-adornment-username-login">아이디</InputLabel>
             <OutlinedInput
-              id="outlined-adornment-email-login"
-              type="email"
-              value={values.email}
-              name="email"
+              id="outlined-adornment-username-login"
+              type="text"
+              value={values.username}
+              name="username"
               onBlur={handleBlur}
               onChange={handleChange}
             />
-            {touched.email && errors.email && (
-              <FormHelperText error id="standard-weight-helper-text-email-login">
-                {errors.email}
+            {touched.username && errors.username && (
+              <FormHelperText error id="standard-weight-helper-text-username-login">
+                {errors.username}
               </FormHelperText>
             )}
           </CustomFormControl>
 
           <CustomFormControl fullWidth error={Boolean(touched.password && errors.password)}>
-            <InputLabel htmlFor="outlined-adornment-password-login">Password</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-password-login">비밀번호</InputLabel>
             <OutlinedInput
               id="outlined-adornment-password-login"
               type={showPassword ? 'text' : 'password'}
@@ -140,22 +139,6 @@ export default function JWTLogin({ ...others }) {
                 label="Keep me logged in"
               />
             </Grid>
-            <Grid>
-              <Typography
-                variant="subtitle1"
-                component={Link}
-                to={
-                  isLoggedIn
-                    ? '/pages/forgot-password/forgot-password3'
-                    : authParam
-                      ? `/forgot-password?auth=${authParam}`
-                      : '/forgot-password'
-                }
-                sx={{ textDecoration: 'none', color: 'secondary.main' }}
-              >
-                Forgot Password?
-              </Typography>
-            </Grid>
           </Grid>
 
           {errors.submit && (
@@ -166,7 +149,7 @@ export default function JWTLogin({ ...others }) {
           <Box sx={{ mt: 2 }}>
             <AnimateButton>
               <Button color="secondary" disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained">
-                Sign In
+               로그인
               </Button>
             </AnimateButton>
           </Box>
