@@ -29,17 +29,32 @@ function forceLogout() {
 axiosServices.interceptors.response.use(
   // 1. 성공적인 응답은 그대로 통과
   (response) => response,
+
   // 2. 에러 응답 처리
   async (error) => {
     const originalRequest = error.config;
 
-    // 401(Unauthorized) 에러이고, 재시도한 요청이 아니며, 토큰 갱신 요청 자체가 실패한 것이 아닌지 확인
-    if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/auth/refresh') {
+    // 401(Unauthorized) 에러일때
+    if (error.response?.status === 401) {
+      // 로그인 또는 리프레시 요청 자체가 401로 실패한 경우
+      // 이 경우는 강제 로그아웃이 아니라, 폼에서 에러 메시지를 표시
+      if (originalRequest.url === '/api/auth/login' || originalRequest.url === '/api/auth/refresh') {
+        // 에러를 그대로 반환하여 AuthLogin.jsx의 catch 블록에서 처리
+        return Promise.reject((error.response && error.response.data) || 'Wrong Services');
+      }
+
+      // 이미 재시도한 요청이 401을 받은 경우 (토큰 갱신 후에도 실패)
+      if (originalRequest._retry) {
+        console.error('Retry failed after token refresh:', error);
+        forceLogout(); // 이 경우 강제 로그아웃
+        return Promise.reject((error.response && error.response.data) || 'Wrong Services');
+      }
+
+      // 그 외 401 에러 -> 토큰 갱신 시도
       originalRequest._retry = true; // 재시도 플래그 설정
 
       try {
-        // 리프레시 토큰은 HttpOnly 쿠키로 자동 전송됨
-        // /api/auth/refresh 호출 시 빈 객체({})를 전송 (컨트롤러가 쿠키에서 읽음)
+        // 리프레시 토큰은 HttpOnly 쿠키로 자동 전송
         await axiosServices.post('/api/auth/refresh', {});
 
         // 새로받은 accessToken으로 원래 실패했던 요청을 재시도
@@ -52,12 +67,7 @@ axiosServices.interceptors.response.use(
       }
     }
 
-    // 401 에러가 아니거나, 이미 재시도했거나, 리프레시 요청이 실패한 경우
-    if (error.response.status === 401) {
-      forceLogout(); // 최종적으로 401이면 로그아웃
-    }
-
-    // 다른 모든 에러는 그대로 반환
+    // 401이 아닌 다른 모든 에러는 그대로 반환
     return Promise.reject((error.response && error.response.data) || 'Wrong Services');
   }
 );
