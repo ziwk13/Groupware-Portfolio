@@ -104,6 +104,45 @@ const pages = {
           target: true
         }
       ]
+    }, {
+      id: 'approval',
+      title: '전자결재',
+      type: 'collapse',
+      icon: icons.IconBug,
+      children: [
+        {
+          id: 'insert',
+          title: '결재 작성',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },{
+          id: 'view1',
+          title: '결재 대기',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },{
+          id: 'view2',
+          title: '결재 기안',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },{
+          id: 'view3',
+          title: '결재 완료',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },{
+          id: 'view4',
+          title: '결재 참조',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },
+
+      ]
     }
 
   ]
