@@ -104,7 +104,29 @@ const pages = {
           target: true
         }
       ]
+    }, {
+      id:'gaesipan',
+      title: '게시판',
+      type: 'collapse',
+      icon: icons.IconBug,
+      children: [
+        {
+          id: 'isNotification',
+          title: '공지사항',
+          type: 'item',
+          url: '/pages/error',
+          target: true
+        },
+        {
+          id: 'freeBoard',
+          title: '자유게시판',
+          type: 'item',
+          url: '/pages/500',
+          target: true
+        },
+      ]
     }
+
 
   ]
 };
