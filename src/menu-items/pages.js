@@ -1,5 +1,5 @@
 // assets
-import { IconKey, IconReceipt2, IconBug, IconBellRinging, IconPhoneCall, IconQuestionMark, IconShieldLock } from '@tabler/icons-react';
+import { IconClipboardList, IconMail, IconKey, IconReceipt2, IconBug, IconBellRinging, IconPhoneCall, IconQuestionMark, IconShieldLock } from '@tabler/icons-react';
 
 // constant
 const icons = {
@@ -9,7 +9,9 @@ const icons = {
   IconBellRinging,
   IconPhoneCall,
   IconQuestionMark,
-  IconShieldLock
+  IconShieldLock,
+  IconMail,
+  IconClipboardList
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -63,45 +65,66 @@ const pages = {
         }
       ]
     }, {
-      id: 'mailham',
+      id: 'mail',
       title: '메일함',
       type: 'collapse',
-      icon: icons.IconBug,
+      icon: icons.IconMail,
       children: [
         {
-          id: 'error',
-          title: 'error-404',
+          id: 'mail-inbox',
+          title: '받은메일함',
           type: 'item',
           url: '/pages/error',
           target: true
         },
         {
-          id: '500',
-          title: 'error-500',
+          id: 'mail-sent',
+          title: '보낸메일함',
+          type: 'item',
+          url: '/pages/500',
+          target: true
+        },
+        {
+          id: 'mail-my',
+          title: '개인보관함',
+          type: 'item',
+          url: '/pages/500',
+          target: true
+        },
+        {
+          id: 'mail-trash',
+          title: '휴지통',
           type: 'item',
           url: '/pages/500',
           target: true
         }
       ]
     }, {
-      id: 'upmoo1g',
+      id: 'worklog',
       title: '업무일지',
       type: 'collapse',
-      icon: icons.IconBug,
+      icon: icons.IconClipboardList,
       children: [
         {
-          id: 'error',
-          title: 'error-404',
+          id: 'worklog-all',
+          title: '전체업무일지',
           type: 'item',
-          url: '/pages/error',
-          target: true
+          url: '/worklog/list',
+          target: false
         },
         {
-          id: '500',
-          title: 'error-500',
+          id: 'worklog-department',
+          title: '부서업무일지',
           type: 'item',
-          url: '/pages/500',
-          target: true
+          url: '/worklog/list?type=department',
+          target: false
+        },
+        {
+          id: 'worklog-personal',
+          title: '나의업무일지',
+          type: 'item',
+          url: '/worklog/list?type=personal',
+          target: false
         }
       ]
     }
