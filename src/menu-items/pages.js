@@ -1,5 +1,17 @@
 // assets
-import { IconClipboardList, IconMail, IconKey, IconReceipt2, IconBug, IconBellRinging, IconPhoneCall, IconQuestionMark, IconShieldLock } from '@tabler/icons-react';
+import {
+  IconClipboardList,
+  IconMail,
+  IconKey,
+  IconReceipt2,
+  IconBug,
+  IconBellRinging,
+  IconPhoneCall,
+  IconQuestionMark,
+  IconShieldLock,
+  IconFileCheck,
+  IconClipboardCheck
+} from '@tabler/icons-react';
 
 // constant
 const icons = {
@@ -11,7 +23,9 @@ const icons = {
   IconQuestionMark,
   IconShieldLock,
   IconMail,
-  IconClipboardList
+  IconClipboardList,
+  IconFileCheck,
+  IconClipboardCheck
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -131,38 +145,38 @@ const pages = {
       id: 'approval',
       title: '전자결재',
       type: 'collapse',
-      icon: icons.IconBug,
+      icon: icons.IconClipboardCheck,
       children: [
         {
           id: 'insert',
           title: '결재 작성',
           type: 'item',
-          url: '/pages/error',
-          target: true
+          url: '/approval/form',
+          target: false
         },{
-          id: 'view1',
-          title: '결재 대기',
+          id: 'approval-list-pending',
+          title: '결재 대기 목록',
           type: 'item',
-          url: '/pages/error',
-          target: true
+          url: '/approval/list?status=pending',
+          target: false
         },{
-          id: 'view2',
-          title: '결재 기안',
+          id: 'approval-list-draft',
+          title: '결재 기안 목록',
           type: 'item',
-          url: '/pages/error',
-          target: true
+          url: '/approval/list?status=draft',
+          target: false
         },{
-          id: 'view3',
-          title: '결재 완료',
+          id: 'approval-list-completed',
+          title: '결재 완료 목록',
           type: 'item',
-          url: '/pages/error',
-          target: true
+          url: '/approval/list?status=completed',
+          target: false
         },{
-          id: 'view4',
-          title: '결재 참조',
+          id: 'approval-list-reference',
+          title: '결재 참조 목록',
           type: 'item',
-          url: '/pages/error',
-          target: true
+          url: '/approval/list?status=reference',
+          target: false
         },
 
       ]
