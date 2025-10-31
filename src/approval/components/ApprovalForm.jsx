@@ -1,12 +1,9 @@
-import { useState } from 'react';
-
 // material-ui
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Autocomplete from '@mui/material/Autocomplete';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import IconButton from '@mui/material/IconButton';
 import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
 
 // third party
@@ -77,11 +74,8 @@ export default function ApprovalForm({
                 <Button variant="contained" color="primary" type="submit" sx={{ height: '35px' }}>
                   기안
                 </Button>
-                <Button variant="outlined" color="primary" type="submit" sx={{ height: '35px' }}>
+                <Button variant="outlined" color="primary" type="submit" sx={{ height: '35px' }} endIcon={<PersonAddAlt1OutlinedIcon />}>
                   결재선 수정
-                  <IconButton>
-                    <PersonAddAlt1OutlinedIcon sx={{ fontSize: 18, color: 'grey.500' }} />
-                  </IconButton>
                 </Button>
               </Stack>
             }
