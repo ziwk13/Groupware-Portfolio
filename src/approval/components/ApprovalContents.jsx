@@ -10,116 +10,107 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // project imports
 import Avatar from 'ui-component/extended/Avatar';
 
-// ==============================|| MOCK DATA & UTILS ||============================== //
+// ==============================|| UTILS ||============================== //
 
 // 이미지 경로 유틸리티
 const ImagePath = {
-  USERS: 'assets/images/users/' // 템플릿의 기본 이미지 경로 가정
+  USERS: '/assets/images/users/' // 추후 이미지 경로로 변경 해야함
 };
 
 // 이미지 경로를 조합해주는 간단한 함수
 const getImageUrl = (name, path) => {
-  return `${path}${name}`;
+  // name이 'default_profile.png' 같은 파일명일 경우 경로 조합
+  if (!name.startsWith('http') && !name.startsWith('/')) {
+    return `${path}${name}`;
+  }
+  // 이미 전체 URL인 경우 그대로 반환
+  return name;
 };
 
-// 상신자/결재자 모두 프로필, 이름, 이메일을 갖도록 더미 데이터 수정
-const dummyApprovals = [
-  {
-    id: '#1',
-    draftDate: '2025-10-31',
-    // 상신자 정보
-    drafterAvatar: 'avatar-1.png',
-    drafterName: '김철수 (영업팀)',
-    drafterEmail: 'chulsoo.kim@example.com',
-    // 결재자 정보
-    approverAvatar: 'avatar-2.png',
-    approverName: '박영희 (인사팀)',
-    approverEmail: 'younghee.park@example.com',
-    // 문서 정보
-    formType: '휴가 신청서',
-    title: '2025년 하계 휴가 사용 신청',
-    status: 'Pending' // '진행중'
-  },
-  {
-    id: '#2',
-    draftDate: '2025-10-30',
-    // 상신자 정보
-    drafterAvatar: 'avatar-3.png',
-    drafterName: '이민준 (개발팀)',
-    drafterEmail: 'minjun.lee@example.com',
-    // 결재자 정보
-    approverAvatar: 'avatar-4.png',
-    approverName: '최지우 (개발팀장)',
-    approverEmail: 'jiwoo.choi@example.com',
-    // 문서 정보
-    formType: '지출 결의서',
-    title: '개발용 소프트웨어 구매',
-    status: 'Active' // '승인'
-  },
-  {
-    id: '#3',
-    draftDate: '2025-10-29',
-    // 상신자 정보
-    drafterAvatar: 'avatar-4.png',
-    drafterName: '최지우 (개발팀장)',
-    drafterEmail: 'jiwoo.choi@example.com',
-    // 결재자 정보
-    approverAvatar: 'avatar-5.png', // 결재자 임의 아바타
-    approverName: '이영자 (경영지원팀)',
-    approverEmail: 'youngja.lee@example.com',
-    // 문서 정보
-    formType: '기안서',
-    title: '신규 프로젝트 인력 충원 요청',
-    status: 'Rejected' // '반려'
-  },
-  {
-    id: '#4',
-    draftDate: '2025-10-28',
-    // 상신자 정보
-    drafterAvatar: 'avatar-2.png',
-    drafterName: '박영희 (인사팀)',
-    drafterEmail: 'younghee.park@example.com',
-    // 결재자 정보
-    approverAvatar: 'avatar-1.png',
-    approverName: '김철수 (영업팀)',
-    approverEmail: 'chulsoo.kim@example.com',
-    // 문서 정보
-    formType: '휴가 신청서',
-    title: '경조 휴가 신청',
-    status: 'Active' // '승인'
+const getStatusChip = (statusValue) => {
+  switch (statusValue) {
+    case 'DOC_APPROVED':
+      return <Chip label="최종 승인" size="small" color="success" />;
+    case 'DOC_REJECTED':
+      return <Chip label="최종 반려" size="small" color="error" />;
+    case 'LINE_APPROVED':
+      return <Chip label="승인" size="small" color="success" />;
+    case 'AWAITING': // 결재 대기 (내 차례)
+      return <Chip label="대기" size="small" color="warning" />;
+    case 'PENDING': // 미결 (내 차례 아님)
+      return <Chip label="미결" size="small" color="primary" />;
+
+    default:
+      return null;
   }
-];
+};
 
 // ==============================|| APPROVAL CONTENTS ||============================== //
 
-export default function ApprovalContents({ status }) {
-  const [data, setData] = React.useState(dummyApprovals);
-
+export default function ApprovalContents({ status, data, loading, error, page, size }) {
   // '결재 기안 목록'이 아닐 때만 상신자(drafter)를 보여줌
   const showDrafter = status !== 'draft';
-  // '결재 대기 목록'과 '결재 완료 목록'이 아닐 때만 결재자(approver)를 보여줌
-  const showApprover = status !== 'pending' && status !== 'completed';
+  // '결재 대기 목록'이 아닐 때만 결재자(approver)를 보여줌
+  const showApprover = status !== 'pending';
+
+  // 컬럼 수 계산 (로딩/에러 시 colSpan 위해)
+  let colSpan = 5; // 기본 컬럼 (순번, 기안일, 결재양식, 제목, 결재상태)
+  if (showDrafter) colSpan++;
+  if (showApprover) colSpan++;
+
+  // 결재자 열 헤더 텍스트 동적 변경
+  let approverHeaderText = '결재자';
+  if (status === 'reference' || status === 'completed') {
+    approverHeaderText = '최종 결재자';
+  }
+
+  // API 응답(creator 객체)을 아바타 컴포넌트에 맞게 렌더링
+  const renderUserStack = (user) => {
+    if (!user) {
+      return (
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+          <Avatar alt="Unknown User" src={getImageUrl(null, ImagePath.USERS)} />
+          <Stack>
+            <Typography variant="subtitle1">정보 없음</Typography>
+            <Typography variant="subtitle2" noWrap>
+              -
+            </Typography>
+          </Stack>
+        </Stack>
+      );
+    }
+    return (
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+        <Avatar alt={user.name} src={getImageUrl(user.profileImg, ImagePath.USERS)} />
+        <Stack>
+          <Typography variant="subtitle1">{`${user.name} (${user.department || '부서미지정'})`}</Typography>
+          <Typography variant="subtitle2" noWrap>
+            {user.email}
+          </Typography>
+        </Stack>
+      </Stack>
+    );
+  };
+
 
   return (
     <TableContainer>
       <Table
         sx={{
-          tableLayout: 'fixed', // 테이블이 TableHead에 정의된 너비를 기준으로 컬럼을 그리도록
-          // 컬럼 구분선
+          tableLayout: 'fixed',
           '& .MuiTableCell-root': {
             borderRight: '1px solid rgba(224, 224, 224, 1)'
           },
           '& .MuiTableCell-root:last-child': {
             borderRight: 'none'
           },
-
-          // TableBody 내부의 모든 TableCell의 상하 여백(padding)을 줄임
           '& .MuiTableBody-root .MuiTableCell-root': {
-            py: 1.3 // py: 1는 8px (MUI 기본값 16px)
+            py: 1.3
           }
         }}
       >
@@ -131,72 +122,101 @@ export default function ApprovalContents({ status }) {
             <TableCell sx={{ width: 100 }} align="center">
               기안일
             </TableCell>
-            <TableCell sx={{ width: 110 }} align="center">
+            <TableCell sx={{ width: 120 }} align="center">
               결재양식
             </TableCell>
             <TableCell sx={{ width: 240 }} align="center">
               제목
             </TableCell>
             {showDrafter && (
-              <TableCell sx={{ width: 250 }} align="center">
+              <TableCell sx={{ width: 220 }} align="center">
                 상신자
               </TableCell>
             )}
             {showApprover && (
-              <TableCell sx={{ width: 250 }} align="center">
-                결재자
+              <TableCell sx={{ width: 220 }} align="center">
+                {approverHeaderText}
               </TableCell>
             )}
-            <TableCell sx={{ width: 80 }} align="center">
+            <TableCell sx={{ width: 100 }} align="center">
               결재상태
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {data &&
-            data.map((row, index) => (
-              <TableRow hover key={index}>
-                <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
-                <TableCell>{row.draftDate}</TableCell>
-                <TableCell>{row.formType}</TableCell>
-                <TableCell>
-                  <Typography variant="subtitle1" noWrap>
-                    {row.title}
-                  </Typography>
-                </TableCell>
-                {showDrafter && (
-                  <TableCell>
-                    <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-                      <Avatar alt={row.drafterName} src={getImageUrl(row.drafterAvatar, ImagePath.USERS)} />
-                      <Stack>
-                        <Typography variant="subtitle1">{row.drafterName}</Typography>
-                        <Typography variant="subtitle2" noWrap>
-                          {row.drafterEmail}
-                        </Typography>
-                      </Stack>
-                    </Stack>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={colSpan} align="center" sx={{ py: 5 }}>
+                <CircularProgress />
+              </TableCell>
+            </TableRow>
+          ) : error ? (
+            <TableRow>
+              <TableCell colSpan={colSpan} align="center" sx={{ py: 5 }}>
+                <Typography color="error">데이터 조회 실패: {error}</Typography>
+              </TableCell>
+            </TableRow>
+          ) : !data || data.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={colSpan} align="center" sx={{ py: 5 }}>
+                <Typography>데이터가 없습니다.</Typography>
+              </TableCell>
+            </TableRow>
+          ) : (
+            data.map((row, index) => {
+              // 순번 (0-based page * size + index + 1)
+              const serialNumber = page * size + index + 1;
+              // 기안일
+              const draftDate = row.createdAt ? row.createdAt.split('T')[0] : '';
+              // 상신자 정보
+              const drafter = row.creator;
+              // 결재자 정보
+              const approver = showApprover ? row.approvalLines[0].approver : null;
+
+              let displayStatusValue = null;
+              const docStatus = row.docStatus.value1;
+
+              // 결재 상태를 위한 조건문
+              if (docStatus === 'APPROVED') {
+                displayStatusValue = 'DOC_APPROVED';
+              } else if (docStatus === 'REJECTED') {
+                displayStatusValue = 'DOC_REJECTED';
+              } else if (docStatus === 'IN_PROGRESS') {
+                // Doc 상태가 'IN_PROGRESS(진행중)'이면 결재선 상태를 확인
+                if (row.approvalLines && row.approvalLines.length > 0) {
+                  const lineToDisplay = row.approvalLines[0].approver;
+
+                  const lineStatus = lineToDisplay.approvalStatus.value1;
+
+                  if (lineStatus === 'APPROVED') {
+                    displayStatusValue = 'LINE_APPROVED';
+                  } else if (lineStatus === 'AWAITING') {
+                    displayStatusValue = 'AWAITING';
+                  } else if (lineStatus === 'PENDING') {
+                    displayStatusValue = 'PENDING';
+                  }
+                }
+              }
+
+              return (
+                <TableRow hover key={row.docId || index}>
+                  <TableCell sx={{ pl: 3 }} align="center">
+                    {serialNumber}
                   </TableCell>
-                )}
-                {showApprover && (
+                  <TableCell align="center">{draftDate}</TableCell>
+                  <TableCell align="center">현재 미구현 기능</TableCell>
                   <TableCell>
-                    <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-                      <Avatar alt={row.approverName} src={getImageUrl(row.approverAvatar, ImagePath.USERS)} />
-                      <Stack>
-                        <Typography variant="subtitle1">{row.approverName}</Typography>
-                        <Typography variant="subtitle2" noWrap>
-                          {row.approverEmail}
-                        </Typography>
-                      </Stack>
-                    </Stack>
+                    <Typography variant="subtitle1" noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {row.title}
+                    </Typography>
                   </TableCell>
-                )}
-                <TableCell align="center">
-                  {row.status === 'Active' && <Chip label="승인" size="small" color="success" />}
-                  {row.status === 'Rejected' && <Chip label="반려" size="small" color="error" />}
-                  {row.status === 'Pending' && <Chip label="진행중" size="small" color="warning" />}
-                </TableCell>
-              </TableRow>
-            ))}
+                  {showDrafter && <TableCell>{renderUserStack(drafter)}</TableCell>}
+                  {showApprover && <TableCell>{renderUserStack(approver)}</TableCell>}
+                  <TableCell align="center">{getStatusChip(displayStatusValue)}</TableCell>
+                </TableRow>
+              );
+            })
+          )}
         </TableBody>
       </Table>
     </TableContainer>
