@@ -184,7 +184,7 @@ export default function ApprovalContents({ status, data, loading, error, page, s
               } else if (docStatus === 'IN_PROGRESS') {
                 // Doc 상태가 'IN_PROGRESS(진행중)'이면 결재선 상태를 확인
                 if (row.approvalLines && row.approvalLines.length > 0) {
-                  const lineToDisplay = row.approvalLines[0].approver;
+                  const lineToDisplay = row.approvalLines[0];
 
                   const lineStatus = lineToDisplay.approvalStatus.value1;
 
