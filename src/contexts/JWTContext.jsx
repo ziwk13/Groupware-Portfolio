@@ -9,7 +9,9 @@ import accountReducer from 'store/accountReducer';
 
 // project imports
 import Loader from 'ui-component/Loader';
-import axios from 'utils/axios'; // axios.js에서 설정한 인스턴스
+import axios from 'utils/axios';
+// mypageAPI에서 updatePassword도 가져오도록 수정
+import { updateEmployeeInfo, updatePassword as apiUpdatePassword } from '../features/mypage/api/mypageAPI';
 
 // constant
 const initialState = {
@@ -49,7 +51,7 @@ export function JWTProvider({ children }) {
         });
       } catch (err) {
         console.error('JWTContext init error (likely no valid session):', err);
-        // init 과정에서 에러 발생 시 (예: myInfo 조회 실패, 갱신 실패 등) 로그아웃
+        // init 과정에서 에러 발생 시 로그아웃
         dispatch({
           type: LOGOUT
         });
@@ -60,14 +62,13 @@ export function JWTProvider({ children }) {
   }, []); // 컴포넌트 마운트 시 1회만 실행
 
   const login = async (email, password) => {
-    // 1. 로그인 요청
     const response = await axios.post('/api/auth/login', { username: email, password });
 
-    // 2. 서버가 HttpOnly 쿠키(accessToken, refreshToken)를 설정함
-    // 3. 응답 body에는 user 정보(EmployeeResponseDTO)만 있음
+    // 서버가 HttpOnly 쿠키(accessToken, refreshToken)를 설정함
+    // 응답 body에는 user 정보(EmployeeResponseDTO)만 있음
     const user = response.data;
 
-    // 4. Context state 업데이트
+    // Context state 업데이트
     dispatch({
       type: LOGIN,
       payload: {
@@ -84,27 +85,49 @@ export function JWTProvider({ children }) {
 
   const logout = async () => {
     try {
-      // 1. 서버에 로그아웃 요청을 보내 HttpOnly 쿠키를 만료시킴
+      // 서버에 로그아웃 요청을 보내 HttpOnly 쿠키를 만료시킴
       await axios.post('/api/auth/logout');
     } catch (error) {
-      // 2. 서버 요청에 실패하더라도 (예: 네트워크 오류, 서버 다운)
-      //    클라이언트 측에서는 로그아웃을 진행함
+      // 서버 요청에 실패하더라도 (예: 네트워크 오류, 서버 다운)
+      // 클라이언트 측에서는 로그아웃을 진행함
       console.error('Logout API call failed:', error);
     } finally {
-      // 3. API 호출 성공/실패 여부와 관계없이 클라이언트 상태를 로그아웃으로 변경
+      // API 호출 성공/실패 여부와 관계없이 클라이언트 상태를 로그아웃으로 변경
       dispatch({ type: LOGOUT });
     }
   };
 
   const resetPassword = async (email) => {};
 
-  const updateProfile = () => {};
+  // 사용자 정보 업데이트 함수 (연락처 등)
+  const updateProfile = async (data) => {
+    const response = await updateEmployeeInfo(data);
+    const updatedUser = response.data.data;
+
+    // 프로필 변경은 user 객체가 변경되므로 dispatch로 전역 상태 업데이트
+    dispatch({
+      type: LOGIN,
+      payload: {
+        isLoggedIn: true,
+        user: updatedUser
+      }
+    });
+  };
+
+  // 비밀번호 변경 함수 추가
+  const updatePassword = async (data) => {
+    return apiUpdatePassword(data);
+  };
 
   if (state.isInitialized !== undefined && !state.isInitialized) {
     return <Loader />;
   }
 
-  return <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile }}>{children}</JWTContext.Provider>;
+  return (
+    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile, updatePassword }}>
+      {children}
+    </JWTContext.Provider>
+  );
 }
 
 export default JWTContext;
