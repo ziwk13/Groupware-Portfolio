@@ -17,18 +17,14 @@ export default function PlaceholderContent({ type }) {
       {type !== DropzopType.standard && (
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          sx={{ alignItems: 'center', justifyContent: 'center', width: 1, textAlign: { xs: 'center', md: 'left' }, gap: 2 }}
+          sx={{ alignItems: 'center', justifyContent: 'center', width: 1, textAlign: { xs: 'center', md: 'left' }, gap: 2, userSelect:'none', height:'100%'}}
         >
-          <CardMedia component="img" image={UploadCover} sx={{ width: 150 }} />
+          <CardMedia component="img" image={UploadCover} sx={{ width: 150 }} draggable={false}/>
           <Stack sx={{ p: 3, gap: 1 }}>
-            <Typography variant="h5">Drag & Drop or Select file</Typography>
+            <Typography variant="h5">드래그 앤 드롭으로 파일 추가</Typography>
 
             <Typography sx={{ color: 'secondary.main' }}>
-              Drop files here or click&nbsp;
-              <Typography component="span" sx={{ textDecoration: 'underline', color: 'primary.main' }}>
-                browse
-              </Typography>
-              &nbsp;through your machine
+              Drop files here through your machine
             </Typography>
           </Stack>
         </Stack>

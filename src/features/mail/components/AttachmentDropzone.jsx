@@ -14,8 +14,6 @@ import * as yup from 'yup';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
-import UploadAvatar from 'ui-component/third-party/dropzone/Avatar';
-import UploadSingleFile from 'ui-component/third-party/dropzone/SingleFile';
 import UploadMultiFile from 'ui-component/third-party/dropzone/MultiFile';
 import { gridSpacing } from 'store/constant';
 

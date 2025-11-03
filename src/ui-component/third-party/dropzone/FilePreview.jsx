@@ -27,12 +27,21 @@ export default function FilesPreview({ showList = false, files, onRemove, type }
   const hasFile = files.length > 0;
   const layoutType = type;
 
+  const formatBytes = (bytes) => {
+    if (!bytes) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   return (
     <List
       disablePadding
       sx={{
         ...(hasFile && type !== DropzopType.standard && { my: 3 }),
-        ...(type === DropzopType.standard && { width: 'calc(100% - 84px)' })
+        ...(type === DropzopType.standard && { width: 'calc(100% - 84px)' }),
+        margin:0
       }}
     >
       {files.map((file, index) => {
@@ -99,7 +108,7 @@ export default function FilesPreview({ showList = false, files, onRemove, type }
             <InsertDriveFileOutlinedIcon sx={{ color: 'secondary.main', width: 30, height: 30, fontSize: '1.15rem', mr: 0.5 }} />
             <ListItemText
               primary={typeof file === 'string' ? file : name}
-              secondary={typeof file === 'string' ? '' : size}
+              secondary={typeof file === 'string' ? '' : formatBytes(size)}
               slotProps={{ primary: { variant: 'subtitle2' }, secondary: { variant: 'caption' } }}
             />
 
