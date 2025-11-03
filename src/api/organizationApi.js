@@ -1,16 +1,18 @@
+// organizationApi.js
+
 import axios from "axios";
 
 const API_BASE_URL = "/api";
 
 export const organizationAPI = {
+    
     // 부서 목록 조회
     getDepartments: async () => {
         try {
         const res = await axios.get(`${API_BASE_URL}/commoncode/department`);
         return res.data;
-    } catch (err) {
-        console.warn("서벙요청 실패 후 더미데이터로 대체");
-        
+            } catch (err) {
+                console.warn("서버요청 실패 후 더미데이터로 대체");
         return [
             { code: "DP1", value1: "스타트업", value2: null, codeDescription: "부서" },
         { code: "DP2", value1: "경영지원본부", value2: "DP1", codeDescription: "부서" },
@@ -74,7 +76,7 @@ export const organizationAPI = {
         { id: 32, name: "법무", dept: "DP1", deptName: "스타트업", position: "부장", email: "legal@startup.com", phone: "010-1717-1718" },
         ];
     return employees.filter(
-      (e) => e.dept?.toUpperCase().trim() === deptCode?.toUpperCase().trim()
+      (e) => e.dept?.toString().trim().toUpperCase() === deptCode?.toString().trim().toUpperCase()
     );
   }
 },

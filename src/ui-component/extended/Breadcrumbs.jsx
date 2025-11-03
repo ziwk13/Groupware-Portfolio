@@ -80,6 +80,29 @@ export default function Breadcrumbs({
   let customLocation = location.pathname;
 
   useEffect(() => {
+    const getCollapse = (menu) => {
+      if (!custom && menu.children) {
+        menu.children.filter((collapse) => {
+          if (collapse.type && collapse.type === 'collapse') {
+            getCollapse(collapse);
+            if (collapse.url === customLocation) {
+              setMain(collapse);
+              setItem(collapse);
+            }
+          } else if (collapse.type && collapse.type === 'item') {
+            if (customLocation === collapse.url) {
+              setMain(menu);
+              setItem(collapse);
+            }
+          }
+          return false;
+        });
+      }
+    };
+    // 경로가 변경될 때마다 main과 item state를 초기화
+    setMain(undefined);
+    setItem(undefined);
+
     navigation?.items?.map((menu) => {
       if (menu.type && menu.type === 'group') {
         if (menu?.url && menu.url === customLocation) {
@@ -91,28 +114,8 @@ export default function Breadcrumbs({
       }
       return false;
     });
-  });
-
-  // set active item state
-  const getCollapse = (menu) => {
-    if (!custom && menu.children) {
-      menu.children.filter((collapse) => {
-        if (collapse.type && collapse.type === 'collapse') {
-          getCollapse(collapse);
-          if (collapse.url === customLocation) {
-            setMain(collapse);
-            setItem(collapse);
-          }
-        } else if (collapse.type && collapse.type === 'item') {
-          if (customLocation === collapse.url) {
-            setMain(menu);
-            setItem(collapse);
-          }
-        }
-        return false;
-      });
-    }
-  };
+    // customLocation (경로) 또는 custom prop이 변경될 때만 useEffect 실행
+  }, [customLocation, custom]);
 
   // item separator
   const SeparatorIcon = separator;
