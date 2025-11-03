@@ -19,7 +19,6 @@ import useConfig from 'hooks/useConfig';
 import SkeletonTotalGrowthBarChart from 'ui-component/cards/Skeleton/TotalGrowthBarChart';
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
-import WorkTimeCard from '../WorktimeCard';
 
 // chart data
 import barChartOptions from './total-growth-bar-chart';
@@ -65,7 +64,7 @@ export default function AttendanceBasicCard({ isLoading }) {
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  // value2 → 한글 변환 맵
+  // 근무 상태
   const workStatusMap = {
     NORMAL: '정상근무',
     LATE: '지각',

@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 
 // project imports
-import EarningCard from '../components/EarningCard';
-import TotalIncomeDarkCard from '../../../ui-component/cards/TotalIncomeDarkCard';
 import AttendanceBasicCard from '../components/chart-data/AttendanceBasicCard';
 
 import { gridSpacing } from 'store/constant';

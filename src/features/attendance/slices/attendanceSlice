@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'utils/axios';
 
-// ✅ 오늘 근태 조회
+//  오늘 근태 조회
 export const fetchTodayAttendance = createAsyncThunk('attendance/fetchTodayAttendance', async (employeeId, { rejectWithValue }) => {
   try {
     const response = await axios.get(`/api/attendances/today/${employeeId}`);
@@ -11,7 +11,7 @@ export const fetchTodayAttendance = createAsyncThunk('attendance/fetchTodayAtten
   }
 });
 
-// ✅ 출근 처리
+//  출근 처리
 export const clockIn = createAsyncThunk('attendance/clockIn', async (employeeId, { rejectWithValue }) => {
   try {
     const response = await axios.post(`/api/attendances/clock-in/${employeeId}`);
@@ -21,7 +21,7 @@ export const clockIn = createAsyncThunk('attendance/clockIn', async (employeeId,
   }
 });
 
-// ✅ 퇴근 처리
+//  퇴근 처리
 export const clockOut = createAsyncThunk('attendance/clockOut', async (employeeId, { rejectWithValue }) => {
   try {
     const response = await axios.post(`/api/attendances/clock-out/${employeeId}`);
