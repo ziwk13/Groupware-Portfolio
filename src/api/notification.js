@@ -12,17 +12,6 @@ export const getUnreadCount = async () => {
   }
 };
 
-// 삭제되지 않은 전체 알림 개수 조회 (index.jsx)
-export const getTotalCount = async () => {
-  try {
-    const response = await axiosServices.get(`/api/notifications/total-count`); 
-    return response.data; // ex: { count: 120 }
-  } catch (error) {
-    console.error('전체 알림 개수 조회에 실패 하였습니다. : ', error);
-    throw error;
-  }
-};
-
 // 모든 알림 읽음 처리 (index.jsx)
 export const markAllAsRead = async () => {
   try {
@@ -48,8 +37,8 @@ export const deleteAllNotifications = async () => {
 // 알림 목록 조회 (페이지네이션) (NotificationList.jsx) 
 export const getNotifications = async (page, size) => {
   try {
-    const response = await axiosServices.get('/api/notifications', { 
-      params: { page, size } 
+    const response = await axiosServices.get('/api/notifications', {
+      params: { page, size }
     });
     return response.data; // { content: [...], last: false }
   } catch (error) {
