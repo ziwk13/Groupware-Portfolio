@@ -8,24 +8,23 @@ import ListItem from '@mui/material/ListItem';
 import IconButton from '@mui/material/IconButton';
 
 // project imports
-import { DropzopType } from 'config';
 import useConfig from 'hooks/useConfig';
 import getDropzoneData from 'utils/getDropzoneData';
 
 // assets
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import { Typography } from '@mui/material';
 
 // ==============================|| MULTI UPLOAD - PREVIEW ||============================== //
 
-export default function FilesPreview({ showList = false, files, onRemove, type }) {
+export default function FilesPreview({ showList = false, files, onRemove }) {
   const {
     state: { borderRadius }
   } = useConfig();
   const theme = useTheme();
 
   const hasFile = files.length > 0;
-  const layoutType = type;
 
   const formatBytes = (bytes) => {
     if (!bytes) return '0 Bytes';
@@ -39,13 +38,12 @@ export default function FilesPreview({ showList = false, files, onRemove, type }
     <List
       disablePadding
       sx={{
-        ...(hasFile && type !== DropzopType.standard && { my: 3 }),
-        ...(type === DropzopType.standard && { width: 'calc(100% - 84px)' }),
+        ...(hasFile && { my: 3 }),
         margin:0
       }}
     >
       {files.map((file, index) => {
-        const { key, name, size, preview, type } = getDropzoneData(file, index);
+        const { key, name, size, preview, type = '' } = getDropzoneData(file, index);
 
         if (showList) {
           return (
@@ -54,8 +52,8 @@ export default function FilesPreview({ showList = false, files, onRemove, type }
               sx={{
                 p: 0,
                 m: 0.5,
-                width: layoutType === DropzopType.standard ? 64 : 80,
-                height: layoutType === DropzopType.standard ? 64 : 80,
+                width: 80,
+                height: 80,
                 borderRadius: `${borderRadius}px`,
                 position: 'relative',
                 display: 'inline-flex',
@@ -107,11 +105,18 @@ export default function FilesPreview({ showList = false, files, onRemove, type }
           >
             <InsertDriveFileOutlinedIcon sx={{ color: 'secondary.main', width: 30, height: 30, fontSize: '1.15rem', mr: 0.5 }} />
             <ListItemText
-              primary={typeof file === 'string' ? file : name}
+              primary={typeof file === 'string' ? 
+                file : 
+                <Typography sx={{whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{name}</Typography>
+              }
               secondary={typeof file === 'string' ? '' : formatBytes(size)}
               slotProps={{ primary: { variant: 'subtitle2' }, secondary: { variant: 'caption' } }}
             />
 
+              {/* 다운로드 버튼 */}
+            {/* <IconButton edge="end" onClick={() => onDownload(file)}>
+                <IconDownload />
+              </IconButton> */}
             {onRemove && (
               <IconButton edge="end" size="small" onClick={() => onRemove(file)} color="error">
                 <HighlightOffIcon style={{ fontSize: '1.15rem' }} />
@@ -124,4 +129,8 @@ export default function FilesPreview({ showList = false, files, onRemove, type }
   );
 }
 
-FilesPreview.propTypes = { showList: PropTypes.bool, files: PropTypes.any, onRemove: PropTypes.any, type: PropTypes.any };
+FilesPreview.propTypes = { 
+  showList: PropTypes.bool, 
+  files: PropTypes.any, 
+  onRemove: PropTypes.any, 
+};

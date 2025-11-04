@@ -1,13 +1,9 @@
 import React from 'react'
-import AttachmentDropzone from '../components/AttachmentDropzone';
-import MultiFileUpload from '../../../ui-component/third-party/dropzone/MultiFile';
+import MailWrite from '../components/MailWrite'
 
 function MailWritePage() {
   return (
-    <>
-      <AttachmentDropzone />
-      {/* <MultiFileUpload /> */}
-    </>
+    <MailWrite/>
   )
 }
 
