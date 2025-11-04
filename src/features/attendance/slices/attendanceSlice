@@ -31,6 +31,16 @@ export const clockOut = createAsyncThunk('attendance/clockOut', async (employeeI
   }
 });
 
+//  근무상태 변경 (외근 / 복귀)
+export const updateWorkStatus = createAsyncThunk('attendance/updateWorkStatus', async ({ employeeId, statusCode }, { rejectWithValue }) => {
+  try {
+    const response = await axios.put(`/api/attendances/${employeeId}/${statusCode}`);
+    return response.data.data; // OUT_ON_BUSINESS 또는 NORMAL 반환됨
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || '근무상태 변경 실패');
+  }
+});
+
 const attendanceSlice = createSlice({
   name: 'attendance',
   initialState: {
@@ -61,6 +71,18 @@ const attendanceSlice = createSlice({
       // 퇴근
       .addCase(clockOut.fulfilled, (state, action) => {
         state.today = action.payload;
+      })
+
+      //  근무상태 변경
+      .addCase(updateWorkStatus.fulfilled, (state, action) => {
+        if (state.today) {
+          state.today.workStatus = action.payload; // 변경된 상태 반영
+        } else {
+          state.today = { workStatus: action.payload };
+        }
+      })
+      .addCase(updateWorkStatus.rejected, (state, action) => {
+        state.error = action.payload;
       });
   }
 });

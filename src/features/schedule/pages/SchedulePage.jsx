@@ -18,11 +18,12 @@ import { dispatch, useSelector } from 'store';
 import { getEvents, addEvent, updateEvent, deleteEvent } from '../slices/scheduleSlice';
 import AddAlarmTwoToneIcon from '@mui/icons-material/AddAlarmTwoTone';
 import { format } from 'date-fns';
+import useAuth from 'hooks/useAuth';
 
 // 서버(LocalDateTime) 포맷: 타임존 없이 2025-11-03T15:00:00
 const fmtLocal = (d) => (d ? format(new Date(d), "yyyy-MM-dd'T'HH:mm:ss") : null);
 
-export default function Calendar({ employeeId }) {
+export default function Calendar() {
   const calendarRef = useRef(null);
   const matchSm = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const { events, loading, error } = useSelector((state) => state.schedule);
@@ -33,9 +34,35 @@ export default function Calendar({ employeeId }) {
   const [selectedRange, setSelectedRange] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  const { user } = useAuth();
+  const employeeId = user?.employeeId;
+
+  // 🔹 작성자만 수정 가능하도록 하는 함수
+  const canEdit = (event) => {
+    const creatorId = event.extendedProps?.employeeId || event.employeeId;
+    return Number(creatorId) === Number(employeeId);
+  };
+
+  // 일정 생성
+  const handleEventCreate = async (data) => {
+    const payload = {
+      title: data.title,
+      content: data.content,
+      categoryCode: data.categoryCode || 'MEETING',
+      employeeId: employeeId || 1,
+      startTime: fmtLocal(data.startTime),
+      endTime: fmtLocal(data.endTime || data.startTime),
+      isDeleted: false
+    };
+
+    const created = await dispatch(addEvent(payload));
+    return created;
+  };
+
+  // 일정 불러오기
   useEffect(() => {
-    dispatch(getEvents());
-  }, []);
+    if (employeeId) dispatch(getEvents(employeeId));
+  }, [employeeId]);
 
   // 날짜/뷰 제어
   const handleDateToday = () => {
@@ -78,7 +105,7 @@ export default function Calendar({ employeeId }) {
     setIsModalOpen(true);
   };
 
-  // 이벤트 클릭(수정 모달)
+  // 이벤트 클릭 (모달 열기)
   const handleEventSelect = (arg) => {
     const found = events.find((e) => e.scheduleId === Number(arg.event.id));
     setSelectedEvent(found ?? null);
@@ -86,28 +113,30 @@ export default function Calendar({ employeeId }) {
     setIsModalOpen(true);
   };
 
-  //  수정(모달 or 드래그/리사이즈)
+  // 일정 수정 (드래그, 리사이즈 포함)
   const handleEventUpdate = (argOrId, maybeData) => {
     let scheduleId;
     let payload;
 
-    //  case 1: FullCalendar 드래그/리사이즈
     if (argOrId?.event) {
       const e = argOrId.event;
       scheduleId = Number(e.id);
-
-      //  기존 이벤트 데이터 유지 (description 등)
       const existing = events.find((ev) => ev.scheduleId === scheduleId);
 
+      // 🔹 주최자만 드래그/리사이즈 허용
+      if (!canEdit(e)) {
+        alert('이 일정은 작성자만 수정할 수 있습니다.');
+        argOrId.revert?.();
+        return;
+      }
+
       payload = {
-        ...existing, // content, categoryCode 등 유지
+        ...existing,
         title: e.title,
         startTime: fmtLocal(e.start),
         endTime: fmtLocal(e.end || e.start)
       };
-    }
-    // case 2: 모달(EditForm)
-    else {
+    } else {
       scheduleId = Number(argOrId);
       payload = {
         ...maybeData,
@@ -121,22 +150,7 @@ export default function Calendar({ employeeId }) {
     handleModalClose();
   };
 
-  // 생성
-  const handleEventCreate = (data) => {
-    const payload = {
-      title: data.title,
-      content: data.content,
-      categoryCode: data.categoryCode || 'MEETING',
-      employeeId: employeeId || 1,
-      startTime: fmtLocal(data.startTime),
-      endTime: fmtLocal(data.endTime || data.startTime),
-      isDeleted: false
-    };
-    dispatch(addEvent(payload));
-    handleModalClose();
-  };
-
-  // 삭제
+  // 일정 삭제
   const handleEventDelete = (scheduleId) => {
     dispatch(deleteEvent(scheduleId));
     handleModalClose();
@@ -184,12 +198,15 @@ export default function Calendar({ employeeId }) {
               start: new Date(e.startTime),
               end: new Date(e.endTime),
               backgroundColor: e.colorCode || '#60A5FA',
-              extendedProps: { content: e.content } // ✅ description 유지용
+              extendedProps: {
+                content: e.content,
+                employeeId: e.employeeId //  작성자 ID 포함
+              }
             }))}
             eventTimeFormat={{
               hour: '2-digit',
               minute: '2-digit',
-              hour12: false // ✅ 24시간제 표시
+              hour12: false
             }}
             selectable
             editable
@@ -199,6 +216,7 @@ export default function Calendar({ employeeId }) {
             select={handleRangeSelect}
             eventDrop={handleEventUpdate}
             eventResize={handleEventUpdate}
+            eventAllow={(dropInfo, draggedEvent) => canEdit(draggedEvent)} //  작성자만 이동 가능
             eventClick={handleEventSelect}
           />
         </SubCard>
@@ -207,13 +225,14 @@ export default function Calendar({ employeeId }) {
       <Dialog maxWidth="sm" fullWidth open={isModalOpen} onClose={handleModalClose} slotProps={{ paper: { sx: { p: 0 } } }}>
         {isModalOpen && (
           <AddEventForm
-            key={selectedEvent?.scheduleId ?? 'new'} // ✅ 새로운 일정이면 완전 새 Form 인스턴스
+            key={selectedEvent?.scheduleId ?? 'new'}
             event={selectedEvent}
             range={selectedRange}
             onCancel={handleModalClose}
             handleCreate={handleEventCreate}
             handleDelete={handleEventDelete}
             handleUpdate={handleEventUpdate}
+            employeeId={employeeId}
           />
         )}
       </Dialog>
