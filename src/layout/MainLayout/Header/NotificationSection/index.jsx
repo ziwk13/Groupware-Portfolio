@@ -206,7 +206,7 @@ export default function NotificationSection() {
                     <Stack sx={{ gap: 2 }}>
                       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', pt: 2, px: 2 }}>
                         <Stack direction="row" sx={{ gap: 2 }}>
-                          <Typography variant="subtitle1">모든 알림</Typography>
+                          <Typography variant="subtitle1">안읽은 알림</Typography>
                           <Chip size="small" label={unreadCount} variant="filled" sx={{ color: 'background.default', bgcolor: 'warning.dark' }} />
                         </Stack>
                         <Stack direction="row" spacing={0.5}>
