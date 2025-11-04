@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import CloseIcon from '@mui/icons-material/Close';
-import { Avatar, Chip, IconButton, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from '@mui/material';
+import { Avatar, Chip, IconButton, ListItem, ListItemAvatar, Stack, Typography, Box } from '@mui/material';
 
 import { IconBadge, IconBug, IconFileCheck, IconMail } from '@tabler/icons-react';
 import EmployeeIcon from 'assets/icons/EmployeeIcon';
@@ -97,7 +97,7 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
         size="small"
         sx={{
           position: 'absolute',
-          top: 8,
+          top: 1.5,
           right: 8,
           zIndex: 1,
         }}
@@ -109,7 +109,6 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
         disablePadding
         secondaryAction={
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography variant="caption">{displayTime}</Typography>
           </Stack>
         }
       >
@@ -117,7 +116,10 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
           {/* 알림 종류에 따른 아이콘 불러오기 */}
           <Avatar>{renderIcon()}</Avatar>
         </ListItemAvatar>
-        <ListItemText primary={title} />
+        <Box
+          sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {title}
+        </Box>
       </ListItem>
       <Stack sx={containerSX}>
         <Typography
@@ -136,6 +138,7 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
               )}
             </>
           )}
+          <Typography variant="caption" sx={{ marginLeft: 'auto' }}>{displayTime}</Typography>
         </Stack>
       </Stack>
     </ListItemWrapper>
