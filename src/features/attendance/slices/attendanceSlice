@@ -1,0 +1,68 @@
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'utils/axios';
+
+//  오늘 근태 조회
+export const fetchTodayAttendance = createAsyncThunk('attendance/fetchTodayAttendance', async (employeeId, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/api/attendances/today/${employeeId}`);
+    return response.data.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || '조회 실패');
+  }
+});
+
+//  출근 처리
+export const clockIn = createAsyncThunk('attendance/clockIn', async (employeeId, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`/api/attendances/clock-in/${employeeId}`);
+    return response.data.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || '출근 실패');
+  }
+});
+
+//  퇴근 처리
+export const clockOut = createAsyncThunk('attendance/clockOut', async (employeeId, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`/api/attendances/clock-out/${employeeId}`);
+    return response.data.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || '퇴근 실패');
+  }
+});
+
+const attendanceSlice = createSlice({
+  name: 'attendance',
+  initialState: {
+    today: null,
+    loading: false,
+    error: null
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      // 오늘 근태
+      .addCase(fetchTodayAttendance.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchTodayAttendance.fulfilled, (state, action) => {
+        state.loading = false;
+        state.today = action.payload;
+      })
+      .addCase(fetchTodayAttendance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // 출근
+      .addCase(clockIn.fulfilled, (state, action) => {
+        state.today = action.payload;
+      })
+      // 퇴근
+      .addCase(clockOut.fulfilled, (state, action) => {
+        state.today = action.payload;
+      });
+  }
+});
+
+export default attendanceSlice.reducer;
