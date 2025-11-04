@@ -11,7 +11,7 @@ import { Menu, MenuItem } from '@mui/material';
 
 // redux
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTodayAttendance, clockIn, clockOut } from 'features/attendance/slices/attendanceSlice';
+import { fetchTodayAttendance, clockIn, clockOut, updateWorkStatus } from 'features/attendance/slices/attendanceSlice';
 
 // project imports
 import useAuth from 'hooks/useAuth';
@@ -42,6 +42,9 @@ export default function AttendanceBasicCard({ isLoading }) {
     return () => clearInterval(timer);
   }, []);
   const formattedTime = currentTime.toLocaleTimeString('ko-KR', {
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit'
@@ -175,6 +178,7 @@ export default function AttendanceBasicCard({ isLoading }) {
                 <Button
                   variant="outlined"
                   onClick={handleClick}
+                  disabled={today?.workStatus === 'CLOCK_OUT' || today?.workStatus === 'OFF' || today?.workStatus === 'EARLY_LEAVE'}
                   sx={{
                     borderColor: '#D1D5DB',
                     color: '#FBBF24',
@@ -186,7 +190,13 @@ export default function AttendanceBasicCard({ isLoading }) {
                     '&:hover': {
                       borderColor: '#FBBF24',
                       backgroundColor: 'rgba(251, 191, 36, 0.1)'
-                    }
+                    },
+                    opacity:
+                      today?.workStatus === 'CLOCK_OUT' || today?.workStatus === 'OFF' || today?.workStatus === 'EARLY_LEAVE' ? 0.5 : 1,
+                    cursor:
+                      today?.workStatus === 'CLOCK_OUT' || today?.workStatus === 'OFF' || today?.workStatus === 'EARLY_LEAVE'
+                        ? 'not-allowed'
+                        : 'pointer'
                   }}
                 >
                   근무상태 변경
@@ -206,7 +216,6 @@ export default function AttendanceBasicCard({ isLoading }) {
               </Stack>
             </Stack>
 
-            {/* ===== 근태 요약 섹션 ===== */}
             <Box
               sx={{
                 mt: 2,
