@@ -2,17 +2,16 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 
 // material-ui
-import { Avatar, Chip, ListItem, ListItemAvatar, ListItemText, Stack, Typography, Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { Avatar, Chip, IconButton, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from '@mui/material';
 
-import { IconMailbox } from '@tabler/icons-react';
+import { IconBadge, IconBug, IconFileCheck, IconMail } from '@tabler/icons-react';
 import EmployeeIcon from 'assets/icons/EmployeeIcon';
 
 // date-fns 라이브러리
-import { formatRelativeTime } from 'utils/formatDate';
-import { markAsRead, deleteNotification } from 'api/notification';
+import { deleteNotification, markAsRead } from 'api/notification';
 import ChatIcon from 'assets/icons/ChatIcon';
-import CategoriIcon from 'assets/icons/CategoriIcon';
+import { formatRelativeTime } from 'utils/formatDate';
 import ListItemWrapper from './ListItemWrapper';
 
 const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) => {
@@ -21,7 +20,7 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
   const containerSX = { gap: 2, pl: 7 };
 
   // 새 알림 Chip을 표시할 시간
-  const NEW_THRESHOLD_MINUTES = 1;
+  const NEW_THRESHOLD_MINUTES = 5;
   const NEW_NOTIFICATION_THRESHOLD_MS = NEW_THRESHOLD_MINUTES * 60 * 1000;
 
   // 현재 시간과 알림 생성 시간의 차이 계산
@@ -41,13 +40,17 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
   const renderIcon = () => {
     switch (ownerType) {
       case 'MAIL':
-        return <IconMailbox />;
+        return <IconMail />;
       case 'EMPLOYEE':
         return <EmployeeIcon />;
       case 'TEAMCHATNOTI':
         return <ChatIcon />;
       case 'CATEGORI':
-        return <CategoriIcon />;
+        return <IconBug />;
+      case 'APPROVAL':
+        return <IconFileCheck />;
+      case 'WORKLOG':
+        return <IconBadge />;
       default:
         return null;
     }
