@@ -5,7 +5,7 @@
 // - 선택된 부서 코드를 부모 컴포넌트로 전달 (setSelectedDept)
 
 import { useEffect, useState } from "react";
-import { organizationAPI } from "../../api/organizationApi";
+import { organizationAPI } from "../api/organizationApi";
 
 // MUI TreeView 
 import Collapse from '@mui/material/Collapse';

@@ -4,7 +4,6 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
-import OrganizationPage from '../views/organization/OrganizationPage';
 
 // sample page routing
 const SamplePage = Loadable(lazy(() => import('views/sample-page')));
@@ -13,6 +12,7 @@ const ApprovalListPage = Loadable(lazy(() => import('features/approval/pages/App
 const MyPage = Loadable(lazy(() => import('features/mypage/pages/MyInfoPage')));
 const SchedulePage = Loadable(lazy(() => import('features/schedule/pages/SchedulePage')));
 const AttendancePage = Loadable(lazy(() => import('features/attendance/pages/AttendancePage')));
+const OrganizationPage = Loadable(lazy(() => import('features/organization/pages/OrganizationPage')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 

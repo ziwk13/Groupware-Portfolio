@@ -1,7 +1,4 @@
-import axios from "axios";
-
-// 모든 요청에서 쿠키 자동 포함 (accessToken, refreshToken)
-axios.defaults.withCredentials = true;
+import axiosServices from "utils/axios";
 
 // 백엔드 주소 (개발 중이면 localhost:8080)
 const API_BASE_URL = "http://localhost:8080/api";
@@ -10,7 +7,7 @@ export const organizationAPI = {
   // 부서 목록 조회
   getDepartments: async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/commoncode/department`);
+      const res = await axiosServices.get(`${API_BASE_URL}/commoncode/department`);
       // APIResponseDTO 형태일 수도 있으니 data 필드 우선 확인
       const data = res.data?.data || res.data;
       console.log("부서 목록 응답", data);
@@ -29,7 +26,7 @@ export const organizationAPI = {
   // 특정 부서의 직원 목록 조회
   getEmployeesByDeptCode: async (deptCode) => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/employees/department/${deptCode}`, {
+      const res = await axiosServices.get(`${API_BASE_URL}/employees/department/${deptCode}`, {
         withCredentials: true,
       });
       const data = res.data?.data || res.data;
@@ -41,10 +38,10 @@ export const organizationAPI = {
     }
   },
 
-  //직원 상세 정보 조회
+  //직원 상세 정보 조회 - 필요없을거같으니 추후 판단해서 삭제
   getEmployeeDetail: async (employeeId) => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/employees/${employeeId}`);
+      const res = await axiosServices.get(`${API_BASE_URL}/employees/${employeeId}`);
       const data = res.data?.data || res.data;
       console.log("직원 상세 응답", data);
       return data;
