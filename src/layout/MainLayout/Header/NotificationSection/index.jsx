@@ -1,29 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { stompService } from 'api/stompService';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CardActions from '@mui/material/CardActions';
+import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { Button } from '@mui/material';
 
 // project imports
-import MainCard from 'ui-component/cards/MainCard';
-import Transitions from 'ui-component/extended/Transitions';
-import NotificationList from './NotificationList';
+import { deleteAllNotifications, getUnreadCount, markAllAsRead } from 'api/notification';
+import NotificationList from './components/NotificationList';
 
 // assets
-import { IconBell } from '@tabler/icons-react';
+import MainCard from 'ui-component/cards/MainCard';
+import Transitions from 'ui-component/extended/Transitions';
+import BellCheckIcon from 'assets/icons/BellCheckIcon';
+import IconBell from 'assets/icons/IconBell';
+import IconBellRingingFilled from 'assets/icons/IconBellRingingFilled';
+import TrashIcon from 'assets/icons/TrashIcon';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 // notification status options
 const status = [
@@ -53,11 +57,90 @@ export default function NotificationSection() {
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  /**
-   * anchorRef is used on different componets and specifying one type leads to other components throwing an error
-   * */
   const anchorRef = useRef(null);
+  const listRef = useRef(null);  // NotificationList의 loadMore 함수를 호출하기 위한 ref
+  const scrollRef = useRef(null);  // 스크롤 이벤트를 감지할 Box의 ref
+
+  const prevOpen = useRef(open);
+  useEffect(() => {
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current.focus();
+    }
+    prevOpen.current = open;
+  }, [open]);
+
+  // 최초 1회 읽지 않은(HTTP)
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const unreadData = await getUnreadCount();
+        if (typeof unreadData === 'number') {
+          setUnreadCount(unreadData);
+        }
+      } catch (error) {
+        console.error('초기 읽지 않은 개수 조회 실패: ', error);
+      }
+    };
+    fetchInitialData();
+  }, [refreshKey]);
+
+  // 웹소켓 연결 및 구독
+  useEffect(() => {
+    // 서비스에 연결 요청
+    stompService.connect(() => {
+      console.log('STOMP: 연결 성공');
+
+      // 알림 구독 요청
+      stompService.subscribeToNotifications((payload) => {
+        console.log('STOMP: 새 알림 개수 수신', payload);
+        setUnreadCount(payload.unreadCount);
+        setRefreshKey(prevKey => prevKey + 1);
+      });
+    });
+    return () => {
+      stompService.disconnect();
+    };
+  }, []);
+
+  // 전체 알림 읽기
+  const handleClick = async () => {
+    try {
+      await markAllAsRead();
+      setUnreadCount(0);
+      if (listRef.current) {
+        listRef.current.markAllAsRead();
+      }
+    } catch (error) {
+      // API 파일에서 실패 처리 콘솔 생성
+    }
+  }
+
+  // Dialog 열기 핸들러
+  const handleDeleteAllClick = () => {
+    setDialogOpen(true);
+  };
+
+  // Dialog 닫기 핸들러
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  // 실제 Dialog의 삭제 로직을 처리할 핸들러
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteAllNotifications();
+      setUnreadCount(0);  // 안읽은 개수
+      setRefreshKey(prevKey => prevKey + 1);
+    } catch (error) {
+      // API 파일에서 실패 처리
+    }
+    // 처리가 끝나면 닫기
+    setDialogOpen(false);
+  };
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -70,16 +153,15 @@ export default function NotificationSection() {
     setOpen(false);
   };
 
-  const prevOpen = useRef(open);
-  useEffect(() => {
-    if (prevOpen.current === true && open === false) {
-      anchorRef.current.focus();
+  const handleScroll = () => {
+    const scrollBox = scrollRef.current;
+    if (scrollBox) {
+      // 스크롤이 (전체 높이 - 50px)지점, 즉 거의 맨 밑에 도달했는지 확인
+      const isBottom = scrollBox.scrollHeight - scrollBox.scrollTop <= scrollBox.clientHeight + 50;
+      if (isBottom && listRef.current) {
+        listRef.current.loadMore();
+      }
     }
-    prevOpen.current = open;
-  }, [open]);
-
-  const handleChange = (event) => {
-    event?.target.value && setValue(event?.target.value);
   };
 
   return (
@@ -111,7 +193,12 @@ export default function NotificationSection() {
           aria-haspopup="true"
           onClick={handleToggle}
         >
-          <IconBell stroke={1.5} size="20px" />
+          {/* notificationCount 값에 따라 아이콘을 다르게 표시 */}
+          {unreadCount > 0 ? (
+            <IconBellRingingFilled storke={1.5} size="20px" />
+          ) : (
+            <IconBell stroke={1.5} size="20px" />
+          )}
         </Avatar>
       </Box>
       <Popper
@@ -128,43 +215,59 @@ export default function NotificationSection() {
             <Transitions position={downMD ? 'top' : 'top-right'} in={open} {...TransitionProps}>
               <Paper>
                 {open && (
-                  <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]} sx={{ maxWidth: 330 }}>
+                  <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]} sx={{ width: 330 }}>
                     <Stack sx={{ gap: 2 }}>
                       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', pt: 2, px: 2 }}>
                         <Stack direction="row" sx={{ gap: 2 }}>
-                          <Typography variant="subtitle1">All Notification</Typography>
-                          <Chip size="small" label="01" variant="filled" sx={{ color: 'background.default', bgcolor: 'warning.dark' }} />
+                          <Typography variant="subtitle1">안읽은 알림</Typography>
+                          <Chip size="small" label={unreadCount} variant="filled" sx={{ color: 'background.default', bgcolor: 'warning.dark' }} />
                         </Stack>
-                        <Typography component={Link} to="#" variant="subtitle2" sx={{ color: 'primary.main' }}>
-                          Mark as all read
-                        </Typography>
-                      </Stack>
-                      <Box sx={{ height: 1, maxHeight: 'calc(100vh - 205px)', overflowX: 'hidden', '&::-webkit-scrollbar': { width: 5 } }}>
-                        <Box sx={{ px: 2, pt: 0.25 }}>
-                          <TextField
-                            id="outlined-select-currency-native"
-                            select
-                            fullWidth
-                            value={value}
-                            onChange={handleChange}
-                            slotProps={{ select: { native: true } }}
+                        <Stack direction="row" spacing={0.5}>
+                          <Tooltip title="전체 알림 읽음">
+                            <IconButton onClick={handleClick} color="primary" size="small">
+                              <BellCheckIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Dialog
+                            open={dialogOpen}
+                            onClose={handleDialogClose}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
                           >
-                            {status.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </TextField>
-                        </Box>
-                        <Divider sx={{ mt: 2 }} />
-                        <NotificationList />
+                            <DialogTitle id="alert-dialog-title" textAlign={'center'}>
+                              {"알림 전체 삭제"}
+                            </DialogTitle>
+                            <DialogContent>
+                              <DialogContentText id="alert-dialog-description">
+                                모든 알림을 삭제 하시겠습니까?
+                              </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                              <Button onClick={handleConfirmDelete} color="error" autoFocus>
+                                삭제
+                              </Button>
+                              <Button onClick={handleDialogClose}>취소</Button>
+                            </DialogActions>
+                          </Dialog>
+                          <Tooltip title="전체 알림 삭제">
+                            <IconButton onClick={handleDeleteAllClick} color="error" size="small">
+                              <TrashIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </Stack>
+                      <Box
+                        ref={scrollRef}
+                        onScroll={handleScroll}
+                        sx={{ height: 1, maxHeight: 'calc(100vh - 235px)', overflowX: 'hidden', '&::-webkit-scrollbar': { width: 5 } }}>
+                        <NotificationList
+                          ref={listRef}
+                          refreshKey={refreshKey}
+                          onCountChange={setUnreadCount}
+                          onClose={handleClose}
+                        />
                       </Box>
                     </Stack>
-                    <CardActions sx={{ p: 1.25, justifyContent: 'center' }}>
-                      <Button size="small" disableElevation>
-                        View All
-                      </Button>
-                    </CardActions>
                   </MainCard>
                 )}
               </Paper>
