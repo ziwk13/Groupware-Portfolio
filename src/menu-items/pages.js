@@ -10,8 +10,11 @@ import {
   IconQuestionMark,
   IconShieldLock,
   IconFileCheck,
-  IconClipboardCheck
+  IconClipboardCheck,
+  IconCalendar
 } from '@tabler/icons-react';
+
+import IconBadge from '@mui/icons-material/Badge';
 
 // constant
 const icons = {
@@ -25,7 +28,9 @@ const icons = {
   IconMail,
   IconClipboardList,
   IconFileCheck,
-  IconClipboardCheck
+  IconClipboardCheck,
+  IconCalendar,
+  IconBadge
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -39,46 +44,18 @@ const pages = {
     {
       id: 'gntaegwanry',
       title: '근태관리',
-      type: 'collapse',
-      icon: icons.IconBug,
-      children: [
-        {
-          id: 'error',
-          title: 'error-404',
-          type: 'item',
-          url: '/pages/error',
-          target: true
-        },
-        {
-          id: '500',
-          title: 'error-500',
-          type: 'item',
-          url: '/pages/500',
-          target: true
-        }
-      ]
-    },{
+      type: 'item',
+      icon: icons.IconBadge,
+      url: '/attendance'
+    },
+    {
       id: 'calendar',
       title: '캘린더',
-      type: 'collapse',
-      icon: icons.IconBug,
-      children: [
-        {
-          id: 'error',
-          title: 'error-404',
-          type: 'item',
-          url: '/pages/error',
-          target: true
-        },
-        {
-          id: '500',
-          title: 'error-500',
-          type: 'item',
-          url: '/pages/500',
-          target: true
-        }
-      ]
-    }, {
+      type: 'item',
+      icon: icons.IconCalendar,
+      url: '/schedule'
+    },
+    {
       id: 'mail',
       title: '메일함',
       type: 'collapse',
@@ -113,7 +90,8 @@ const pages = {
           target: true
         }
       ]
-    }, {
+    },
+    {
       id: 'worklog',
       title: '업무일지',
       type: 'collapse',
@@ -141,7 +119,8 @@ const pages = {
           target: false
         }
       ]
-    }, {
+    },
+    {
       id: 'approval',
       title: '전자결재',
       type: 'collapse',
@@ -153,35 +132,39 @@ const pages = {
           type: 'item',
           url: '/approval/form',
           target: false
-        },{
+        },
+        {
           id: 'approval-list-pending',
           title: '결재 대기 목록',
           type: 'item',
           url: '/approval/list/pending',
           target: false
-        },{
+        },
+        {
           id: 'approval-list-draft',
           title: '결재 기안 목록',
           type: 'item',
           url: '/approval/list/draft',
           target: false
-        },{
+        },
+        {
           id: 'approval-list-completed',
           title: '결재 완료 목록',
           type: 'item',
           url: '/approval/list/completed',
           target: false
-        },{
+        },
+        {
           id: 'approval-list-reference',
           title: '결재 참조 목록',
           type: 'item',
           url: '/approval/list/reference',
           target: false
-        },
-
+        }
       ]
-    }, {
-      id:'gaesipan',
+    },
+    {
+      id: 'gaesipan',
       title: '게시판',
       type: 'collapse',
       icon: icons.IconBug,
@@ -199,11 +182,9 @@ const pages = {
           type: 'item',
           url: '/pages/500',
           target: true
-        },
+        }
       ]
     }
-
-
   ]
 };
 
