@@ -29,7 +29,7 @@ export default function AttachmentDropzone({attachments, setAttachments, height}
                 showList={list}
                 files={attachments}
                 onFilesChange={handleFilesChange}
-                height={height}
+                // height={height}
               />
             </Stack>
             {error && (

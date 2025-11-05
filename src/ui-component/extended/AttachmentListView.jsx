@@ -20,7 +20,7 @@ const AttachmentListBox = styled('div')(({ theme }) => ({
   overflowY: 'auto'
 }));
 
-export default function AttachmentListView({ attachments = [], height }) {
+export default function AttachmentListView({ attachments = [], height="200px"}) {
   const theme = useTheme();
   const hasFile = attachments.length > 0;
 
