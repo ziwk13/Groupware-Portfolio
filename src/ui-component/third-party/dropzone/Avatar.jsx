@@ -59,49 +59,37 @@ const PlaceholderWrapper = styled('div')(({ theme }) => ({
 
 // ==============================|| UPLOAD - AVATAR ||============================== //
 
-export default function AvatarUpload({ error, file = [], setFieldValue, sx, ...other }) {
+export default function AvatarUpload({file, setFile, sx,}) {
   const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({
-    accept: {
-      'image/*': []
-    },
+    accept: {'image/*': []},
     multiple: false,
     onDrop: (acceptedFiles) => {
-      setFieldValue(
-        'files',
-        acceptedFiles.map((file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file)
-          })
-        )
-      );
+      if(acceptedFiles.length > 0) {
+        const selectedFile = acceptedFiles[0];
+        const preview = URL.createObjectURL(selectedFile);
+        setFile(Object.assign(selectedFile, {preview}));
+      }
     }
   });
 
-  const thumbs =
-    file &&
-    file.map((item) => (
-      <CardMedia
-        component="img"
-        key={item.name}
-        alt={item.name}
-        src={item.preview}
-        onLoad={() => {
-          URL.revokeObjectURL(item.preview);
-        }}
-      />
-    ));
-
   return (
     <>
-      <RootWrapper sx={{ ...((isDragReject || error) && { borderColor: 'error.light' }), ...sx }}>
+      <RootWrapper sx={{ ...((isDragReject) && { borderColor: 'error.light' }), height:'150px', width:'150px'}}>
         <DropzoneWrapper {...getRootProps()} sx={{ ...(isDragActive && { opacity: 0.6 }) }}>
           <input {...getInputProps()} />
-          {thumbs}
+          {file && (
+            <CardMedia
+              component="img"
+              alt={file.name}
+              src={file.preview}
+              onLoad={() => URL.revokeObjectURL(file.preview)}
+            />
+          )}
           <PlaceholderWrapper
             className="placeholder"
             sx={{
-              ...(thumbs && { opacity: 0, color: 'common.white', bgcolor: 'grey.900' }),
-              ...((isDragReject || error) && { bgcolor: 'error.lighter' })
+              ...(file && { opacity: 0, color: 'common.white', bgcolor: 'grey.900' }),
+              ...((isDragReject) && { bgcolor: 'error.lighter' })
             }}
           >
             <Stack sx={{ gap: 0.5, alignItems: 'center', color: file ? 'background.default' : 'secondary.main' }}>
@@ -111,15 +99,18 @@ export default function AvatarUpload({ error, file = [], setFieldValue, sx, ...o
           </PlaceholderWrapper>
         </DropzoneWrapper>
       </RootWrapper>
-      {fileRejections.length > 0 && <RejectionFiles fileRejections={fileRejections} />}
+
+      {fileRejections.length > 0 && (
+        <Typography variant="caption" color="error">
+          파일 형식이 올바르지 않습니다.
+        </Typography>
+      )}
     </>
   );
 }
 
 AvatarUpload.propTypes = {
-  error: PropTypes.any,
   file: PropTypes.array,
-  setFieldValue: PropTypes.any,
+  setFile: PropTypes.any,
   sx: PropTypes.any,
-  other: PropTypes.any
 };

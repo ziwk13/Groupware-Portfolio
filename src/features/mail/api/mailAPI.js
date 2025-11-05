@@ -13,3 +13,8 @@ export const sendMail = async (mailData) => {
 		headers: { 'Content-Type': 'multipart/form-data' }
 	})
 }
+
+// 메일 상세 조회
+export const detailMail = async (mailId) => {
+	return axiosServices.get(`/api/mails/${mailId}`);
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axiosServices from '../../../utils/axios';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -30,6 +31,7 @@ import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
+import AttachmentProfile from '../../../ui-component/extended/AttachmentProfile';
 
 export default function UserProfile() {
   const { user, updateProfile } = useAuth();
@@ -37,6 +39,7 @@ export default function UserProfile() {
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [file, setFile] = useState(null);   // 프로필
 
   useEffect(() => {
     if (user?.phoneNumber) {
@@ -78,6 +81,7 @@ export default function UserProfile() {
         </Grid>
       )}
 
+      {/* 기존 프로필 이미지 영역 */}
       <Grid size={4}>
         <Grid container direction="column" sx={{ alignItems: 'center', gap: 2 }}>
           <Grid>
@@ -99,7 +103,39 @@ export default function UserProfile() {
             </Grid>
           </Grid>
         </Grid>
+        
+        {/* 프로필 이미지 부분 */}
+        <AttachmentProfile file={file} setFile={setFile}/>
+         <Stack sx={{ mt: 2, alignItems: 'center' }}>
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={async () => {
+        if (!file) {
+          alert('파일을 먼저 선택하세요.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('files', file); // 서비스가 List<MultipartFile>이면 그대로 유지
+
+        try {
+          const res = await axiosServices.post('/api/attachmentFiles/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          console.log('✅ 업로드 성공:', res.data);
+          alert('업로드 성공!');
+        } catch (err) {
+          console.error('❌ 업로드 실패:', err);
+          alert('업로드 실패');
+        }
+      }}
+    >
+      프로필 업로드 테스트
+    </Button>
+  </Stack>
       </Grid>
+
 
       <Grid size={8}>
         <List component="nav" aria-label="user details" sx={{ width: '100%' }}>

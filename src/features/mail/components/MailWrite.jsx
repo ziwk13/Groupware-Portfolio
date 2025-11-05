@@ -98,54 +98,54 @@ export default function MailWrite() {
 
   return (
 	<Grid container spacing={gridSpacing}>
-     	<Grid size={12}>
-		<MainCard>
-			<Grid container spacing={gridSpacing}>
-			<Grid size={12}>
-				<Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-				<Button variant="contained" onClick={handleSendMail}>Reply</Button>
+		<Grid size={12}>
+			<MainCard>
+				<Grid container spacing={gridSpacing}>
+				<Grid size={12}>
+					<Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+					<Button variant="contained" onClick={handleSendMail}>Reply</Button>
 
-				<Link
-					component={RouterLink}
-					to="#"
-					color={colorScheme === ThemeMode.DARK ? 'primary' : 'secondary'}
-					onClick={handleCcBccChange}
-					underline="hover"
-				>
-					CC & BCC
-				</Link>
-				</Box>
-			</Grid>
-			<Grid size={12}>
-				<TextField fullWidth label="To" />
-			</Grid>
-			<Grid size={12}>
-				<TextField fullWidth label="Subject" />
-			</Grid>
-			<Grid sx={{ display: ccBccValue ? 'block' : 'none' }} size={12}>
-				<Collapse in={ccBccValue}>
-				{ccBccValue && (
-					<Grid container spacing={gridSpacing}>
-					<Grid size={12}>
-						<TextField fullWidth label="CC" />
-					</Grid>
-					<Grid size={12}>
-						<TextField fullWidth label="BCC" />
-					</Grid>
-					</Grid>
-				)}
-				</Collapse>
-			</Grid>
+					<Link
+						component={RouterLink}
+						to="#"
+						color={colorScheme === ThemeMode.DARK ? 'primary' : 'secondary'}
+						onClick={handleCcBccChange}
+						underline="hover"
+					>
+						CC & BCC
+					</Link>
+					</Box>
+				</Grid>
+				<Grid size={12}>
+					<TextField fullWidth label="제목" value={title} onChange = {e => setTitle(e.target.value)}/>
+				</Grid>
+				<Grid size={12}>
+					<TextField fullWidth label="수신자" value={to} onChange = {e => setTo(e.target.value)}/>
+				</Grid>
+				<Grid sx={{ display: ccBccValue ? 'block' : 'none' }} size={12}>
+					<Collapse in={ccBccValue}>
+					{ccBccValue && (
+						<Grid container spacing={gridSpacing}>
+							<Grid size={12}>
+								<TextField fullWidth label="참조" value={cc} onChange = {e => setCc(e.target.value)}/>
+							</Grid>
+							<Grid size={12}>
+								<TextField fullWidth label="숨은 참조" value={bcc} onChange = {e => setBcc(e.target.value)}/>
+							</Grid>
+						</Grid>
+					)}
+					</Collapse>
+				</Grid>
 
-			{/* quill editor */}
-			<Grid size={12}>
-				<ReactQuill />
-			</Grid>
-			<Grid size={12}>
-				<AttachmentDropzone attachments={attachments} setAttachments={setAttachments}/>
-			</Grid>
-			</Grid>
-		</MainCard>
+				{/* quill editor */}
+				<Grid size={12}>
+					<ReactQuill value={content} onChange = {e => setContent(e.target.value)} />
+				</Grid>
+				<Grid size={12}>
+					<AttachmentDropzone attachments={attachments} setAttachments={setAttachments} height={"150px"}/>
+				</Grid>
+				</Grid>
+			</MainCard>
 		</Grid>
 	</Grid>
   );
