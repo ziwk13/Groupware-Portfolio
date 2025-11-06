@@ -2,12 +2,13 @@ import axiosServices from "utils/axios";
 
 // 백엔드 주소 (개발 중이면 localhost:8080)
 const API_BASE_URL = "http://localhost:8080/api";
+const COMMON_CODE_URL = `${API_BASE_URL}/commoncodes`;
 
 export const organizationAPI = {
   // 부서 목록 조회
   getDepartments: async () => {
     try {
-      const res = await axiosServices.get(`${API_BASE_URL}/commoncode/department`);
+      const res = await axiosServices.get(`${COMMON_CODE_URL}/department`);
       // APIResponseDTO 형태일 수도 있으니 data 필드 우선 확인
       const data = res.data?.data || res.data;
       console.log("부서 목록 응답", data);
@@ -20,6 +21,42 @@ export const organizationAPI = {
         { code: "DP2", value1: "경영지원본부", value2: "DP1" },
         { code: "DP3", value1: "인사팀", value2: "DP2" },
       ];
+    }
+  },
+
+  // 재직 상태 목록 조회
+  getEmployeeStatus: async () => {
+    try {
+      const res = await axiosServices.get(`${COMMON_CODE_URL}/status`);
+      const data = res.data?.data || res.data;
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error("재직 상태 목록 조회 실패:", err);
+      return [];
+    }
+  },
+
+  // 직급 목록 조회
+  getPositions: async () => {
+    try {
+      const res = await axiosServices.get(`${COMMON_CODE_URL}/position`);
+      const data = res.data?.data || res.data;
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error("직급 목록 조회 실패:", err);
+      return [];
+    }
+  },
+
+  // 권한 목록 조회
+  getRoles: async () => {
+    try {
+      const res = await axiosServices.get(`${COMMON_CODE_URL}/role`);
+      const data = res.data?.data || res.data;
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error("권한 목록 조회 실패:", err);
+      return [];
     }
   },
 
