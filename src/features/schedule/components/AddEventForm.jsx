@@ -7,7 +7,7 @@ import {
   Divider,
   FormControlLabel,
   FormHelperText,
-  Grid as Grid, // ✅ Berry Template에서 size prop 지원 버전
+  Grid as Grid,
   IconButton,
   Stack,
   Switch,
@@ -25,12 +25,13 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { gridSpacing } from 'store/constant';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { dispatch } from 'store';
 import axios from 'utils/axios';
-import { inviteParticipants } from '../slices/scheduleSlice';
+import { inviteParticipants, getEvents, updateParticipantStatus } from '../slices/scheduleSlice';
 import useAuth from 'hooks/useAuth';
 
 // ==============================|| ADD / EDIT EVENT FORM ||============================== //
@@ -41,7 +42,6 @@ function getInitialValues(event, range) {
   return {
     title: event?.title || '',
     content: event?.content || '',
-    allDay: event?.allDay || false,
     startTime: toDate(event?.startTime) || toDate(range?.start) || now,
     endTime: toDate(event?.endTime) || toDate(range?.end) || now,
     selectedParticipants: []
@@ -55,6 +55,8 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
   const { user } = useAuth();
   const loggedInId = user?.employeeId;
   const isHost = event && Number(event.employeeId) === Number(loggedInId);
+  const navigate = useNavigate();
+  const [participantStatus, setParticipantStatus] = useState(null);
 
   // 직원 목록 불러오기
   useEffect(() => {
@@ -82,6 +84,11 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
     fetchParticipants();
   }, [event]);
 
+  useEffect(() => {
+    const myStatus = participants.find((p) => p.participantEmployeeId === loggedInId)?.participantStatusName;
+    setParticipantStatus(myStatus === '참석' ? 'ATTEND' : myStatus === '거절' ? 'REJECT' : null);
+  }, [participants, loggedInId]);
+
   const EventSchema = Yup.object().shape({
     title: Yup.string().max(255).required('Title is required'),
     content: Yup.string().max(5000),
@@ -96,7 +103,6 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
         const data = {
           title: values.title,
           content: values.content,
-          allDay: values.allDay,
           startTime: values.startTime,
           endTime: values.endTime
         };
@@ -182,21 +188,13 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                 <Autocomplete
                   multiple
                   options={employeeOptions}
-                  getOptionLabel={(option) => option.username || ''}
+                  getOptionLabel={(option) => option.name || ''}
                   value={values.selectedParticipants}
                   onChange={(e, val) => (isCreating || isHost) && setFieldValue('selectedParticipants', val)}
                   renderTags={(tagValue, getTagProps) =>
-                    tagValue.map((option, index) => <Chip key={option.employeeId} label={option.username} {...getTagProps({ index })} />)
+                    tagValue.map((option, index) => <Chip key={option.employeeId} label={option.name} {...getTagProps({ index })} />)
                   }
                   renderInput={(params) => <TextField {...params} label="참석자 선택" placeholder="직원 검색" />}
-                />
-              </Grid>
-
-              {/* All Day */}
-              <Grid size={12}>
-                <FormControlLabel
-                  control={<Switch checked={values.allDay} {...getFieldProps('allDay')} disabled={event && !isHost} />}
-                  label="All day"
                 />
               </Grid>
 
@@ -227,14 +225,78 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
               {/* 참여자 목록 */}
               {!isCreating && participants.length > 0 && (
                 <Grid size={12} sx={{ mt: 2 }}>
+                  {/* 주최자가 아닌 경우에만 참석/거절 버튼 표시 */}
+                  {!isHost && (
+                    <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                      <Button
+                        size="small"
+                        variant={participantStatus === 'ATTEND' ? 'contained' : 'outlined'}
+                        sx={{
+                          color: participantStatus === 'ATTEND' ? '#fff' : '#4ADE80',
+                          borderColor: '#4ADE80',
+                          backgroundColor: participantStatus === 'ATTEND' ? '#4ADE80' : 'transparent',
+                          '&:hover': {
+                            backgroundColor: '#4ADE80',
+                            color: '#fff'
+                          },
+                          textTransform: 'none',
+                          fontWeight: 600
+                        }}
+                        onClick={async () => {
+                          try {
+                            await dispatch(updateParticipantStatus(event.scheduleId, loggedInId, 'ATTEND'));
+                            setParticipantStatus('ATTEND');
+                            alert('참석 상태로 변경되었습니다.');
+                            await dispatch(getEvents(loggedInId));
+                            onCancel();
+                          } catch {
+                            alert('참석 상태 변경 실패');
+                          }
+                        }}
+                      >
+                        참석
+                      </Button>
+
+                      <Button
+                        size="small"
+                        variant={participantStatus === 'REJECT' ? 'contained' : 'outlined'}
+                        sx={{
+                          color: participantStatus === 'REJECT' ? '#fff' : '#F87171',
+                          borderColor: '#F87171',
+                          backgroundColor: participantStatus === 'REJECT' ? '#F87171' : 'transparent',
+                          '&:hover': {
+                            backgroundColor: '#F87171',
+                            color: '#fff'
+                          },
+                          textTransform: 'none',
+                          fontWeight: 600
+                        }}
+                        onClick={async () => {
+                          try {
+                            await dispatch(updateParticipantStatus(event.scheduleId, loggedInId, 'REJECT'));
+                            setParticipantStatus('REJECT');
+                            alert('거절 상태로 변경되었습니다.');
+                            await dispatch(getEvents(loggedInId));
+                            onCancel();
+                          } catch {
+                            alert('거절 상태 변경 실패');
+                          }
+                        }}
+                      >
+                        거절
+                      </Button>
+                    </Stack>
+                  )}
                   <Typography variant="h6" gutterBottom>
                     참여자 목록
                   </Typography>
+
+                  {/*  참여자 목록 리스트 */}
                   <List dense>
                     {participants.map((p) => (
                       <ListItem key={p.participantId}>
                         <ListItemText
-                          primary={`${p.participantUserName ?? p.participantName} (${
+                          primary={`${p.participantName ?? p.participantName} (${
                             (p.participantStatusName || '').replace(/^참여\s*상태\s*-\s*/, '') || '상태 없음'
                           })`}
                         />

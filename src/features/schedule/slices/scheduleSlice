@@ -55,7 +55,7 @@ export default slice.reducer;
 export const getEvents = (employeeId) => async (dispatch) => {
   try {
     dispatch(slice.actions.startLoading());
-    const res = await axios.get(`/api/schedules/visible/${employeeId}`);
+    const res = await axios.get(`/api/schedules/visible/${employeeId}`, { withCredentials: true });
     const data = res.data?.data || res.data;
     dispatch(slice.actions.getEventsSuccess(data));
   } catch (error) {
@@ -67,7 +67,7 @@ export const getEvents = (employeeId) => async (dispatch) => {
 export const addEvent = (eventData) => async () => {
   try {
     dispatch(slice.actions.startLoading());
-    const res = await axios.post('/api/schedules', eventData);
+    const res = await axios.post('/api/schedules', eventData, { withCredentials: true });
     const created = res.data?.data || res.data;
     dispatch(slice.actions.addEventSuccess(created));
     return created;
@@ -83,7 +83,7 @@ export const updateEvent = (scheduleId, updatedData) => async (dispatch, getStat
     dispatch(slice.actions.startLoading());
     const state = getState();
     const prev = state.schedule.events.find((e) => e.scheduleId === Number(scheduleId)) || {};
-    const res = await axios.put(`/api/schedules/${scheduleId}`, updatedData);
+    const res = await axios.put(`/api/schedules/${scheduleId}`, updatedData, { withCredentials: true });
     const server = res.data?.data || {};
     const merged = { ...prev, ...updatedData, ...server, scheduleId: Number(scheduleId) };
     dispatch(slice.actions.updateEventSuccess(merged));
@@ -93,9 +93,13 @@ export const updateEvent = (scheduleId, updatedData) => async (dispatch, getStat
 };
 
 // 일정 삭제
-export const deleteEvent = (scheduleId) => async (dispatch) => {
+export const deleteEvent = (scheduleId) => async (dispatch, getState) => {
   try {
-    await axios.delete(`/api/schedules/${scheduleId}`);
+    await axios.delete(`/api/schedules/${scheduleId}`, { withCredentials: true });
+
+    const state = getState();
+    const updatedEvents = state.schedule.events.filter((e) => e.scheduleId !== scheduleId);
+    dispatch(slice.actions.getEventsSuccess(updatedEvents));
   } catch (error) {
     dispatch(slice.actions.hasError(error));
   }
@@ -104,9 +108,26 @@ export const deleteEvent = (scheduleId) => async (dispatch) => {
 // 참여자 초대
 export const inviteParticipants = (scheduleId, employeeIds) => async () => {
   try {
-    await axios.post(`/api/schedules/${scheduleId}/participants`, employeeIds);
+    await axios.post(`/api/schedules/${scheduleId}/participants`, employeeIds, { withCredentials: true });
     return true;
   } catch (error) {
+    throw error;
+  }
+};
+
+// 참여자 상태 변경
+export const updateParticipantStatus = (schdeuleId, employeeId, value1) => async (dispatch) => {
+  try {
+    await axios.put(`/api/schedules/${schdeuleId}/participants/${employeeId}`, null, {
+      params: { value1 },
+      withCredentials: true
+    });
+
+    await dispatch(getEvents(employeeId));
+
+    return true;
+  } catch (error) {
+    dispatch(slice.actions.hasError(error));
     throw error;
   }
 };

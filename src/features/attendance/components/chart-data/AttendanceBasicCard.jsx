@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { Menu, MenuItem } from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 // redux
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,6 +26,7 @@ import barChartOptions from './total-growth-bar-chart';
 
 export default function AttendanceBasicCard({ isLoading }) {
   const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const dispatch = useDispatch();
   const { colorScheme } = useColorScheme();
   const { user, isLoggedIn } = useAuth();
@@ -41,14 +43,15 @@ export default function AttendanceBasicCard({ isLoading }) {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-  const formattedTime = currentTime.toLocaleTimeString('ko-KR', {
-    year: '2-digit',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
+
+  // 요일
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+
+  const formattedTime = `${currentTime.getFullYear()}년 ${String(currentTime.getMonth() + 1).padStart(2, '0')}월 ${String(
+    currentTime.getDate()
+  ).padStart(2, '0')}일 (${days[currentTime.getDay()]}) ${String(currentTime.getHours()).padStart(2, '0')}:${String(
+    currentTime.getMinutes()
+  ).padStart(2, '0')}:${String(currentTime.getSeconds()).padStart(2, '0')}`;
 
   // 초기 렌더링 시 오늘 근태 조회
   useEffect(() => {
@@ -123,8 +126,7 @@ export default function AttendanceBasicCard({ isLoading }) {
             {/* ===== 헤더 ===== */}
             <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
               <Stack sx={{ gap: 1 }}>
-                <Typography variant="h3">근태 관리</Typography>
-                <Typography variant="h3" sx={{ color: 'secondary.200' }}>
+                <Typography variant={isSmall ? 'h5' : 'h3'} sx={{ color: 'secondary.200' }}>
                   {formattedTime}
                 </Typography>
               </Stack>
@@ -139,8 +141,8 @@ export default function AttendanceBasicCard({ isLoading }) {
                     borderColor: '#D1D5DB',
                     color: '#60A5FA',
                     borderRadius: '12px',
-                    width: '100px',
-                    height: '40px',
+                    width: isSmall ? '90px' : '110px',
+                    height: isSmall ? '35px' : '40px',
                     fontWeight: 600,
                     fontSize: '0.8rem',
                     '&:hover': {
@@ -161,8 +163,8 @@ export default function AttendanceBasicCard({ isLoading }) {
                     borderColor: '#D1D5DB',
                     color: '#F87171',
                     borderRadius: '12px',
-                    width: '100px',
-                    height: '40px',
+                    width: isSmall ? '90px' : '110px',
+                    height: isSmall ? '35px' : '40px',
                     fontWeight: 600,
                     fontSize: '0.8rem',
                     '&:hover': {
@@ -183,8 +185,8 @@ export default function AttendanceBasicCard({ isLoading }) {
                     borderColor: '#D1D5DB',
                     color: '#FBBF24',
                     borderRadius: '12px',
-                    width: '120px',
-                    height: '40px',
+                    width: isSmall ? '80px' : '110px',
+                    height: isSmall ? '35px' : '40px',
                     fontWeight: 600,
                     fontSize: '0.8rem',
                     '&:hover': {

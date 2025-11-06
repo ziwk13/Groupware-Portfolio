@@ -37,7 +37,7 @@ export default function Calendar() {
   const { user } = useAuth();
   const employeeId = user?.employeeId;
 
-  // 🔹 작성자만 수정 가능하도록 하는 함수
+  //  작성자만 수정 가능하도록 하는 함수
   const canEdit = (event) => {
     const creatorId = event.extendedProps?.employeeId || event.employeeId;
     return Number(creatorId) === Number(employeeId);
@@ -123,7 +123,7 @@ export default function Calendar() {
       scheduleId = Number(e.id);
       const existing = events.find((ev) => ev.scheduleId === scheduleId);
 
-      // 🔹 주최자만 드래그/리사이즈 허용
+      // 주최자만 드래그/리사이즈 허용
       if (!canEdit(e)) {
         alert('이 일정은 작성자만 수정할 수 있습니다.');
         argOrId.revert?.();
@@ -151,8 +151,8 @@ export default function Calendar() {
   };
 
   // 일정 삭제
-  const handleEventDelete = (scheduleId) => {
-    dispatch(deleteEvent(scheduleId));
+  const handleEventDelete = async (scheduleId) => {
+    await dispatch(deleteEvent(scheduleId));
     handleModalClose();
   };
 
