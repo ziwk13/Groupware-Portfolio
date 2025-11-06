@@ -15,9 +15,13 @@ import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 
 // project imports
+import Avatar from 'ui-component/extended/Avatar';
 import { gridSpacing } from 'store/constant';
 import useAuth from 'hooks/useAuth';
 import AnimateButton from '../../../ui-component/extended/AnimateButton';
+
+// assets
+import ErrorTwoToneIcon from '@mui/icons-material/ErrorTwoTone';
 
 // 아이콘 imports
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
@@ -26,7 +30,6 @@ import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
-import AttachmentProfile from '../../../ui-component/extended/AttachmentProfile';
 
 export default function UserProfile() {
   const { user, updateProfile } = useAuth();
@@ -34,7 +37,6 @@ export default function UserProfile() {
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [file, setFile] = useState(null);   // 프로필
 
   useEffect(() => {
     if (user?.phoneNumber) {
@@ -76,9 +78,8 @@ export default function UserProfile() {
         </Grid>
       )}
 
-      {/* 기존 프로필 이미지 영역 */}
       <Grid size={4}>
-        {/* <Grid container direction="column" sx={{ alignItems: 'center', gap: 2 }}>
+        <Grid container direction="column" sx={{ alignItems: 'center', gap: 2 }}>
           <Grid>
             <Avatar alt="User" src={user?.profileImg} sx={{ height: 150, width: 150 }} />
           </Grid>
@@ -97,12 +98,8 @@ export default function UserProfile() {
               </Grid>
             </Grid>
           </Grid>
-        </Grid> */}
-        
-        {/* 프로필 이미지 부분 */}
-        <AttachmentProfile file={file} setFile={setFile}/>
+        </Grid>
       </Grid>
-
 
       <Grid size={8}>
         <List component="nav" aria-label="user details" sx={{ width: '100%' }}>
