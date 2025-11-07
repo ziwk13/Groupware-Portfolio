@@ -12,6 +12,8 @@ import Loader from 'ui-component/Loader';
 import axios from 'utils/axios';
 // mypageAPI에서 updatePassword도 가져오도록 수정
 import { updateEmployeeInfo, updatePassword as apiUpdatePassword } from '../features/mypage/api/mypageAPI';
+import { getImageUrl } from 'utils/getImageUrl';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
 // constant
 const initialState = {
@@ -129,12 +131,22 @@ export function JWTProvider({ children }) {
     return apiUpdatePassword(data);
   };
 
+  // 프로필 이미지 URL을 반환하는 함수
+  const getProfileImg = () => {
+    if (state.user && state.user.profileImg && state.user.profileImg !== '') {
+      return getImageUrl(state.user.profileImg);
+    }
+
+    // 위 조건에 맞지 않으면, import된 기본 이미지 경로 반환
+    return DefaultAvatar;
+  };
+
   if (state.isInitialized !== undefined && !state.isInitialized) {
     return <Loader />;
   }
 
   return (
-    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile, updatePassword, adminUpdateEmployee }}>
+    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile, updatePassword, adminUpdateEmployee, getProfileImg }}>
       {children}
     </JWTContext.Provider>
   );
