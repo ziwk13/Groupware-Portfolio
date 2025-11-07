@@ -11,6 +11,7 @@ import MobileSection from './MobileSection';
 import ProfileSection from './ProfileSection';
 import FullScreenSection from './FullScreenSection';
 import NotificationSection from './NotificationSection';
+import OrganizationSection from './OrganizationSection';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation } from 'config';
@@ -76,6 +77,9 @@ export default function Header() {
 
       {/* notification */}
       <NotificationSection />
+
+      {/* organizationSection */}
+      <OrganizationSection/>
 
       {/* full sceen toggler */}
       <Box sx={{ display: { xs: 'none', lg: 'block' } }}>

@@ -80,7 +80,15 @@ export function JWTProvider({ children }) {
 
   const register = async (userData) => {
     const response = await axios.post('/api/auth/signup', userData);
-    return response.data;
+    // OrganizationPage에서 EmployeeResponseDTO 객체 자체를 필요로 하므로 .data.data를 반환
+    return response.data.data;
+  };
+
+  // 관리자가 '다른' 직원의 정보를 수정하는 함수
+  const adminUpdateEmployee = async (employeeId, employeeData) => {
+    const response = await axios.patch(`/api/employees/updateEmployeeByAdmin/${employeeId}`, employeeData);
+    // register와 마찬가지로 APIResponseDTO에서 실제 Employee DTO 객체를 반환
+    return response.data.data;
   };
 
   const logout = async () => {
@@ -124,7 +132,7 @@ export function JWTProvider({ children }) {
   }
 
   return (
-    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile, updatePassword }}>
+    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile, updatePassword, adminUpdateEmployee }}>
       {children}
     </JWTContext.Provider>
   );

@@ -42,6 +42,13 @@ const pages = {
   type: 'group',
   children: [
     {
+      id: 'organization',
+      title: '인사관리',
+      type: 'item',
+      icon: icons.IconBadge,
+      url: '/organization'
+    },
+    {
       id: 'gntaegwanry',
       title: '근태관리',
       type: 'item',
@@ -65,8 +72,8 @@ const pages = {
           id: 'mail-inbox',
           title: '받은메일함',
           type: 'item',
-          url: '/mail/list',
-          target: false
+          url: '/pages/error',
+          target: true
         },
         {
           id: 'mail-sent',
@@ -88,20 +95,6 @@ const pages = {
           type: 'item',
           url: '/pages/500',
           target: true
-        },
-        {
-          id: 'mail-write',
-          title: '메일작성',
-          type: 'item',
-          url: '/mail/write',
-          target: false
-        },
-        {
-          id: 'mail-detail',
-          title: '메일상세',
-          type: 'item',
-          url: '/mail/detail',
-          target: false
         }
       ]
     },
