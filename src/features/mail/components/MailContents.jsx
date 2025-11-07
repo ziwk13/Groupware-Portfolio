@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
+import {useNavigate} from 'react-router-dom';
 
 // material-ui
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox, Typography} from '@mui/material';
@@ -8,6 +9,12 @@ import axiosServices from 'utils/axios';
 
 export default function MailContents({mailboxType}) {
   const [mails, setMails] = useState([]);
+
+  const navigate = useNavigate();
+
+  const handleOpenMailDetail =(mailId) => {
+    navigate(`/mail/detail/${mailId}`);  
+  }
 
   useEffect(() => {
     axiosServices
@@ -18,13 +25,6 @@ export default function MailContents({mailboxType}) {
     })
       .catch(console.error);
   }, [mailboxType]);
-  
-  // useEffect(() => {
-  //   setMails([
-  //     { mailId: 1, senderName: '테스트 사용자', title: '테스트 메일', sendAt: '2025-11-06', isRead: false },
-  //     { mailId: 2, senderName: '홍길동', title: '업무 일정 공유드립니다', sendAt: '2025-11-05', isRead: true }
-  //   ]);
-  // }, []);
 
 
   return (
@@ -50,8 +50,8 @@ export default function MailContents({mailboxType}) {
             </TableRow>
           ) : (
             mails.map((mail) => (
-              <TableRow key={mail.mailId} hover>
-                <TableCell><Checkbox color="primary" /></TableCell>
+              <TableRow key={mail.mailId} hover onClick={() => handleOpenMailDetail(mail.mailId)}>
+                <TableCell onClick={e => e.stopPropagation()}><Checkbox color="primary" /></TableCell>
                 <TableCell align="center">
                   {mail.isRead ? (
                     <IconMailOpened size={22} stroke={1.5} color="#1976d2" />
@@ -59,15 +59,16 @@ export default function MailContents({mailboxType}) {
                     <IconMail size={22} stroke={1.5}/>
                   )}
                 </TableCell>
-                <TableCell>{mail.receivers}</TableCell>
+                <TableCell>{mail.senderName}</TableCell>
                 <TableCell>{mail.title}</TableCell>
                 <TableCell>
                   {new Date(mail.receivedAt).toLocaleString('ko-KR', {
-                    year: 'numeric',
+                    year: '2-digit',
                     month: '2-digit',
                     day: '2-digit',
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    hour12: false
                   })}
                 </TableCell>
               </TableRow>

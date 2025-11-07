@@ -102,13 +102,6 @@ const pages = {
           type: 'item',
           url: '/mail/write',
           target: false
-        },
-        {
-          id: 'mail-detail',
-          title: '메일상세',
-          type: 'item',
-          url: '/mail/detail',
-          target: false
         }
       ]
     },

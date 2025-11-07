@@ -27,6 +27,9 @@ export default function MailList({mailboxType}) {
         <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{display:"flex", gap:"5px"}}>
 						<Button variant="contained">작성</Button>
+						<Button variant="contained">수정</Button>
+						<Button variant="contained">이동</Button>
+						<Button variant="contained">삭제</Button>
 					</Box>
           <Grid>
 						<Box sx={{display:"flex"}}>

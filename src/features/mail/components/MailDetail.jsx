@@ -7,28 +7,29 @@ import {Box, Grid, Button } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
 import AttachmentListView from 'ui-component/extended/AttachmentListView';
+import axiosServices from '../../../utils/axios';
 
 import { detailMail } from '../api/mailAPI';
+import { useParams } from 'react-router-dom';
 
 
 export default function MailDetail() {
+	const {mailId} = useParams();
 	const [mail, setMail] = useState(null);	// 메일 상세 데이터
-	const [attachments, setAttachments] = useState([]);
-	const mailId = 10;
 
 	useEffect(() => {
-		const fetchMailDetail = async () => {
-			try {
-				const res = await detailMail(mailId);
-				console.log('메일 상세 :', res.data.data);
-				setMail(res.data.data);
-				setAttachments(res.data.data.attachments || []);
-			} catch (err) {
-				console.error('메일 조회 실패', err)
-			}
-		};
-		fetchMailDetail();
-	}, []);
+    if (!mailId) return;
+
+    axiosServices
+      .get(`/api/mails/${mailId}`)
+      .then((res) => {
+        console.log('메일 상세 데이터:', res.data.data);
+        setMail(res.data.data);
+      })
+      .catch((err) => {
+        console.error('메일 상세 조회 실패:', err);
+      });
+  }, [mailId]);
 
 	if (!mail) {
     return (
@@ -45,11 +46,6 @@ export default function MailDetail() {
 				{/* 메일 상세 부분 */}
 				<Grid container spacing={gridSpacing}>
 					<Grid size={12}>
-						<Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-						<Button variant="contained">상세보기 (테스트)</Button>
-						</Box>
-					</Grid>
-					<Grid size={12}>
 						<Box>제목 : {mail.title}</Box>
 					</Grid>
 					<Grid size={12}>
@@ -65,7 +61,7 @@ export default function MailDetail() {
 				{/* 메일 상세 부분 */}
 
 				<Box sx={{height:"30px"}}></Box>
-				<AttachmentListView attachments = {attachments}/>
+				<AttachmentListView attachments = {mail.attachments} height={"300px"}/>
 			</MainCard>
 		</Grid>
 	</Grid>

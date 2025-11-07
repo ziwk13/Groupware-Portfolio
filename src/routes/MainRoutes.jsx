@@ -67,7 +67,7 @@ const MainRoutes = {
           element: <MailWritePage />
         },
         {
-          path: 'detail',
+          path: 'detail/:mailId',
           element: <MailDetailPage/>
         }
       ]
