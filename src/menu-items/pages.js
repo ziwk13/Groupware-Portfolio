@@ -11,7 +11,8 @@ import {
   IconShieldLock,
   IconFileCheck,
   IconClipboardCheck,
-  IconCalendar
+  IconCalendar,
+  IconMessage
 } from '@tabler/icons-react';
 
 import IconBadge from '@mui/icons-material/Badge';
@@ -30,7 +31,8 @@ const icons = {
   IconFileCheck,
   IconClipboardCheck,
   IconCalendar,
-  IconBadge
+  IconBadge,
+  IconMessage
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -191,6 +193,13 @@ const pages = {
           target: true
         }
       ]
+    },
+    {
+      id: 'chat',
+      title: '채팅',
+      type: 'item',
+      icon: icons.IconMessage,
+      url: '/chat'
     }
   ]
 };
