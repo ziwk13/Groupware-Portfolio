@@ -1,4 +1,4 @@
-// EmployeeList 
+// EmployeeList
 // 직원 목록 컴포넌트
 // - 좌측 부서 트리에서 부서를 클릭했을 때, 해당 부서의 직원들을 불러와 보여줌.
 
@@ -10,7 +10,7 @@ import Stack from '@mui/material/Stack';
 import MainCard from 'ui-component/cards/MainCard';
 
 // 컴포넌트
-export default function EmployeeList({ selectedDept, onSelectEmployee, refreshList, selectedEmployeeId }) {
+export default function EmployeeList({ selectedDept, onSelectEmployee, refreshList, selectedEmployeeId, showHeader = true }) {
   // 직원 목록 데이터를 저장할 state
   const [employees, setEmployees] = useState([]);
   // activeId는 이제 부모(OrganizationPage)로부터 selectedEmployeeId로 받음
@@ -22,7 +22,6 @@ export default function EmployeeList({ selectedDept, onSelectEmployee, refreshLi
     organizationAPI
       .getEmployeesByDeptCode(selectedDept) // 백엔드 API 요청
       .then((data) => {
-        console.log('받아온 직원 데이터:', data);
         // 데이터가 배열 형태인지 검증하고, 아니면 빈 배열로 초기화
         setEmployees(Array.isArray(data) ? data : []);
         // setActiveId(null); // 부모가 관리하므로 이젠 필요 없음
@@ -52,10 +51,10 @@ export default function EmployeeList({ selectedDept, onSelectEmployee, refreshLi
             p: 3,
             flex: 1,
             minHeight: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "text.secondary",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'text.secondary'
           }}
         >
           부서를 선택하세요.
@@ -81,7 +80,7 @@ export default function EmployeeList({ selectedDept, onSelectEmployee, refreshLi
       }}
     >
       {/* 제목(MainCard.title)은 고정, 아래 내용만 스크롤 */}
-      <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
         {/* 내부 표면만 사용, 이중 스크롤 방지 */}
         <Paper sx={{ height: '100%', boxShadow: 'none', background: 'transparent', p: 0 }}>
           {employees.length === 0 ? (
