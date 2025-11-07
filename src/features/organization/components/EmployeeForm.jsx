@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Box, Divider, Grid, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Avatar, Box, Button, Divider, Grid, List, ListItem, ListItemIcon, ListItemText, Stack, Typography } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 
 // 아이콘 임포트
@@ -15,7 +15,7 @@ import FingerprintTwoToneIcon from '@mui/icons-material/FingerprintTwoTone';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 
-function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo }) {
+function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler }) {
   // 1. 폼 데이터가 없을 때 (초기 상태)
   if (!formData) {
     return (
@@ -79,15 +79,27 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo }) 
     <MainCard
       title="인사 정보"
       content={false}
+      secondary={
+        !isNew && (
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Button variant="contained" color="primary" onClick={resetPasswordHandler} size="small">
+              비밀번호 초기화
+            </Button>
+          </Stack>
+        )
+      }
       sx={{
         height: '100%',
         border: '1px solid',
         '& .MuiCardHeader-root': {
           padding: 1.5
-        }
+        },
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden' // 자식 요소가 스크롤을 제어하도록 함
       }}
     >
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 3, flex: 1, overflowY: 'auto' }}>
         <Grid container spacing={3}>
           {/* 프로필 이미지 */}
           {!isNew && (
@@ -95,7 +107,7 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo }) 
               <Grid size={12}>
                 <Grid container direction="column" sx={{ alignItems: 'center' }}>
                   <Grid>
-                    <Avatar alt={formData.name} src={formData.profileImg} sx={{ height: 90, width: 90 }} />
+                    <Avatar alt={formData.name} src={formData.profileImg} sx={{ height: 70, width: 70 }} />
                   </Grid>
                 </Grid>
               </Grid>

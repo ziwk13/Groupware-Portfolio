@@ -105,7 +105,9 @@ export function JWTProvider({ children }) {
     }
   };
 
-  const resetPassword = async (email) => {};
+  const resetPassword = async (id) => {
+    return axios.patch(`/api/employees/initPassword/${id}`,{});
+  };
 
   // 사용자 정보 업데이트 함수 (연락처 등)
   const updateProfile = async (data) => {

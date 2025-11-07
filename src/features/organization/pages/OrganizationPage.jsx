@@ -54,7 +54,28 @@ export default function OrganizationPage() {
     severity: 'info' // 'success', 'error', 'warning', 'info'
   });
 
-  const { register, adminUpdateEmployee } = useAuth();
+  const { register, adminUpdateEmployee, resetPassword } = useAuth();
+
+const resetPasswordHandler = async () => {
+    setAlertInfo({ open: false });
+    try {
+      await resetPassword(selectedEmployee.employeeId);
+
+      setAlertInfo({
+        open: true,
+        message: '비밀번호가 성공적으로 초기화되었습니다.',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('비밀번호 초기화 실패:', error);
+      const errorMessage = error.response?.data?.message || error.message;
+      setAlertInfo({
+        open: true,
+        message: `비밀번호 초기화 중 오류가 발생했습니다: ${errorMessage}`,
+        severity: 'error'
+      });
+    }
+  };
 
   // 2. 데이터 로딩 (공통 코드)
   useEffect(() => {
@@ -298,6 +319,7 @@ const handleSelectEmployee = (employee) => {
                 setFormData={setFormData}
                 commonCodes={commonCodes}
                 selectedDeptInfo={selectedDept}
+                resetPasswordHandler={resetPasswordHandler}
               />
             </Box>
           </Grid>

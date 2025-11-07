@@ -10,6 +10,7 @@ export let ImagePath;
 
 // ==============================|| NEW URL - GET IMAGE URL ||============================== //
 
-export function getImageUrl(name, path) {
-  return new URL(`/src/assets/images/${path}/${name}`, import.meta.url).href;
+export function getImageUrl(path) {
+  const serverBaseUrl = import.meta.env.VITE_APP_API_URL;
+  return `${serverBaseUrl}uploads/${path}`;
 }
