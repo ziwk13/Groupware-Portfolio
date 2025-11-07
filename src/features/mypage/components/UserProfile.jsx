@@ -18,7 +18,7 @@ import Alert from '@mui/material/Alert';
 import Avatar from 'ui-component/extended/Avatar';
 import { gridSpacing } from 'store/constant';
 import useAuth from 'hooks/useAuth';
-import AnimateButton from '../../../ui-component/extended/AnimateButton';
+import AnimateButton from 'ui-component/extended/AnimateButton';
 
 // assets
 import ErrorTwoToneIcon from '@mui/icons-material/ErrorTwoTone';
@@ -30,6 +30,7 @@ import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
+import AttachmentProfile from 'ui-component/extended/AttachmentProfile';
 
 export default function UserProfile() {
   const { user, updateProfile } = useAuth();
@@ -78,28 +79,33 @@ export default function UserProfile() {
         </Grid>
       )}
 
-      <Grid size={4}>
-        <Grid container direction="column" sx={{ alignItems: 'center', gap: 2 }}>
-          <Grid>
-            <Avatar alt="User" src={user?.profileImg} sx={{ height: 150, width: 150 }} />
-          </Grid>
-          <Grid size={{ sm: 'grow' }}>
-            <Grid container spacing={1}>
-              <Grid size={12}>
-                <Stack direction="row" sx={{ alignItems: 'center' }}>
-                  <input accept="image/*" style={{ display: 'none' }} id="contained-button-file" multiple type="file" />
-                </Stack>
-              </Grid>
-              <Grid size={12}>
-                <Typography variant="caption">
-                  <ErrorTwoToneIcon sx={{ height: 16, width: 16, mr: 1, verticalAlign: 'text-bottom' }} />
-                  이부분에 이미지 수정 컴포넌트
-                </Typography>
+      {/* 기존 프로필 이미지 영역 */}
+        <Grid size={4}>
+          {/* <Grid container direction="column" sx={{ alignItems: 'center', gap: 2 }}>
+            <Grid>
+              <Avatar alt="User" src={user?.profileImg} sx={{ height: 150, width: 150 }} />
+            </Grid>
+            <Grid size={{ sm: 'grow' }}>
+              <Grid container spacing={1}>
+                <Grid size={12}>
+                  <Stack direction="row" sx={{ alignItems: 'center' }}>
+                    <input accept="image/*" style={{ display: 'none' }} id="contained-button-file" multiple type="file" />
+                  </Stack>
+                </Grid>
+                <Grid size={12}>
+                  <Typography variant="caption">
+                    <ErrorTwoToneIcon sx={{ height: 16, width: 16, mr: 1, verticalAlign: 'text-bottom' }} />
+                    이부분에 이미지 수정 컴포넌트
+                  </Typography>
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
+          </Grid> */}
+          
+          {/* 프로필 이미지 부분 */}
+          {/* <AttachmentProfile file={file} setFile={setFile}/> */}
+          <AttachmentProfile/>
         </Grid>
-      </Grid>
 
       <Grid size={8}>
         <List component="nav" aria-label="user details" sx={{ width: '100%' }}>

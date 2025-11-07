@@ -72,29 +72,43 @@ const pages = {
           id: 'mail-inbox',
           title: '받은메일함',
           type: 'item',
-          url: '/pages/error',
-          target: true
+          url: '/mail/list/INBOX',
+          target: false
         },
         {
           id: 'mail-sent',
           title: '보낸메일함',
           type: 'item',
-          url: '/pages/500',
-          target: true
+          url: '/mail/list/SENT',
+          target: false
         },
         {
           id: 'mail-my',
           title: '개인보관함',
           type: 'item',
-          url: '/pages/500',
-          target: true
+          url: '/mail/list/MYBOX',
+          target: false
         },
         {
           id: 'mail-trash',
           title: '휴지통',
           type: 'item',
-          url: '/pages/500',
-          target: true
+          url: '/mail/list/TRASH',
+          target: false
+        },
+        {
+          id: 'mail-write',
+          title: '메일작성',
+          type: 'item',
+          url: '/mail/write',
+          target: false
+        },
+        {
+          id: 'mail-detail',
+          title: '메일상세',
+          type: 'item',
+          url: '/mail/detail',
+          target: false
         }
       ]
     },
