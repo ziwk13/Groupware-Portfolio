@@ -10,14 +10,6 @@ let notificationSubscription = null;
  */
 const connect = (onConnectedCallback) => {
 
-  // serviceToken 가져오기
-  const serviceToken = localStorage.getItem('serviceToken');
-
-  if (!serviceToken) {
-    console.warn('STOMP: localStorage에 serviceToken이 없습니다. 로그인이 필요합니다.');
-    return;
-  }
-
   // 이미 연결되어 있다면 콜백만 실행
   if (stompClient && stompClient.active) {
     console.log('STOMP: 이미 연결되어 있습니다.');
@@ -28,9 +20,6 @@ const connect = (onConnectedCallback) => {
   // 새 클라이언트 생성
   stompClient = new Client({
     webSocketFactory: () => new SockJS('http://localhost:8080/ws'), // 백엔드 엔드포인트
-    connectHeaders: {
-      Authorization: `Bearer ${serviceToken}`
-    },
     reconnectDelay: 5000, // 5초마다 재연결 시도
     heartbeatIncoming: 4000,
     heartbeatOutgoing: 4000,
