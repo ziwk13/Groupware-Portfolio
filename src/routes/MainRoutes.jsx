@@ -7,7 +7,7 @@ import AuthGuard from 'utils/route-guard/AuthGuard';
 import MailListPage from '../features/mail/pages/MailListPage';
 import MailWritePage from '../features/mail/pages/MailWritePage';
 import MailDetailPage from '../features/mail/pages/MailDetailPage';
-import TestModal from '../features/organization/components/TestModal';
+import OrganizationModalPreview from '../features/organization/components/OrganizationModalPreview';
 
 // sample page routing
 const SamplePage = Loadable(lazy(() => import('views/sample-page')));
@@ -82,8 +82,8 @@ const MainRoutes = {
       element: <AttendancePage />
     },
     {
-      path: '/test-Modal',
-      element: <TestModal />
+      path: '/organizationModalPreview',
+      element: <OrganizationModalPreview />
     }
   ]
 };
