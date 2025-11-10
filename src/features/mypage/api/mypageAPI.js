@@ -13,5 +13,9 @@ export const updatePassword = (data) => {
  * @param {object} data - { phoneNumber }
  */
 export const updateEmployeeInfo = (data) => {
-  return axiosServices.patch('/api/employees/updateEmployeeByUser', data);
+  return axiosServices.patch('/api/employees/updateEmployeeByUser', data,{
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 };

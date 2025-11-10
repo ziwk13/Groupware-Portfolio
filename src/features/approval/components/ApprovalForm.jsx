@@ -1,9 +1,5 @@
 // material-ui
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import Autocomplete from '@mui/material/Autocomplete';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
+import { Button, Grid, Autocomplete, Stack, TextField, Box, Alert } from '@mui/material';
 import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
 
 // third party
@@ -12,15 +8,16 @@ import { Formik } from 'formik';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import StartAndEndDateTime from './StartAndEndDateTime';
+import AttachmentDropzone from 'ui-component/extended/AttachmentDropzone';
 
-// assets
+// react
+import { useState } from 'react';
 
-// autocomplete options
+// (임시 데이터) 실제로는 API를 통해 결재 양식 목록을 가져와야 함
 const top100Films = [
-  { title: 'The Shawshank Redemption', year: 1994 },
-  { title: 'The Godfather', year: 1972, date: true },
-  { title: 'The Godfather: Part II', year: 1974 },
-  { title: 'The Dark Knight', year: 2008 }
+  { id: 1, title: '휴가 신청서', date: true },
+  { id: 2, title: '지출 결의서', date: false },
+  { id: 3, title: '출장 보고서', date: true }
 ];
 
 // ==============================|| ADD NEW FORM ||============================== //
@@ -31,26 +28,25 @@ export default function ApprovalForm({
   startTime,
   setStartTime,
   endTime,
-  setEndTime
+  setEndTime,
+  attachments,
+  setAttachments,
+  onOpenModal,
+  onFormSubmit,
+  alertInfo,
+  setAlertInfo
 }) {
-
   // 40px 높이를 위한 공통 스타일
   const customInputStyle = {
-    // 기본 MuiInputBase-root의 높이를 40px로 설정
     '& .MuiInputBase-root': {
       height: 40
     },
-    // 내부 input 패딩 조정
-    // 40px 높이(size="small")의 기본값은 8.5px
     '& .MuiInputBase-input': {
       padding: '8.5px 14px'
     },
-    // 라벨 위치 조정
     '& .MuiInputLabel-root.MuiInputLabel-outlined': {
       transform: 'translate(14px, 9.5px) scale(1)'
     },
-    // 축소된 라벨 위치 조정
-    // size="small"의 기본값 -6px
     '& .MuiInputLabel-root.MuiInputLabel-outlined.MuiInputLabel-shrink': {
       transform: 'translate(14px, -6px) scale(0.75)'
     }
@@ -59,24 +55,46 @@ export default function ApprovalForm({
   return (
     <Formik
       initialValues={{
-        files: null
+        title: '', // 제목
+        content: '' // 상신 의견
       }}
-      onSubmit={(values) => {
-        console.log('values', values);
-        // submit form
-      }}
+      onSubmit={onFormSubmit}
     >
-      {({ values, handleSubmit }) => (
+      {({ values, handleSubmit, handleChange, handleBlur, isSubmitting }) => (
         <form onSubmit={handleSubmit}>
           <MainCard
             title={
               <Stack direction="row" sx={{ flexWrap: 'wrap', gap: { xs: 1, lg: 2 } }}>
-                <Button variant="contained" color="primary" type="submit" sx={{ height: '35px' }}>
+                <Button variant="contained" color="primary" type="submit" sx={{ height: '35px' }} disabled={isSubmitting}>
                   기안
                 </Button>
-                <Button variant="outlined" color="primary" type="submit" sx={{ height: '35px' }} endIcon={<PersonAddAlt1OutlinedIcon />}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  type="button"
+                  sx={{ height: '35px' }}
+                  endIcon={<PersonAddAlt1OutlinedIcon />}
+                  onClick={onOpenModal}
+                >
                   결재선 수정
                 </Button>
+                <Box sx={{ flexGrow: 1 }} />
+
+                {alertInfo.open && (
+                  <Alert
+                    severity={alertInfo.severity}
+                    onClose={() => setAlertInfo({ ...alertInfo, open: false })}
+                    sx={{
+                      flex: 1,
+                      height: '35px',
+                      py: 0,
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {alertInfo.message}
+                  </Alert>
+                )}
               </Stack>
             }
             sx={{ '& .MuiCardHeader-root': { flexWrap: 'wrap', gap: 1.5 }, '& .MuiCardHeader-action': { flex: 'unset' } }}
@@ -87,29 +105,50 @@ export default function ApprovalForm({
                   <Grid item size={3}>
                     <Autocomplete
                       id="combo-box-demo"
-                      options={top100Films}
+                      options={top100Films} // 실제로는 API로 가져온 양식 목록 사용
                       getOptionLabel={(option) => option.title}
-                      // Autocomplete 값이 변경될 때 selectedForm state를 업데이트
                       onChange={(event, newValue) => {
                         setSelectedForm(newValue);
                       }}
+                      value={selectedForm}
                       renderInput={(params) => <TextField {...params} label="결재 양식" sx={customInputStyle} />}
                     />
                   </Grid>
                   <Grid item size={9}>
-                    <TextField fullWidth id="outlined-title" label="제목" sx={customInputStyle} />
+                    <TextField
+                      fullWidth
+                      id="outlined-title"
+                      label="제목"
+                      name="title"
+                      value={values.title}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      sx={customInputStyle}
+                    />
                   </Grid>
                 </Grid>
               </Grid>
               <Grid item size={12}>
-                <TextField fullWidth multiline rows={5} placeholder={'상신 의견'}></TextField>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={5}
+                  placeholder={'상신 의견'}
+                  name="content"
+                  value={values.content}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                ></TextField>
               </Grid>
-              <Grid item size={12}></Grid>
               {selectedForm && selectedForm.date === true && (
                 <Grid item size={12}>
                   <StartAndEndDateTime startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} />
                 </Grid>
               )}
+
+              <Grid item size={12}>
+                <AttachmentDropzone attachments={attachments} setAttachments={setAttachments} height={100} />
+              </Grid>
             </Grid>
           </MainCard>
         </form>

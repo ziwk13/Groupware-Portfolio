@@ -14,6 +14,9 @@ import SecurityTwoToneIcon from '@mui/icons-material/SecurityTwoTone';
 import FingerprintTwoToneIcon from '@mui/icons-material/FingerprintTwoTone';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import {getImageUrl} from 'utils/getImageUrl';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
+
 
 function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler }) {
   // 1. 폼 데이터가 없을 때 (초기 상태)
@@ -107,7 +110,9 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, re
               <Grid size={12}>
                 <Grid container direction="column" sx={{ alignItems: 'center' }}>
                   <Grid>
-                    <Avatar alt={formData.name} src={formData.profileImg} sx={{ height: 70, width: 70 }} />
+                    <Avatar alt={formData.name}
+                            src={formData.profileImg ? getImageUrl(formData.profileImg) : DefaultAvatar}
+                            sx={{ height: 70, width: 70 }} />
                   </Grid>
                 </Grid>
               </Grid>
