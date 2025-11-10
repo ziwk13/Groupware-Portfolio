@@ -36,3 +36,22 @@ export const getApprovalList = async (status, page = 0, size = 10) => {
     throw error;
   }
 };
+
+/**
+ * 새 결재 문서를 생성(상신)하는 API
+ * @param {FormData} formData - 결재 문서 데이터 (FormData 객체)
+ * @returns {Promise<object>} - 생성된 결재 문서 데이터
+ */
+export const createApproval = async (formData) => {
+  try {
+    const response = await axiosServices.post('/api/approvals', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to create approval', error);
+    throw error;
+  }
+};
