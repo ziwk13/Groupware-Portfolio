@@ -19,7 +19,8 @@ import { getEvents, addEvent, updateEvent, deleteEvent } from '../slices/schedul
 import AddAlarmTwoToneIcon from '@mui/icons-material/AddAlarmTwoTone';
 import { format } from 'date-fns';
 import useAuth from 'hooks/useAuth';
-import { Typography, Grid, Alert } from '@mui/material'; // ✅ Alert, Grid 추가
+import { Typography, Grid, Alert } from '@mui/material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 // 서버(LocalDateTime) 포맷: 타임존 없이 2025-11-03T15:00:00
 const fmtLocal = (d) => (d ? format(new Date(d), "yyyy-MM-dd'T'HH:mm:ss") : null);
@@ -28,7 +29,8 @@ export default function Calendar() {
   const calendarRef = useRef(null);
   const matchSm = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const { events, loading, error } = useSelector((state) => state.schedule);
-
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [date, setDate] = useState(new Date());
   const [view, setView] = useState(matchSm ? 'listWeek' : 'dayGridMonth');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -67,6 +69,26 @@ export default function Calendar() {
   useEffect(() => {
     if (employeeId) dispatch(getEvents(employeeId));
   }, [employeeId]);
+
+  useEffect(() => {
+    const modal = searchParams.get('modal');
+    const id = searchParams.get('id');
+
+    if (!events?.length) return; // 이벤트 아직 로드 안 됐으면 대기
+
+    if (modal === 'edit' && id) {
+      const found = events.find((e) => e.scheduleId === Number(id));
+      if (found) {
+        setSelectedEvent(found);
+        setSelectedRange(null);
+        setIsModalOpen(true);
+      }
+    } else if (modal === 'add') {
+      setSelectedEvent(null);
+      setSelectedRange(null);
+      setIsModalOpen(true);
+    }
+  }, [searchParams, events]);
 
   // 날짜/뷰 제어
   const handleDateToday = () => {
@@ -115,6 +137,7 @@ export default function Calendar() {
     setSelectedEvent(found ?? null);
     setSelectedRange(null);
     setIsModalOpen(true);
+    navigate(`/schedule?modal=edit&id=${arg.event.id}`, { replace: false });
   };
 
   // 일정 수정 (드래그, 리사이즈 포함)
@@ -163,6 +186,8 @@ export default function Calendar() {
     setIsModalOpen(false);
     setSelectedEvent(null);
     setSelectedRange(null);
+
+    navigate('/schedule', { replace: false });
   };
 
   if (loading) return <Loader />;
