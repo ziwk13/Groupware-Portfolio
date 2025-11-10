@@ -13,6 +13,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 // redux
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTodayAttendance, clockIn, clockOut, updateWorkStatus } from 'features/attendance/slices/attendanceSlice';
+import { fetchWeeklyAttendance } from 'features/attendance/slices/attendanceSlice';
 
 // project imports
 import useAuth from 'hooks/useAuth';
@@ -20,6 +21,7 @@ import useConfig from 'hooks/useConfig';
 import SkeletonTotalGrowthBarChart from 'ui-component/cards/Skeleton/TotalGrowthBarChart';
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
+import WorkProgressBar from '../WorkProgressBar';
 
 // chart data
 import barChartOptions from './total-growth-bar-chart';
@@ -33,6 +35,7 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   // Redux 상태
   const { today, loading } = useSelector((state) => state.attendance);
+  const { weekly } = useSelector((state) => state.attendance);
 
   // 로그인된 사원 ID
   const employeeId = user?.employeeId || user?.id;
@@ -57,12 +60,28 @@ export default function AttendanceBasicCard({ isLoading }) {
   useEffect(() => {
     if (isLoggedIn && employeeId) {
       dispatch(fetchTodayAttendance(employeeId));
+      dispatch(fetchWeeklyAttendance(employeeId));
+
+      const interval = setInterval(() => {
+        dispatch(fetchWeeklyAttendance(employeeId));
+      }, 60000);
+
+      return () => clearInterval(interval);
     }
   }, [dispatch, employeeId, isLoggedIn]);
 
   // 출근 / 퇴근 핸들러
-  const handleClockIn = () => dispatch(clockIn(employeeId));
-  const handleClockOut = () => dispatch(clockOut(employeeId));
+  const handleClockIn = async () => {
+    await dispatch(clockIn(employeeId));
+    dispatch(fetchTodayAttendance(employeeId));
+    dispatch(fetchWeeklyAttendance(employeeId));
+  };
+
+  const handleClockOut = async () => {
+    await dispatch(clockOut(employeeId));
+    dispatch(fetchTodayAttendance(employeeId));
+    dispatch(fetchWeeklyAttendance(employeeId));
+  };
 
   // 근무상태 변경 메뉴
   const [anchorEl, setAnchorEl] = useState(null);
@@ -124,14 +143,94 @@ export default function AttendanceBasicCard({ isLoading }) {
         <MainCard>
           <Stack sx={{ gap: gridSpacing }}>
             {/* ===== 헤더 ===== */}
-            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-              <Stack sx={{ gap: 1 }}>
-                <Typography variant={isSmall ? 'h5' : 'h3'} sx={{ color: 'secondary.200' }}>
-                  {formattedTime}
-                </Typography>
-              </Stack>
+            <Stack sx={{ gap: 1 }}>
+              <Typography variant={isSmall ? 'h5' : 'h3'} sx={{ color: 'secondary.200' }}>
+                {formattedTime}
+              </Typography>
+            </Stack>
+            <Box sx={{ mt: 1, mb: 1 }}>
+              <WorkProgressBar currentMinutes={weekly?.totalMinutes || 0} targetMinutes={weekly?.targetMinutes || 2400} />
+            </Box>
 
-              <Stack direction="row" spacing={2}>
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(4px)',
+                color: '#E5E7EB'
+              }}
+            >
+              {/* 출근 시간 */}
+              <Box sx={{ flex: 1, textAlign: 'center' }}>
+                <Typography variant="subtitle1" sx={{ color: '#9CA3AF', mb: 0.5 }}>
+                  출근 시간
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  {today?.startTime
+                    ? new Date(today.startTime).toLocaleTimeString('ko-KR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                      })
+                    : '-'}
+                </Typography>
+              </Box>
+
+              {/* 화살표 */}
+              <Box sx={{ flex: 0.3, textAlign: 'center' }}>
+                <Typography variant="h5" sx={{ color: '#9CA3AF' }}>
+                  ➜
+                </Typography>
+              </Box>
+
+              {/* 퇴근 시간 */}
+              <Box sx={{ flex: 1, textAlign: 'center' }}>
+                <Typography variant="subtitle1" sx={{ color: '#9CA3AF', mb: 0.5 }}>
+                  퇴근 시간
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  {today?.endTime
+                    ? new Date(today.endTime).toLocaleTimeString('ko-KR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                      })
+                    : '-'}
+                </Typography>
+              </Box>
+
+              {/* 근무 상태 */}
+              <Box sx={{ flex: 1, textAlign: 'center' }}>
+                <Typography variant="subtitle1" sx={{ color: '#9CA3AF', mb: 0.5 }}>
+                  근무 상태
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 600,
+                    color: today?.workStatus === 'OUT_ON_BUSINESS' ? '#FBBF24' : today?.workStatus === 'NORMAL' ? '#60A5FA' : '#E5E7EB'
+                  }}
+                >
+                  {workStatusMap[today?.workStatus] || '-'}
+                </Typography>
+              </Box>
+            </Box>
+            <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{
+                  justifyContent: 'flex-end',
+                  width: '100%',
+                  mt: 1
+                }}
+              >
                 {/* 출근하기 */}
                 <Button
                   variant="outlined"
@@ -217,76 +316,6 @@ export default function AttendanceBasicCard({ isLoading }) {
                 </Menu>
               </Stack>
             </Stack>
-
-            <Box
-              sx={{
-                mt: 2,
-                p: 2,
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                backdropFilter: 'blur(4px)',
-                color: '#E5E7EB'
-              }}
-            >
-              {/* 출근 시간 */}
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography variant="subtitle1" sx={{ color: '#9CA3AF', mb: 0.5 }}>
-                  출근 시간
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  {today?.startTime
-                    ? new Date(today.startTime).toLocaleTimeString('ko-KR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                      })
-                    : '-'}
-                </Typography>
-              </Box>
-
-              {/* 화살표 */}
-              <Box sx={{ flex: 0.3, textAlign: 'center' }}>
-                <Typography variant="h5" sx={{ color: '#9CA3AF' }}>
-                  ➜
-                </Typography>
-              </Box>
-
-              {/* 퇴근 시간 */}
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography variant="subtitle1" sx={{ color: '#9CA3AF', mb: 0.5 }}>
-                  퇴근 시간
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  {today?.endTime
-                    ? new Date(today.endTime).toLocaleTimeString('ko-KR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                      })
-                    : '-'}
-                </Typography>
-              </Box>
-
-              {/* 근무 상태 */}
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography variant="subtitle1" sx={{ color: '#9CA3AF', mb: 0.5 }}>
-                  근무 상태
-                </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 600,
-                    color: today?.workStatus === 'OUT_ON_BUSINESS' ? '#FBBF24' : today?.workStatus === 'NORMAL' ? '#60A5FA' : '#E5E7EB'
-                  }}
-                >
-                  {workStatusMap[today?.workStatus] || '-'}
-                </Typography>
-              </Box>
-            </Box>
           </Stack>
         </MainCard>
       )}

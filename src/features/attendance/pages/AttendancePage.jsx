@@ -5,11 +5,9 @@ import Grid from '@mui/material/Grid';
 
 // project imports
 import AttendanceBasicCard from '../components/chart-data/AttendanceBasicCard';
+import AttendanceSummaryCard from '../components/AttendanceSummaryCard';
 
 import { gridSpacing } from 'store/constant';
-
-// assets
-import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
 
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
@@ -24,8 +22,9 @@ export default function Dashboard() {
     <Grid container spacing={gridSpacing}>
       <Grid size={12}>
         <Grid container spacing={gridSpacing}>
-          <Grid size={{ xs: 12, md: 8 }}>
+          <Grid size={{ xs: 12, md: 12 }}>
             <AttendanceBasicCard isLoading={isLoading} />
+            <AttendanceSummaryCard />
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}></Grid>
         </Grid>

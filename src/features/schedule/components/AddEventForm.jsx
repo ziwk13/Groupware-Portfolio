@@ -1,16 +1,15 @@
 import PropTypes from 'prop-types';
 import {
   Button,
+  Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Divider,
-  FormControlLabel,
-  FormHelperText,
   Grid as Grid,
   IconButton,
   Stack,
-  Switch,
   TextField,
   Tooltip,
   Autocomplete,
@@ -18,7 +17,9 @@ import {
   List,
   ListItem,
   ListItemText,
-  Typography
+  Typography,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -48,7 +49,7 @@ function getInitialValues(event, range) {
   };
 }
 
-export default function AddEventForm({ event, range, handleDelete, handleCreate, handleUpdate, onCancel, employeeId }) {
+export default function AddEventForm({ event, range, handleDelete, handleCreate, handleUpdate, onCancel, employeeId, setStatusMessage }) {
   const isCreating = !event;
   const [employeeOptions, setEmployeeOptions] = useState([]);
   const [participants, setParticipants] = useState([]);
@@ -57,6 +58,13 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
   const isHost = event && Number(event.employeeId) === Number(loggedInId);
   const navigate = useNavigate();
   const [participantStatus, setParticipantStatus] = useState(null);
+
+  //  MUI 알림 관련 상태
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, onConfirm: null });
+
+  const handleCloseSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
+  const handleCloseConfirm = () => setConfirmDialog({ open: false, onConfirm: null });
 
   // 직원 목록 불러오기
   useEffect(() => {
@@ -111,7 +119,8 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
         if (event) {
           scheduleId = event.scheduleId || event.id;
           if (!isHost) {
-            alert('이 일정은 작성자만 수정할 수 있습니다.');
+            setSnackbar({ open: true, message: '이 일정은 작성자만 수정할 수 있습니다.', severity: 'warning' });
+            setStatusMessage?.('이 일정은 작성자만 수정할 수 있습니다.'); //  상단 표시 추가
             setSubmitting(false);
             return;
           }
@@ -138,15 +147,23 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
 
   const { values, errors, touched, handleSubmit, isSubmitting, getFieldProps, setFieldValue } = formik;
 
+  // 삭제 다이얼로그로 교체
   const handleDeleteClick = () => {
     if (!event) return;
     if (!isHost) {
-      alert('이 일정은 작성자만 삭제할 수 있습니다.');
+      setSnackbar({ open: true, message: '이 일정은 작성자만 삭제할 수 있습니다.', severity: 'warning' });
+      setStatusMessage?.('이 일정은 작성자만 삭제할 수 있습니다.'); // ✅ 상단 표시 추가
       return;
     }
-    if (window.confirm('정말로 이 일정을 삭제하시겠습니까?')) {
-      handleDelete(event.scheduleId || event.id);
-    }
+
+    setConfirmDialog({
+      open: true,
+      onConfirm: () => {
+        handleDelete(event.scheduleId || event.id);
+        setSnackbar({ open: true, message: '일정이 삭제되었습니다.', severity: 'success' });
+        setStatusMessage?.('일정이 삭제되었습니다.'); //  상단 표시 추가
+      }
+    });
   };
 
   return (
@@ -246,11 +263,21 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                           try {
                             await dispatch(updateParticipantStatus(event.scheduleId, loggedInId, 'ATTEND'));
                             setParticipantStatus('ATTEND');
-                            alert('참석 상태로 변경되었습니다.');
+                            setSnackbar({
+                              open: true,
+                              message: '참석 상태로 변경되었습니다.',
+                              severity: 'success'
+                            });
+                            setStatusMessage?.('참석 상태로 변경되었습니다.'); // ✅ 상단 표시 추가
                             await dispatch(getEvents(loggedInId));
                             onCancel();
                           } catch {
-                            alert('참석 상태 변경 실패');
+                            setSnackbar({
+                              open: true,
+                              message: '참석 상태 변경 실패',
+                              severity: 'error'
+                            });
+                            setStatusMessage?.('참석 상태 변경 실패');
                           }
                         }}
                       >
@@ -275,11 +302,21 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                           try {
                             await dispatch(updateParticipantStatus(event.scheduleId, loggedInId, 'REJECT'));
                             setParticipantStatus('REJECT');
-                            alert('거절 상태로 변경되었습니다.');
+                            setSnackbar({
+                              open: true,
+                              message: '거절 상태로 변경되었습니다.',
+                              severity: 'warning'
+                            });
+                            setStatusMessage?.('거절 상태로 변경되었습니다.'); // ✅ 상단 표시 추가
                             await dispatch(getEvents(loggedInId));
                             onCancel();
                           } catch {
-                            alert('거절 상태 변경 실패');
+                            setSnackbar({
+                              open: true,
+                              message: '거절 상태 변경 실패',
+                              severity: 'error'
+                            });
+                            setStatusMessage?.('거절 상태 변경 실패');
                           }
                         }}
                       >
@@ -287,11 +324,11 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                       </Button>
                     </Stack>
                   )}
+
                   <Typography variant="h6" gutterBottom>
                     참여자 목록
                   </Typography>
 
-                  {/*  참여자 목록 리스트 */}
                   <List dense>
                     {participants.map((p) => (
                       <ListItem key={p.participantId}>
@@ -336,6 +373,39 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
           </DialogActions>
         </Form>
       </LocalizationProvider>
+
+      {/* Snackbar (MUI Alert) */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: '100%' }} onClose={handleCloseSnackbar}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* 삭제 확인 Dialog */}
+      <Dialog open={confirmDialog.open} onClose={handleCloseConfirm}>
+        <DialogTitle>일정 삭제 확인</DialogTitle>
+        <DialogContent>
+          <DialogContentText>정말로 이 일정을 삭제하시겠습니까?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm}>취소</Button>
+          <Button
+            onClick={() => {
+              confirmDialog.onConfirm?.();
+              handleCloseConfirm();
+            }}
+            color="error"
+            variant="contained"
+          >
+            삭제
+          </Button>
+        </DialogActions>
+      </Dialog>
     </FormikProvider>
   );
 }
@@ -347,5 +417,6 @@ AddEventForm.propTypes = {
   handleCreate: PropTypes.func,
   handleUpdate: PropTypes.func,
   onCancel: PropTypes.func,
-  employeeId: PropTypes.any
+  employeeId: PropTypes.any,
+  setStatusMessage: PropTypes.func
 };

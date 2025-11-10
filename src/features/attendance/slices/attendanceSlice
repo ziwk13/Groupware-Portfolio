@@ -41,6 +41,16 @@ export const updateWorkStatus = createAsyncThunk('attendance/updateWorkStatus', 
   }
 });
 
+// 주간 근무시간 조회
+export const fetchWeeklyAttendance = createAsyncThunk('attendance/fetchWeeklyAttendance', async (employeeId, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`/api/attendances/weekly/${employeeId}`);
+    return response.data.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || '주간 근무시간 조회 실패');
+  }
+});
+
 const attendanceSlice = createSlice({
   name: 'attendance',
   initialState: {
@@ -75,13 +85,22 @@ const attendanceSlice = createSlice({
 
       //  근무상태 변경
       .addCase(updateWorkStatus.fulfilled, (state, action) => {
+        const newStatus = typeof action.payload === 'string' ? action.payload : action.payload?.workStatus;
         if (state.today) {
-          state.today.workStatus = action.payload; // 변경된 상태 반영
+          state.today.workStatus = newStatus;
         } else {
-          state.today = { workStatus: action.payload };
+          state.today = { workStatus: newStatus };
         }
       })
-      .addCase(updateWorkStatus.rejected, (state, action) => {
+      .addCase(fetchWeeklyAttendance.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchWeeklyAttendance.fulfilled, (state, action) => {
+        state.weekly = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchWeeklyAttendance.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   }
