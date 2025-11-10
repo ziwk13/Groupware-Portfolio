@@ -19,6 +19,7 @@ import { getEvents, addEvent, updateEvent, deleteEvent } from '../slices/schedul
 import AddAlarmTwoToneIcon from '@mui/icons-material/AddAlarmTwoTone';
 import { format } from 'date-fns';
 import useAuth from 'hooks/useAuth';
+import { Typography, Grid, Alert } from '@mui/material'; // ✅ Alert, Grid 추가
 
 // 서버(LocalDateTime) 포맷: 타임존 없이 2025-11-03T15:00:00
 const fmtLocal = (d) => (d ? format(new Date(d), "yyyy-MM-dd'T'HH:mm:ss") : null);
@@ -33,11 +34,14 @@ export default function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const { user } = useAuth();
   const employeeId = user?.employeeId;
 
-  //  작성자만 수정 가능하도록 하는 함수
+  // 작성자만 수정 가능하도록 하는 함수
   const canEdit = (event) => {
     const creatorId = event.extendedProps?.employeeId || event.employeeId;
     return Number(creatorId) === Number(employeeId);
@@ -123,7 +127,6 @@ export default function Calendar() {
       scheduleId = Number(e.id);
       const existing = events.find((ev) => ev.scheduleId === scheduleId);
 
-      // 주최자만 드래그/리사이즈 허용
       if (!canEdit(e)) {
         alert('이 일정은 작성자만 수정할 수 있습니다.');
         argOrId.revert?.();
@@ -175,6 +178,23 @@ export default function Calendar() {
         </Button>
       }
     >
+      <Grid container spacing={1}>
+        {errorMessage && (
+          <Grid item xs={12}>
+            <Alert severity="error" sx={{ width: '100%' }}>
+              {errorMessage}
+            </Alert>
+          </Grid>
+        )}
+        {successMessage && (
+          <Grid item xs={12}>
+            <Alert severity="success" sx={{ width: '100%' }}>
+              {successMessage}
+            </Alert>
+          </Grid>
+        )}
+      </Grid>
+
       <CalendarStyled>
         <Toolbar
           date={date}
@@ -184,6 +204,20 @@ export default function Calendar() {
           onClickToday={handleDateToday}
           onChangeView={handleViewChange}
         />
+
+        {/* 상태 메시지 */}
+        {statusMessage && (
+          <Grid item xs={12}>
+            <Alert
+              severity={
+                statusMessage.includes('실패') || statusMessage.includes('에러') || statusMessage.includes('오류') ? 'error' : 'success'
+              }
+              sx={{ width: '100%', mb: 2 }}
+            >
+              {statusMessage}
+            </Alert>
+          </Grid>
+        )}
 
         <SubCard>
           <FullCalendar
@@ -200,7 +234,7 @@ export default function Calendar() {
               backgroundColor: e.colorCode || '#60A5FA',
               extendedProps: {
                 content: e.content,
-                employeeId: e.employeeId //  작성자 ID 포함
+                employeeId: e.employeeId
               }
             }))}
             eventTimeFormat={{
@@ -216,7 +250,7 @@ export default function Calendar() {
             select={handleRangeSelect}
             eventDrop={handleEventUpdate}
             eventResize={handleEventUpdate}
-            eventAllow={(dropInfo, draggedEvent) => canEdit(draggedEvent)} //  작성자만 이동 가능
+            eventAllow={(dropInfo, draggedEvent) => canEdit(draggedEvent)}
             eventClick={handleEventSelect}
           />
         </SubCard>
@@ -233,6 +267,7 @@ export default function Calendar() {
             handleDelete={handleEventDelete}
             handleUpdate={handleEventUpdate}
             employeeId={employeeId}
+            setStatusMessage={setStatusMessage}
           />
         )}
       </Dialog>
