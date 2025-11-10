@@ -15,6 +15,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from '@mui/material';
+import { IconBell } from '@tabler/icons-react';
 
 // project imports
 import { deleteAllNotifications, getUnreadCount, markAllAsRead } from 'api/notification';
@@ -24,7 +25,6 @@ import NotificationList from './components/NotificationList';
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
 import BellCheckIcon from 'assets/icons/BellCheckIcon';
-import IconBell from 'assets/icons/IconBell';
 import IconBellRingingFilled from 'assets/icons/IconBellRingingFilled';
 import TrashIcon from 'assets/icons/TrashIcon';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';

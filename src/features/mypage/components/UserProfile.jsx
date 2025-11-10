@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -15,13 +15,11 @@ import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 
 // project imports
-import Avatar from 'ui-component/extended/Avatar';
 import { gridSpacing } from 'store/constant';
 import useAuth from 'hooks/useAuth';
-import AnimateButton from '../../../ui-component/extended/AnimateButton';
+import AnimateButton from 'ui-component/extended/AnimateButton';
 
 // assets
-import ErrorTwoToneIcon from '@mui/icons-material/ErrorTwoTone';
 
 // 아이콘 imports
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
@@ -30,9 +28,11 @@ import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
+import AttachmentProfile from 'ui-component/extended/AttachmentProfile';
 
 export default function UserProfile() {
   const { user, updateProfile } = useAuth();
+  const [file, setFile] = useState(null);
 
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [successMessage, setSuccessMessage] = useState(null);
@@ -52,12 +52,23 @@ export default function UserProfile() {
     setSuccessMessage(null);
     setErrorMessage(null);
 
+    // FormData 객체 생성
+    const formData = new FormData();
+
+    formData.append('phoneNumber', phoneNumber);
+
+    // 파일이 있을 경우, DTO의 필드명('multipartFile')에 맞게 파일 추가
+    if (file) {
+      formData.append('multipartFile', file);
+    }
+
     try {
-      await updateProfile({ phoneNumber: phoneNumber, username: user.username });
-      setSuccessMessage('연락처가 성공적으로 변경되었습니다.');
+      await updateProfile(formData);
+      setSuccessMessage('내 정보가 성공적으로 변경되었습니다.');
+      setFile(null);
     } catch (error) {
-      console.error('Failed to update phone number:', error);
-      setErrorMessage('연락처 변경에 실패했습니다.');
+      console.error('Failed to update profile:', error);
+      setErrorMessage('내 정보 변경에 실패했습니다.');
     }
   };
 
@@ -78,27 +89,9 @@ export default function UserProfile() {
         </Grid>
       )}
 
+      {/* 기존 프로필 이미지 영역 */}
       <Grid size={4}>
-        <Grid container direction="column" sx={{ alignItems: 'center', gap: 2 }}>
-          <Grid>
-            <Avatar alt="User" src={user?.profileImg} sx={{ height: 150, width: 150 }} />
-          </Grid>
-          <Grid size={{ sm: 'grow' }}>
-            <Grid container spacing={1}>
-              <Grid size={12}>
-                <Stack direction="row" sx={{ alignItems: 'center' }}>
-                  <input accept="image/*" style={{ display: 'none' }} id="contained-button-file" multiple type="file" />
-                </Stack>
-              </Grid>
-              <Grid size={12}>
-                <Typography variant="caption">
-                  <ErrorTwoToneIcon sx={{ height: 16, width: 16, mr: 1, verticalAlign: 'text-bottom' }} />
-                  이부분에 이미지 수정 컴포넌트
-                </Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+        <AttachmentProfile file={file} setFile={setFile} />
       </Grid>
 
       <Grid size={8}>

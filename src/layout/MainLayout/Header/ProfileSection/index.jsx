@@ -42,7 +42,7 @@ export default function ProfileSection() {
   const [value, setValue] = useState('');
   const [notification, setNotification] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const { logout, user } = useAuth();
+  const { logout, user, getProfileImg } = useAuth();
   const [open, setOpen] = useState(false);
 
   /**
@@ -90,7 +90,7 @@ export default function ProfileSection() {
   return (
     <>
       <Avatar
-        src={user?.profileImg}
+        src={getProfileImg()}
         alt="user-images"
         sx={{
           ml: 2,

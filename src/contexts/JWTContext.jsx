@@ -12,6 +12,8 @@ import Loader from 'ui-component/Loader';
 import axios from 'utils/axios';
 // mypageAPI에서 updatePassword도 가져오도록 수정
 import { updateEmployeeInfo, updatePassword as apiUpdatePassword } from '../features/mypage/api/mypageAPI';
+import { getImageUrl } from 'utils/getImageUrl';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
 // constant
 const initialState = {
@@ -80,7 +82,15 @@ export function JWTProvider({ children }) {
 
   const register = async (userData) => {
     const response = await axios.post('/api/auth/signup', userData);
-    return response.data;
+    // OrganizationPage에서 EmployeeResponseDTO 객체 자체를 필요로 하므로 .data.data를 반환
+    return response.data.data;
+  };
+
+  // 관리자가 '다른' 직원의 정보를 수정하는 함수
+  const adminUpdateEmployee = async (employeeId, employeeData) => {
+    const response = await axios.patch(`/api/employees/updateEmployeeByAdmin/${employeeId}`, employeeData);
+    // register와 마찬가지로 APIResponseDTO에서 실제 Employee DTO 객체를 반환
+    return response.data.data;
   };
 
   const logout = async () => {
@@ -97,7 +107,9 @@ export function JWTProvider({ children }) {
     }
   };
 
-  const resetPassword = async (email) => {};
+  const resetPassword = async (id) => {
+    return axios.patch(`/api/employees/initPassword/${id}`,{});
+  };
 
   // 사용자 정보 업데이트 함수 (연락처 등)
   const updateProfile = async (data) => {
@@ -119,12 +131,22 @@ export function JWTProvider({ children }) {
     return apiUpdatePassword(data);
   };
 
+  // 프로필 이미지 URL을 반환하는 함수
+  const getProfileImg = () => {
+    if (state.user && state.user.profileImg && state.user.profileImg !== '') {
+      return getImageUrl(state.user.profileImg);
+    }
+
+    // 위 조건에 맞지 않으면, import된 기본 이미지 경로 반환
+    return DefaultAvatar;
+  };
+
   if (state.isInitialized !== undefined && !state.isInitialized) {
     return <Loader />;
   }
 
   return (
-    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile, updatePassword }}>
+    <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile, updatePassword, adminUpdateEmployee, getProfileImg }}>
       {children}
     </JWTContext.Provider>
   );
