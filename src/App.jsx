@@ -6,7 +6,7 @@ import router from 'routes';
 // project imports
 import Locales from 'ui-component/Locales';
 import NavigationScroll from 'layout/NavigationScroll';
-// import RTLLayout from 'ui-component/RTLLayout';
+import RTLLayout from 'ui-component/RTLLayout';
 import Snackbar from 'ui-component/extended/Snackbar';
 import Notistack from 'ui-component/third-party/Notistack';
 
@@ -14,6 +14,7 @@ import ThemeCustomization from 'themes';
 
 // auth provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
+import { ChatProvider } from 'contexts/ChatContext';
 // import { FirebaseProvider as AuthProvider } from 'contexts/FirebaseContext';
 // import { Auth0Provider as AuthProvider } from 'contexts/Auth0Context';
 // import { AWSCognitoProvider as AuthProvider } from 'contexts/AWSCognitoContext';
@@ -25,20 +26,22 @@ export default function App() {
   return (
     <>
       <ThemeCustomization>
-        {/* <RTLLayout> */}
+        <RTLLayout>
         <Locales>
           <NavigationScroll>
             <AuthProvider>
+              <ChatProvider>
               <>
                 <Notistack>
                   <RouterProvider router={router} />
                   <Snackbar />
                 </Notistack>
               </>
+              </ChatProvider>
             </AuthProvider>
           </NavigationScroll>
         </Locales>
-        {/* </RTLLayout> */}
+        </RTLLayout>
       </ThemeCustomization>
     </>
   );
