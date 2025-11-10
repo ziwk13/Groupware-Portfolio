@@ -11,7 +11,6 @@ export const organizationAPI = {
       const res = await axiosServices.get(`${COMMON_CODE_URL}/department`);
       // APIResponseDTO 형태일 수도 있으니 data 필드 우선 확인
       const data = res.data?.data || res.data;
-      console.log("부서 목록 응답", data);
       return Array.isArray(data) ? data : [];
     } catch (err) {
       console.error("부서 목록 조회 실패:", err);
@@ -67,7 +66,6 @@ export const organizationAPI = {
         withCredentials: true,
       });
       const data = res.data?.data || res.data;
-      console.log(`직원 목록 (${deptCode}) 응답`, data);
       return Array.isArray(data) ? data : [];
     } catch (err) {
       console.error(`직원 목록 조회 실패 (${deptCode}):`, err);
@@ -80,7 +78,6 @@ export const organizationAPI = {
     try {
       const res = await axiosServices.get(`${API_BASE_URL}/employees/${employeeId}`);
       const data = res.data?.data || res.data;
-      console.log("직원 상세 응답", data);
       return data;
     } catch (err) {
       console.error(`직원 상세 조회 실패 (${employeeId}):`, err);
