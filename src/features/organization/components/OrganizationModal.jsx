@@ -98,7 +98,6 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
     onClose();
   };
 
-  const handleCancel = () => onClose();
 
   const getBoxHeight = () => {
     if (tempList.length === 1) return '100%';
@@ -110,7 +109,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
   return (
     <Dialog
       open={open}
-      onClose={handleCancel}
+      onClose={onClose}
       fullWidth
       maxWidth="lg"
       disableScrollLock
@@ -261,8 +260,11 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
       </Dialog>
 
       <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-        <Button variant="contained" color="primary" onClick={handleApply}>적용</Button>
-        <Button onClick={handleCancel} variant="outlined" color="inherit">닫기</Button>
+        {
+          list && list.length >= 1 && 
+          <Button variant="contained" color="primary" onClick={handleApply}>적용</Button>
+        }  
+        <Button onClick={onClose} variant="outlined" color="inherit">닫기</Button>
       </DialogActions>
     </Dialog>
   );
