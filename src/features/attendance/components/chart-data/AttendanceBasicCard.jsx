@@ -38,7 +38,7 @@ export default function AttendanceBasicCard({ isLoading }) {
   const { weekly } = useSelector((state) => state.attendance);
 
   // 로그인된 사원 ID
-  const employeeId = user?.employeeId || user?.id;
+  const employeeId = user?.employeeId;
 
   // 현재 시간
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -68,7 +68,7 @@ export default function AttendanceBasicCard({ isLoading }) {
 
       return () => clearInterval(interval);
     }
-  }, [dispatch, employeeId, isLoggedIn]);
+  }, [dispatch, user]);
 
   // 출근 / 퇴근 핸들러
   const handleClockIn = async () => {
