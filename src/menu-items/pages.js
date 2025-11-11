@@ -46,7 +46,8 @@ const pages = {
       title: '인사관리',
       type: 'item',
       icon: icons.IconBadge,
-      url: '/organization'
+      url: '/organization',
+      admin: true
     },
     {
       id: 'gntaegwanry',
@@ -54,6 +55,49 @@ const pages = {
       type: 'item',
       icon: icons.IconBadge,
       url: '/attendance'
+    },
+    {
+      id: 'approval',
+      title: '전자결재',
+      type: 'collapse',
+      icon: icons.IconClipboardCheck,
+      children: [
+        {
+          id: 'insert',
+          title: '결재 작성',
+          type: 'item',
+          url: '/approval/form',
+          target: false
+        },
+        {
+          id: 'approval-list-pending',
+          title: '결재 대기 목록',
+          type: 'item',
+          url: '/approval/list/pending',
+          target: false
+        },
+        {
+          id: 'approval-list-draft',
+          title: '결재 기안 목록',
+          type: 'item',
+          url: '/approval/list/draft',
+          target: false
+        },
+        {
+          id: 'approval-list-completed',
+          title: '결재 완료 목록',
+          type: 'item',
+          url: '/approval/list/completed',
+          target: false
+        },
+        {
+          id: 'approval-list-reference',
+          title: '결재 참조 목록',
+          type: 'item',
+          url: '/approval/list/reference',
+          target: false
+        }
+      ]
     },
     {
       id: 'calendar',
@@ -130,49 +174,6 @@ const pages = {
           title: '나의업무일지',
           type: 'item',
           url: '/worklog/list/my',
-          target: false
-        }
-      ]
-    },
-    {
-      id: 'approval',
-      title: '전자결재',
-      type: 'collapse',
-      icon: icons.IconClipboardCheck,
-      children: [
-        {
-          id: 'insert',
-          title: '결재 작성',
-          type: 'item',
-          url: '/approval/form',
-          target: false
-        },
-        {
-          id: 'approval-list-pending',
-          title: '결재 대기 목록',
-          type: 'item',
-          url: '/approval/list/pending',
-          target: false
-        },
-        {
-          id: 'approval-list-draft',
-          title: '결재 기안 목록',
-          type: 'item',
-          url: '/approval/list/draft',
-          target: false
-        },
-        {
-          id: 'approval-list-completed',
-          title: '결재 완료 목록',
-          type: 'item',
-          url: '/approval/list/completed',
-          target: false
-        },
-        {
-          id: 'approval-list-reference',
-          title: '결재 참조 목록',
-          type: 'item',
-          url: '/approval/list/reference',
           target: false
         }
       ]

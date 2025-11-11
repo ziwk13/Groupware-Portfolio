@@ -11,26 +11,14 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
+import {getImageUrl} from 'utils/getImageUrl';
 
 // project imports
 import Avatar from 'ui-component/extended/Avatar';
 
 // ==============================|| UTILS ||============================== //
 
-// 이미지 경로 유틸리티
-const ImagePath = {
-  USERS: '/assets/images/users/' // 추후 이미지 경로로 변경 해야함
-};
-
-// 이미지 경로를 조합해주는 간단한 함수
-const getImageUrl = (name, path) => {
-  // name이 'default_profile.png' 같은 파일명일 경우 경로 조합
-  if (!name.startsWith('http') && !name.startsWith('/')) {
-    return `${path}${name}`;
-  }
-  // 이미 전체 URL인 경우 그대로 반환
-  return name;
-};
 
 const getStatusChip = (statusValue) => {
   switch (statusValue) {
@@ -74,7 +62,7 @@ export default function ApprovalContents({ status, data, loading, error, page, s
     if (!user) {
       return (
         <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-          <Avatar alt="Unknown User" src={getImageUrl(null, ImagePath.USERS)} />
+          <Avatar alt="Unknown User" src={DefaultAvatar} />
           <Stack>
             <Typography variant="subtitle1">정보 없음</Typography>
             <Typography variant="subtitle2" noWrap>
@@ -86,7 +74,7 @@ export default function ApprovalContents({ status, data, loading, error, page, s
     }
     return (
       <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-        <Avatar alt={user.name} src={getImageUrl(user.profileImg, ImagePath.USERS)} />
+        <Avatar alt={user.name} src={user.profile ? getImageUrl(user.profileImg) : DefaultAvatar} />
         <Stack>
           <Typography variant="subtitle1">{`${user.name} (${user.department || '부서미지정'})`}</Typography>
           <Typography variant="subtitle2" noWrap>

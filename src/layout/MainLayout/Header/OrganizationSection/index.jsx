@@ -36,18 +36,18 @@ export default function OrganizationSection() {
             ...theme.typography.commonAvatar,
             ...theme.typography.mediumAvatar,
             transition: 'all .2s ease-in-out',
-            // ✅ 기본 아이콘 색상 (어두운 파란색)
+            // 기본 아이콘 색상 (어두운 파란색)
     color: theme.vars.palette.primary.dark, 
-    // ✅ 기본 배경 색상 (밝은 파란색)
+    // 기본 배경 색상 (밝은 파란색)
     background: theme.vars.palette.primary.light, 
     
-    // ✅ 호버(hover) 시 색상
+    // 호버(hover) 시 색상
     '&:hover, &[aria-controls="menu-list-grow"]': {
       color: theme.vars.palette.primary.light,
       background: theme.vars.palette.primary.main
     },
 
-    // ✅ 다크 모드일 때 색상
+    // 다크 모드일 때 색상
     ...theme.applyStyles('dark', {
       color: theme.vars.palette.primary.dark,
       background: theme.vars.palette.dark.main,

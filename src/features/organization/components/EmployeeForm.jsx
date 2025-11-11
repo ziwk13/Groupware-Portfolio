@@ -14,8 +14,12 @@ import SecurityTwoToneIcon from '@mui/icons-material/SecurityTwoTone';
 import FingerprintTwoToneIcon from '@mui/icons-material/FingerprintTwoTone';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import {getImageUrl} from 'utils/getImageUrl';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
-function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler }) {
+
+function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler, onOpenModal }) {
+  console.log('commonCodes', commonCodes);
   // 1. 폼 데이터가 없을 때 (초기 상태)
   if (!formData) {
     return (
@@ -82,6 +86,9 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, re
       secondary={
         !isNew && (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Button variant="contained" color="primary" onClick={onOpenModal} size="small">
+              변경 이력
+            </Button>
             <Button variant="contained" color="primary" onClick={resetPasswordHandler} size="small">
               비밀번호 초기화
             </Button>
@@ -107,7 +114,9 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, re
               <Grid size={12}>
                 <Grid container direction="column" sx={{ alignItems: 'center' }}>
                   <Grid>
-                    <Avatar alt={formData.name} src={formData.profileImg} sx={{ height: 70, width: 70 }} />
+                    <Avatar alt={formData.name}
+                            src={formData.profileImg ? getImageUrl(formData.profileImg) : DefaultAvatar}
+                            sx={{ height: 70, width: 70 }} />
                   </Grid>
                 </Grid>
               </Grid>

@@ -1,5 +1,5 @@
-import { Grid, Box, Button, Stack } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { Box, Button, Grid, Stack } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { gridSpacing } from 'store/constant';
 import MainCard from 'ui-component/cards/MainCard';
 
@@ -9,6 +9,7 @@ import EmployeeForm from '../components/EmployeeForm';
 import { organizationAPI } from '../api/organizationApi';
 import useAuth from 'hooks/useAuth';
 import Alert from '@mui/material/Alert';
+import EmployeeHistoryModal from 'features/employee/components/EmployeeHistoryModal';
 
 // 신규 직원 생성을 위한 기본 템플릿
 const defaultNewEmployee = {
@@ -25,12 +26,11 @@ const defaultNewEmployee = {
   profileImg: 'default_profile.png'
 };
 
-
 const findIdByValue1 = (list = [], value1) => {
   if (!Array.isArray(list) || !value1) {
     return null;
   }
-  const found = list.find(item => item.value1 === value1);
+  const found = list.find((item) => item.value1 === value1);
   return found ? found.commonCodeId : null;
 };
 
@@ -40,6 +40,8 @@ export default function OrganizationPage() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [formData, setFormData] = useState(null);
   const [refreshList, setRefreshList] = useState(0);
+  const [open, setOpen] = useState(false);
+
 
   // Autocomplete(드롭다운)용 공통 코드
   const [commonCodes, setCommonCodes] = useState({
@@ -56,7 +58,7 @@ export default function OrganizationPage() {
 
   const { register, adminUpdateEmployee, resetPassword } = useAuth();
 
-const resetPasswordHandler = async () => {
+  const resetPasswordHandler = async () => {
     setAlertInfo({ open: false });
     try {
       await resetPassword(selectedEmployee.employeeId);
@@ -114,11 +116,11 @@ const resetPasswordHandler = async () => {
     }
   }, [selectedDept]);
 
-const handleSelectEmployee = (employee) => {
+  const handleSelectEmployee = (employee) => {
     setSelectedEmployee(employee);
 
     // 공통 코드가 로드되었는지 확인
-    const { status, positions, roles} = commonCodes;
+    const { status, positions, roles } = commonCodes;
     if (!status.length || !positions.length || !roles.length) {
       console.error('공통 코드가 아직 로드되지 않아 맵핑에 실패했습니다.');
       setFormData(employee);
@@ -131,7 +133,7 @@ const handleSelectEmployee = (employee) => {
       // 헬퍼 함수를 사용해 문자열 값을 ID 값으로 맵핑
       status: findIdByValue1(status, employee.status),
       position: findIdByValue1(positions, employee.position),
-      role: findIdByValue1(roles, employee.role),
+      role: findIdByValue1(roles, employee.role)
     };
 
     setFormData(formReadyData);
@@ -199,132 +201,132 @@ const handleSelectEmployee = (employee) => {
   };
 
   return (
-    <MainCard
-      title="조직도"
-      secondary={
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          {alertInfo.open && (
-            <Alert
-              severity={alertInfo.severity}
-              onClose={() => setAlertInfo({ open: false })}
-              sx={{ width: '100%', py: 0.3 }}
-            >
-              {alertInfo.message}
-            </Alert>
-          )}
-          <Button variant="outlined" color="secondary" onClick={handleNew}>
-            신규
-          </Button>
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            저장
-          </Button>
-        </Stack>
-      }
-      content={false}
-      sx={{
-        height: '80vh',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}
-    >
-      <Box
+    <>
+      <MainCard
+        title="조직도"
+        secondary={
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            {alertInfo.open && (
+              <Alert severity={alertInfo.severity} onClose={() => setAlertInfo({ open: false })} sx={{ width: '100%', py: 0.3 }}>
+                {alertInfo.message}
+              </Alert>
+            )}
+            <Button variant="outlined" color="secondary" onClick={handleNew}>
+              신규
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleSave}>
+              저장
+            </Button>
+          </Stack>
+        }
+        content={false}
         sx={{
-          flex: 1,
-          overflow: 'hidden',
+          height: '80vh',
           display: 'flex',
           flexDirection: 'column',
-          padding: 3
+          overflow: 'hidden'
         }}
       >
-        <Grid
-          container
-          spacing={gridSpacing}
-          justifyContent="center"
-          wrap="nowrap"
+        <Box
           sx={{
             flex: 1,
-            flexWrap: 'nowrap',
-            alignItems: 'stretch',
             overflow: 'hidden',
-            minHeight: '400px'
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 3
           }}
         >
-          {/* 1. 부서 트리 */}
           <Grid
-            size={{ xs: 12, md: 4 }}
+            container
+            spacing={gridSpacing}
+            justifyContent="center"
+            wrap="nowrap"
             sx={{
-              height: '100%',
-              minWidth: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
+              flex: 1,
+              flexWrap: 'nowrap',
+              alignItems: 'stretch',
+              overflow: 'hidden',
+              minHeight: '400px'
             }}
           >
-            <MainCard
-              title="부서"
-              content={false}
+            {/* 1. 부서 트리 */}
+            <Grid
+              size={{ xs: 12, md: 4 }}
               sx={{
                 height: '100%',
+                minWidth: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden',
-                border: '1px solid',
-                '& .MuiCardHeader-root': {
-                  padding: 1.5
-                }
+                overflow: 'hidden'
+              }}
+            >
+              <MainCard
+                title="부서"
+                content={false}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  border: '1px solid',
+                  '& .MuiCardHeader-root': {
+                    padding: 1.5
+                  }
+                }}
+              >
+                <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+                  <OrganizationTree setSelectedDept={setSelectedDept} />
+                </Box>
+              </MainCard>
+            </Grid>
+
+            {/* 2. 직원 목록 */}
+            <Grid
+              size={{ xs: 12, md: 4 }}
+              sx={{
+                height: '100%',
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
               }}
             >
               <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-                <OrganizationTree setSelectedDept={setSelectedDept} />
+                <EmployeeList
+                  selectedDept={selectedDept?.commonCodeId}
+                  onSelectEmployee={handleSelectEmployee}
+                  refreshList={refreshList}
+                  selectedEmployeeId={formData?.employeeId}
+                />
               </Box>
-            </MainCard>
-          </Grid>
+            </Grid>
 
-          {/* 2. 직원 목록 */}
-          <Grid
-            size={{ xs: 12, md: 4 }}
-            sx={{
-              height: '100%',
-              minWidth: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-              <EmployeeList
-                selectedDept={selectedDept?.commonCodeId}
-                onSelectEmployee={handleSelectEmployee}
-                refreshList={refreshList}
-                selectedEmployeeId={formData?.employeeId}
-              />
-            </Box>
+            {/* 3. 인사 정보 폼 */}
+            <Grid
+              size={{ xs: 12, md: 4 }}
+              sx={{
+                height: '100%',
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
+              }}
+            >
+              <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+                <EmployeeForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  commonCodes={commonCodes}
+                  selectedDeptInfo={selectedDept}
+                  resetPasswordHandler={resetPasswordHandler}
+                  onOpenModal={() => setOpen(true)}
+                />
+              </Box>
+            </Grid>
           </Grid>
-
-          {/* 3. 인사 정보 폼 */}
-          <Grid
-            size={{ xs: 12, md: 4 }}
-            sx={{
-              height: '100%',
-              minWidth: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-              <EmployeeForm
-                formData={formData}
-                setFormData={setFormData}
-                commonCodes={commonCodes}
-                selectedDeptInfo={selectedDept}
-                resetPasswordHandler={resetPasswordHandler}
-              />
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-    </MainCard>
+        </Box>
+      </MainCard>
+      <EmployeeHistoryModal open={open} onClose={() => setOpen(false)} employee={selectedEmployee} />
+    </>
   );
 }

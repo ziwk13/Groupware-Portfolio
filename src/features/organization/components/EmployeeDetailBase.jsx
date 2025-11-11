@@ -6,10 +6,11 @@ import MainCard from "ui-component/cards/MainCard";
 
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import MailTwoToneIcon from '@mui/icons-material/MailTwoTone';
-import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
+import { getImageUrl } from 'utils/getImageUrl';
 
 function EmployeeDetail({ employee }) {
   if (!employee) {
@@ -53,7 +54,7 @@ function EmployeeDetail({ employee }) {
       <Grid size={12}>
         <Grid container direction="column" sx={{ alignItems: 'center' }}>
           <Grid>
-            <Avatar alt={employee?.name} src={employee?.profileImg} sx={{ height: 110, width: 110 }} />
+            <Avatar alt={employee?.name} src={employee.profileImg ? getImageUrl(employee.profileImg) : DefaultAvatar} sx={{ height: 110, width: 110 }} />
           </Grid>
         </Grid>
       </Grid>

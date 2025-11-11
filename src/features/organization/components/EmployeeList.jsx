@@ -1,39 +1,31 @@
-//
-// 3. EmployeeList.jsx
-// - prop: setSelectedEmployee -> onSelectEmployee
-// - prop: refreshList 추가 (저장 시 목록 갱신용)
-// - prop: selectedEmployeeId 추가 (선택된 항목 하이라이트용)
-//
-
+// EmployeeList.jsx
 import { Box, List, ListItemButton, Paper, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { organizationAPI } from '../api/organizationApi';
 import Avatar from 'ui-component/extended/Avatar';
 import Stack from '@mui/material/Stack';
 import MainCard from 'ui-component/cards/MainCard';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
+import { getImageUrl } from 'utils/getImageUrl';
 
-// 컴포넌트
-export default function EmployeeList({ selectedDept, onSelectEmployee, refreshList, selectedEmployeeId }) {
-  // 직원 목록 데이터를 저장할 state
+export default function EmployeeList({
+  selectedDept,
+  onSelectEmployee,
+  refreshList,
+  selectedEmployeeId,
+  showHeader = true
+}) {
   const [employees, setEmployees] = useState([]);
-  // activeId는 이제 부모(OrganizationPage)로부터 selectedEmployeeId로 받음
 
-  // 1. 부서가 선택되거나, refreshList 값이 바뀔 때마다 직원 목록을 새로 불러옴
   useEffect(() => {
-    if (!selectedDept) return; // 선택된 부서가 없으면 API 호출 X
+    if (!selectedDept) return;
 
     organizationAPI
-      .getEmployeesByDeptCode(selectedDept) // 백엔드 API 요청
-      .then((data) => {
-        console.log('받아온 직원 데이터:', data);
-        // 데이터가 배열 형태인지 검증하고, 아니면 빈 배열로 초기화
-        setEmployees(Array.isArray(data) ? data : []);
-        // setActiveId(null); // 부모가 관리하므로 이젠 필요 없음
-      })
+      .getEmployeesByDeptCode(selectedDept)
+      .then((data) => setEmployees(Array.isArray(data) ? data : []))
       .catch((err) => console.error('직원 목록 가져오기 실패', err));
-  }, [selectedDept, refreshList]); // ✅ 의존성 배열 -> selectedDept 또는 refreshList가 변경될 때마다 실행
+  }, [selectedDept, refreshList]);
 
-  // 직원이 없거나 부서가 선택이 안됐을 때
   if (!selectedDept) {
     return (
       <MainCard
@@ -43,11 +35,8 @@ export default function EmployeeList({ selectedDept, onSelectEmployee, refreshLi
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-
           border: '1px solid',
-          '& .MuiCardHeader-root': {
-            padding: 1.5
-          }
+          '& .MuiCardHeader-root': { padding: 1.5 }
         }}
       >
         <Box
@@ -67,7 +56,6 @@ export default function EmployeeList({ selectedDept, onSelectEmployee, refreshLi
     );
   }
 
-  // 2. 렌더링
   return (
     <MainCard
       title={`직원 목록 (${employees.length}명)`}
@@ -78,42 +66,77 @@ export default function EmployeeList({ selectedDept, onSelectEmployee, refreshLi
         flexDirection: 'column',
         overflow: 'hidden',
         border: '1px solid',
-        '& .MuiCardHeader-root': {
-          padding: 1.5
-        }
+        '& .MuiCardHeader-root': { padding: 1.5 }
       }}
     >
-      {/* ✅ 제목(MainCard.title)은 고정, 아래 내용만 스크롤 */}
       <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-        {/* 내부 표면만 사용, 이중 스크롤 방지 */}
         <Paper sx={{ height: '100%', boxShadow: 'none', background: 'transparent', p: 0 }}>
           {employees.length === 0 ? (
             <Typography color="text.secondary" sx={{ p: 2 }}>
               직원이 없습니다.
             </Typography>
           ) : (
-            // 직원 리스트
             <List disablePadding>
-              {employees.map((emp) => {
-                return (
-                  <ListItemButton
-                    key={emp.employeeId}
-                    selected={selectedEmployeeId === emp.employeeId} // ✅ 부모의 폼 데이터 ID와 비교
-                    onClick={() => {
-                      // setActiveId(emp.employeeId); // 부모가 관리
-                      onSelectEmployee(emp); // ✅ 부모에게 선택된 직원 객체 전달
-                    }}
-                    sx={{ px: 2, py: 1.25 }}
-                  >
-                    <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-                      <Avatar alt={emp.name} src={emp.profileImg} />
-                      <Stack>
-                        <Typography variant="subtitle1">{`${emp.name} ${emp.position}`}</Typography>
-                      </Stack>
+              {employees.map((emp) => (
+                <ListItemButton
+                  key={emp.employeeId}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('employee', JSON.stringify(emp));
+
+                    // 커스텀 드래그 미리보기 (선명한 프로필 형태)
+                    const dragPreview = document.createElement('div');
+                    dragPreview.style.position = 'absolute';
+                    dragPreview.style.top = '-99999px';
+                    dragPreview.style.zIndex = '9999';
+                    dragPreview.style.display = 'flex';
+                    dragPreview.style.alignItems = 'center';
+                    dragPreview.style.gap = '8px';
+                    dragPreview.style.padding = '6px 10px';
+                    dragPreview.style.border = '1px solid rgba(0,0,0,0.15)';
+                    dragPreview.style.borderRadius = '8px';
+                    dragPreview.style.background = '#fff';
+                    dragPreview.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
+                    dragPreview.style.fontSize = '13px';
+                    dragPreview.style.color = '#333';
+                    dragPreview.style.fontWeight = '500';
+
+                    // 프로필 이미지
+                    const img = document.createElement('img');
+                    img.src = emp.profileImg ? getImageUrl(emp.profileImg) : DefaultAvatar;
+                    img.style.width = '32px';
+                    img.style.height = '32px';
+                    img.style.borderRadius = '50%';
+                    img.style.objectFit = 'cover';
+
+                    // 이름 + 직급
+                    const text = document.createElement('span');
+                    text.textContent = `${emp.name} ${emp.position}`;
+
+                    dragPreview.appendChild(img);
+                    dragPreview.appendChild(text);
+                    document.body.appendChild(dragPreview);
+
+                    e.dataTransfer.setDragImage(dragPreview, 0, 0);
+
+                    // 드래그 끝나면 프리뷰 제거
+                    setTimeout(() => document.body.removeChild(dragPreview), 0);
+                  }}
+                  selected={selectedEmployeeId === emp.employeeId}
+                  onClick={() => onSelectEmployee(emp)}
+                  sx={{ px: 2, py: 1.25, cursor: 'grab' }}
+                >
+                  <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+                    <Avatar
+                      alt={emp.name}
+                      src={emp.profileImg ? getImageUrl(emp.profileImg) : DefaultAvatar}
+                    />
+                    <Stack>
+                      <Typography variant="subtitle1">{`${emp.name} ${emp.position}`}</Typography>
                     </Stack>
-                  </ListItemButton>
-                );
-              })}
+                  </Stack>
+                </ListItemButton>
+              ))}
             </List>
           )}
         </Paper>
