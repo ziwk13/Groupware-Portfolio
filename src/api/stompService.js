@@ -2,7 +2,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 let stompClient = null;
-let notificationSubscription = null;
+let subscriptions = new Map();
 
 /**
  * STOMP 클라이언트 연결
@@ -47,12 +47,12 @@ const connect = (onConnectedCallback) => {
  * STOMP 클라이언트 연결 해제
  */
 const disconnect = () => {
-  // 알림 구독 해제
-  if (notificationSubscription) {
-    notificationSubscription.unsubscribe();
-    notificationSubscription = null;
-    console.log('STOMP: 알림 구독 해제');
-  }
+  // 모든 구독 해제
+  subscriptions.forEach((subscription, destination) => {
+    subscription.unsubscribe();
+    console.log(`STOPM: [${destination}] 구독 해제`);
+  });
+  subscriptions.clear();
 
   // 연결 해제
   if (stompClient && stompClient.active) {
@@ -60,6 +60,63 @@ const disconnect = () => {
     console.log('STOMP: 연결 해제');
   }
   stompClient = null;
+};
+
+/**
+ * 구독 함수
+ * @param {string} destination - 구독할 경로
+ * @param {Function} callback - 메시지 수신 시 실행할 콜백
+ */
+const subscribe = (destination, callback) => {
+  if(!stompClient || !stompClient.active) {
+    console.warn('STOMP: 연결되지 않은 상태에서 구독 시도');
+    return;
+  }
+  if(subscriptions.has(destination)) {
+    console.warn(`STOMP: [${destination}] 이미 구독 중 입니다.`);
+    return;
+  }
+  const subscription = stompClient.subscribe(destination, (message) => {
+    try {
+      const payload = JSON.parse(message.body);
+      callback(payload);  // 컴포넌트의 state 변경 함수 호출
+    } catch (error) {
+      console.error('STOMP: 메시지 파싱 실패', error);
+    }
+  });
+
+  // 구독 정보 저장
+  subscriptions.set(destination, subscription);
+}
+
+/**
+ * 특정 구독 해제 함수
+ * @param {string} destination - 구독 해제할 경로
+ */
+const unsubscribe = (destination) => {
+  if(subscriptions.has(destination)) {
+    const subscription = subscriptions.get(destination);
+    subscription.unsubscribe();
+    subscriptions.delete(destination);
+    console.log(`STOMP: [${destination}] 구독 해제`);
+  }
+};
+
+/**
+ * 발행 함수
+ * @param {string} destination - 발행할 경로
+ * @param {object} body - 전송할 메시지 객체
+ */
+const publish = (destination, body) => {
+  if(!stompClient || !stompClient.active) {
+    console.warn('STOMP: 연결되지 않은 상태에서 발행 시도.');
+    return;
+  }
+
+  stompClient.publish({
+    destination: destination,
+    body: JSON.stringify(body),
+  });
 };
 
 /**
@@ -78,7 +135,7 @@ const subscribeToNotifications = (callback) => {
   }
 
   // /user/queue/notifications 구독
-  notificationSubscription = stompClient.subscribe('/user/queue/notifications', (message) => {
+  subscribe('/user/queue/notifications', (message) => {
     if (message.body) {
       try {
         const payload = JSON.parse(message.body); // { unreadCount, totalCount }
@@ -95,5 +152,8 @@ const subscribeToNotifications = (callback) => {
 export const stompService = {
   connect,
   disconnect,
+  subscribe,
+  unsubscribe,
+  publish,
   subscribeToNotifications,
 };
