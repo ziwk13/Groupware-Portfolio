@@ -18,7 +18,8 @@ import {getImageUrl} from 'utils/getImageUrl';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
 
-function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler }) {
+function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler, onOpenModal }) {
+  console.log('commonCodes', commonCodes);
   // 1. 폼 데이터가 없을 때 (초기 상태)
   if (!formData) {
     return (
@@ -85,6 +86,9 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, re
       secondary={
         !isNew && (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Button variant="contained" color="primary" onClick={onOpenModal} size="small">
+              변경 이력
+            </Button>
             <Button variant="contained" color="primary" onClick={resetPasswordHandler} size="small">
               비밀번호 초기화
             </Button>
