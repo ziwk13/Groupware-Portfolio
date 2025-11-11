@@ -47,7 +47,8 @@ export const updatePassword = (data) => {
 /**
  * (GET) 특정 사원 인사 정보 수정 이력 조회 API
  * @param {string} employeeId - 조회할 직원 ID
+ * @param {object} params - 페이징 파라미터 { page, size }
  */
-export const getEmployeeHistory = (employeeId) => {
-  return axiosServices.get(`/api/employees/history/${employeeId}`);
+export const getEmployeeHistory = (employeeId, params) => {
+  return axiosServices.get(`/api/employees/history/${employeeId}`, { params });
 };
