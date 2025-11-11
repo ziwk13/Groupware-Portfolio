@@ -17,13 +17,19 @@ import AvatarStatus from './AvatarStatus';
 import { getImageUrl, ImagePath } from 'utils/getImageUrl';
 
 // assets
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import MoreHorizTwoToneIcon from '@mui/icons-material/MoreHorizTwoTone';
 import ErrorTwoToneIcon from '@mui/icons-material/ErrorTwoTone';
+import { IconArrowLeft } from '@tabler/icons-react';
 
 // ==============================|| CHAT - HEADER ||============================== //
 
-export default function ChatHeader({ user, onDrawerOpen, onUserDetailsToggle, isUserDetailsOpen }) {
+export default function ChatHeader({ 
+  user, 
+  onClose, 
+  onUserDetailsToggle, 
+  isUserDetailsOpen,
+  onLeaveRoom
+}) {
   const theme = useTheme();
 
   // 1. ChatPage에 있던 메뉴 관련 state와 핸들러를 이곳으로 가져옵니다.
@@ -36,23 +42,28 @@ export default function ChatHeader({ user, onDrawerOpen, onUserDetailsToggle, is
     setAnchorEl(null);
   };
 
+  // 채팅방 나가기 클릭 핸들러
+  const handleLeaveRoomClick = () => {
+    onLeaveRoom();
+  };
+  
   return (
     <Grid size={12}>
-      <Grid container spacing={0.5} sx={{ alignItems: 'center' }}>
+      <Grid container spacing={0.1} sx={{ alignItems: 'center' }}>
         <Grid>
-          <IconButton onClick={onDrawerOpen} size="large" aria-label="chat menu collapse">
-            <MenuRoundedIcon />
+          <IconButton onClick={onClose} size="small" aria-label="chat menu collapse">
+            <IconArrowLeft />
           </IconButton>
         </Grid>
         <Grid>
-          <Grid container spacing={2} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
+          <Grid container spacing={1} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
             <Grid>
               <Avatar alt={user.name} src={user.avatar && getImageUrl(`${user.avatar}`, ImagePath.USERS)} />
             </Grid>
             <Grid size={{ sm: 'grow' }}>
               <Grid container spacing={0} sx={{ alignItems: 'center' }}>
                 <Grid size={12}>
-                  <Stack direction="row" sx={{ alignItems: 'center', gap: 0.25 }}>
+                  <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
                     <Typography variant="h4">{user.name}</Typography>
                     {user.online_status && <AvatarStatus status={user.online_status} />}
                   </Stack>
@@ -65,16 +76,7 @@ export default function ChatHeader({ user, onDrawerOpen, onUserDetailsToggle, is
           </Grid>
         </Grid>
         <Grid size={{ sm: 'grow' }} />
-        <Grid>
-          <IconButton
-            onClick={onUserDetailsToggle}
-            size="large"
-            aria-label="chat user information"
-            {...(isUserDetailsOpen && { color: 'error' })}
-          >
-            <ErrorTwoToneIcon />
-          </IconButton>
-        </Grid>
+       
         {!isUserDetailsOpen && (
           <Grid>
             <IconButton onClick={handleClickSort} size="large" aria-label="chat user details change">
@@ -95,10 +97,8 @@ export default function ChatHeader({ user, onDrawerOpen, onUserDetailsToggle, is
                 horizontal: 'right'
               }}
             >
-              <MenuItem onClick={handleCloseSort}>Name</MenuItem>
+              <MenuItem onClick={handleLeaveRoomClick}>채팅방 나가기</MenuItem>
               <MenuItem onClick={handleCloseSort}>Date</MenuItem>
-              <MenuItem onClick={handleCloseSort}>Ratting</MenuItem>
-              <MenuItem onClick={handleCloseSort}>Unread</MenuItem>
             </Menu>
           </Grid>
         )}
