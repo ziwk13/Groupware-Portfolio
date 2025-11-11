@@ -10,9 +10,9 @@ import {
   Grid as Grid,
   IconButton,
   Stack,
+  Autocomplete,
   TextField,
   Tooltip,
-  Autocomplete,
   Chip,
   List,
   ListItem,
@@ -34,6 +34,7 @@ import { dispatch } from 'store';
 import axios from 'utils/axios';
 import { inviteParticipants, getEvents, updateParticipantStatus } from '../slices/scheduleSlice';
 import useAuth from 'hooks/useAuth';
+import OrganizationModal from 'features/organization/components/OrganizationModal';
 
 // ==============================|| ADD / EDIT EVENT FORM ||============================== //
 
@@ -53,6 +54,10 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
   const isHost = event && Number(event.employeeId) === Number(loggedInId);
   const navigate = useNavigate();
   const [participantStatus, setParticipantStatus] = useState(null);
+
+  // 조직도 모달 상태
+  const [orgOpen, setOrgOpen] = useState(false);
+  const [orgList, setOrgList] = useState([{ name: '참석자', empList: [] }]);
 
   // MUI 알림 관련 상태
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
@@ -110,6 +115,17 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
       selectedParticipants: []
     };
   }, [event, range]);
+
+  // 조직도에서 선택된 참석자 반영
+  useEffect(() => {
+    const selected = orgList[0]?.empList || [];
+    if (!selected.length) return;
+
+    const merged = [...values.selectedParticipants, ...selected];
+    const unique = merged.filter((emp, idx, arr) => idx === arr.findIndex((e) => Number(e.employeeId) === Number(emp.employeeId)));
+
+    if (isCreating || isHost) setFieldValue('selectedParticipants', unique);
+  }, [orgList]);
 
   // 참여 상태 불러오기
   useEffect(() => {
@@ -244,19 +260,40 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                 />
               </Grid>
 
-              {/* 참석자 선택 */}
+              {/* 참석자 선택 (조직도 모달) */}
               <Grid size={12}>
-                <Autocomplete
-                  multiple
-                  options={employeeOptions}
-                  getOptionLabel={(option) => option.name || ''}
-                  value={values.selectedParticipants}
-                  onChange={(e, val) => (isCreating || isHost) && setFieldValue('selectedParticipants', val)}
-                  renderTags={(tagValue, getTagProps) =>
-                    tagValue.map((option, index) => <Chip key={option.employeeId} label={option.name} {...getTagProps({ index })} />)
-                  }
-                  renderInput={(params) => <TextField {...params} label="참석자 선택" placeholder="직원 검색" />}
-                />
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  참석자
+                </Typography>
+
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {values.selectedParticipants.length > 0 ? (
+                    values.selectedParticipants.map((emp) => (
+                      <Chip
+                        key={emp.employeeId}
+                        label={emp.name}
+                        variant="outlined"
+                        onDelete={() =>
+                          (isCreating || isHost) &&
+                          setFieldValue(
+                            'selectedParticipants',
+                            values.selectedParticipants.filter((p) => Number(p.employeeId) !== Number(emp.employeeId))
+                          )
+                        }
+                      />
+                    ))
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      선택된 참석자가 없습니다.
+                    </Typography>
+                  )}
+                </Stack>
+
+                <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setOrgOpen(true)} disabled={!(isCreating || isHost)}>
+                  조직도 열기
+                </Button>
+
+                <OrganizationModal open={orgOpen} onClose={() => setOrgOpen(false)} list={orgList} setList={setOrgList} />
               </Grid>
 
               {/* 시작/종료 */}
@@ -282,7 +319,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                 />
               </Grid>
 
-              {/* 카테고리 선택  */}
+              {/* 카테고리 선택 */}
               <Grid size={12}>
                 <Autocomplete
                   options={categoryOptions}
@@ -308,7 +345,6 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                 <Grid size={12} sx={{ mt: 2 }}>
                   {!isHost && (
                     <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                      {/* 참석 버튼 */}
                       <Button
                         size="small"
                         variant={participantStatus === 'ATTEND' ? 'contained' : 'outlined'}
@@ -331,14 +367,13 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                             setSnackbar({ open: true, message: '참석 상태 변경 실패', severity: 'error' });
                             setStatusMessage?.('참석 상태 변경 실패');
                           } finally {
-                            onCancel(); // 참여 상태 변경 후 닫기
+                            onCancel();
                           }
                         }}
                       >
                         참석
                       </Button>
 
-                      {/* 거절 버튼 */}
                       <Button
                         size="small"
                         variant={participantStatus === 'REJECT' ? 'contained' : 'outlined'}
@@ -377,9 +412,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                     {participants.map((p) => (
                       <ListItem key={p.participantId}>
                         <ListItemText
-                          primary={`${p.participantName ?? ''} (${
-                            (p.participantStatusName || '').replace(/^참여\s*상태\s*-\s*/, '') || '상태 없음'
-                          })`}
+                          primary={`${p.participantName ?? ''} (${(p.participantStatusName || '').replace(/^참여\s*상태\s*-\s*/, '') || '상태 없음'})`}
                         />
                       </ListItem>
                     ))}
