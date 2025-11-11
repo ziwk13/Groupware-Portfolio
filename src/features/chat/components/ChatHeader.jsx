@@ -98,7 +98,7 @@ export default function ChatHeader({
               }}
             >
               <MenuItem onClick={handleLeaveRoomClick}>채팅방 나가기</MenuItem>
-              <MenuItem onClick={handleCloseSort}>Date</MenuItem>
+              <MenuItem onClick={handleCloseSort}>초대하기</MenuItem>
             </Menu>
           </Grid>
         )}
