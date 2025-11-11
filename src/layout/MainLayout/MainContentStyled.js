@@ -5,26 +5,29 @@ import { styled } from '@mui/material/styles';
 import { MenuOrientation } from 'config';
 import { drawerWidth } from 'store/constant';
 
-// ==============================|| MAIN LAYOUT - STYLED ||============================== //
-
 const MainContentStyled = styled('main', {
   shouldForwardProp: (prop) => prop !== 'open' && prop !== 'menuOrientation' && prop !== 'borderRadius'
 })(({ theme, open, menuOrientation, borderRadius }) => ({
   backgroundColor: theme.vars.palette.grey[100],
-
   ...theme.applyStyles('dark', {
     backgroundColor: theme.vars.palette.dark[800]
   }),
+
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  minHeight: '100vh',
+  flexGrow: 1,
+
   minWidth: '1%',
   width: '100%',
-  minHeight: 'calc(100vh - 88px)',
-  flexGrow: 1,
   padding: 20,
   marginTop: 88,
   marginRight: 20,
   borderRadius: `${borderRadius}px`,
   borderBottomLeftRadius: 0,
   borderBottomRightRadius: 0,
+
   ...(!open && {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
@@ -36,6 +39,7 @@ const MainContentStyled = styled('main', {
       marginTop: menuOrientation === MenuOrientation.HORIZONTAL ? 135 : 88
     }
   }),
+
   ...(open && {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
@@ -48,6 +52,7 @@ const MainContentStyled = styled('main', {
       marginTop: menuOrientation === MenuOrientation.HORIZONTAL ? 135 : 88
     }
   }),
+
   [theme.breakpoints.down('md')]: {
     marginLeft: 20,
     padding: 16,

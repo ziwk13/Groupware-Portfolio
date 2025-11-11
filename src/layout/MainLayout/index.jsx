@@ -15,15 +15,12 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import HorizontalBar from './HorizontalBar';
 import MainContentStyled from './MainContentStyled';
-// import Customization from '../Customization';
 import Loader from 'ui-component/Loader';
 import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 
 import { MenuOrientation } from 'config';
 import useConfig from 'hooks/useConfig';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
-
-// ==============================|| MAIN LAYOUT ||============================== //
 
 export default function MainLayout() {
   const theme = useTheme();
@@ -44,37 +41,40 @@ export default function MainLayout() {
   }, [downMD]);
 
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
-
-  // horizontal menu-list bar : drawer
   const menu = useMemo(() => (isHorizontal ? <HorizontalBar /> : <Sidebar />), [isHorizontal]);
 
   if (menuMasterLoading) return <Loader />;
 
   return (
     <Box sx={{ display: 'flex' }}>
-      {/* header */}
+      {/* Header */}
       <AppBar enableColorOnDark position="fixed" color="inherit" elevation={0} sx={{ bgcolor: 'background.default' }}>
         <Toolbar sx={{ p: isHorizontal ? 1.25 : 2 }}>
           <Header />
         </Toolbar>
       </AppBar>
 
-      {/* menu / drawer */}
+      {/* Menu / Drawer */}
       {menu}
 
-      {/* main content */}
+      {/* Main Content */}
       <MainContentStyled {...{ borderRadius, menuOrientation, open: drawerOpen }}>
         <Container
           maxWidth={container ? 'lg' : false}
-          sx={{ ...(!container && { px: { xs: 0 } }), minHeight: 'calc(100vh - 128px)', display: 'flex', flexDirection: 'column' }}
+          sx={{
+            ...(!container && { px: { xs: 0 } }),
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column'
+          }}
         >
-          {/* breadcrumb */}
           <Breadcrumbs />
-          <Outlet />
+          <Box sx={{ flexGrow: 1 }}>
+            <Outlet />
+          </Box>
           <Footer />
         </Container>
       </MainContentStyled>
-      {/* <Customization /> */}
     </Box>
   );
 }
