@@ -1,13 +1,7 @@
-import React, { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 // material-ui
 import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import Collapse from '@mui/material/Collapse';
-import Dialog from '@mui/material/Dialog';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
 import { styled, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -15,22 +9,15 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 // import EmojiPicker, { SkinTones } from 'emoji-picker-react';
 
 // project imports
-import ChartHistory from '../components/ChartHistory';
-import ChatDrawer from '../components/ChatDrawer';
-import UserDetails from '../components/UserDetails';
-
+import { useChat } from 'contexts/ChatContext';
 import Loader from 'ui-component/Loader';
-import MainCard from 'ui-component/cards/MainCard';
-import SimpleBar from 'ui-component/third-party/SimpleBar';
-
-import { appDrawerWidth as drawerWidth, gridSpacing } from 'store/constant';
+import ChatDrawer from '../components/ChatDrawer';
+import CreateChatRoomModal from '../components/CreateChatRoomModal';
 
 import useAuth from 'hooks/useAuth';
+import { appDrawerWidth as drawerWidth } from 'store/constant';
 
 // assets
-import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
-import ChatHeader from '../components/ChatHeader';
-import MessageInput from '../components/MessageInput';
 
 // drawer content element
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
@@ -57,46 +44,51 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
 // ==============================|| APPLICATION CHAT ||============================== //
 
 export default function ChatMainPage() {
-  const theme = useTheme();
-  const downLG = useMediaQuery(theme.breakpoints.down('lg'));
-  const downMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
-  const { user: authUser } = useAuth();
-
-  const [loading, setLoading] = useState(false);
-
+  const chatCtx = useChat(); // 훅 1
+  const [data, setData] = useState([]); // 훅 2
+  const [isChatLoading, startTransition] = useTransition(); // 훅 3
+  
+  
+  const { user: authUser } = useAuth(); // 훅 4
+  const theme = useTheme(); // 훅 5
+  const [emailDetails, setEmailDetails] = useState(false); // 훅 7
+  const [openChatDrawer, setOpenChatDrawer] = useState(true); // 훅 8
+  const [openCreateModal, setOpenCreateModal] = useState(false); // 훅 9
+  
+  const user = chatCtx?.selectedUser;
+  const goBackToUserList = chatCtx?.goBackToUserList;
+  
   // set chat details page open when user is selected from sidebar
-  const [emailDetails, setEmailDetails] = React.useState(false);
   const handleUserChange = (event) => {
     setEmailDetails((prev) => !prev);
   };
 
   // toggle sidebar
-  const [openChatDrawer, setOpenChatDrawer] = React.useState(true);
   const handleDrawerOpen = () => {
     setOpenChatDrawer((prevState) => !prevState);
   };
 
-  // close sidebar when widow size below 'md' breakpoint
-  useEffect(() => {
-    setOpenChatDrawer(!downLG);
-  }, [downLG]);
 
-  const [user, setUser] = useState({});
-  const [isChatLoading, startTransition] = useTransition();
-  const [data, setData] = React.useState([]);
-
-  const handleUserSelect = (user) => {
-    setData([]);
-
-    startTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500)).then(() => {
-        setUser(user);
-      });
-    });
+  // 플러스 버튼 클릭 시 실행될 핸들러
+  const handleStartNewChat = () => {
+    setOpenCreateModal(true);
   };
 
-  // handle new message form
-  const [message, setMessage] = useState('');
+  // 모달 닫기 핸들러
+  const handleCloseCreateModal = () => {
+    setOpenCreateModal(false);
+  };
+
+  useEffect(() => {
+    if (user) {
+      setData([]);
+      startTransition(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 500)).then(() => {
+        });
+      });
+    }
+  }, [user]);
+
   const handleOnSend = (messageText) => {
     const d = new Date();
     const newMessage = {
@@ -124,140 +116,23 @@ export default function ChatMainPage() {
   //   setAnchorElEmoji(null);
   // };
 
-  if (loading) return <Loader />;
-
   return (
-    <Box sx={{ display: 'flex', overflow: 'hidden' }}>
-      <ChatDrawer openChatDrawer={openChatDrawer} handleDrawerOpen={handleDrawerOpen} setUser={handleUserSelect} />
-      <Main open={openChatDrawer} sx={{ minWidth: 0 }}>
-        <Grid container spacing={gridSpacing} sx={{ height: 1 }}>
-          <Grid
-            size={{ xs: 12, md: emailDetails ? 8 : 12, xl: emailDetails ? 9 : 12 }}
-            sx={(theme) => ({
-              transition: theme.transitions.create('width', {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.shorter + 200
-              })
-            })}
-          >
-            <MainCard
-              sx={{
-                height: 1,
-                bgcolor: 'grey.50',
-                ...theme.applyStyles('dark', { bgcolor: 'dark.main' }),
-                transition: theme.transitions.create('width', {
-                  easing: theme.transitions.easing.easeOut,
-                  duration: theme.transitions.duration.shorter + 200
-                })
-              }}
-            >
-              <Grid container spacing={gridSpacing} sx={{ height: 1 }}>
-                {/* ChatHeader*/}
-                <ChatHeader
-                  user={user}
-                  onDrawerOpen={handleDrawerOpen}
-                  onUserDetailsToggle={handleUserChange}
-                  isUserDetailsOpen={emailDetails}
-                />
-                {/* ChatHistory */}
-                <SimpleBar
-                  sx={{ overflowX: 'hidden', height: 'calc(100vh - 431px)', minHeight: 420, '& .simplebar-content': { height: 1 } }}
-                >
-                  <Box sx={{ height: 1 }}>
-                    {isChatLoading ? (
-                      <Stack sx={{ height: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <CircularProgress color="secondary" />
-                      </Stack>
-                    ) : (
-                      <ChartHistory theme={theme} user={user} data={data} />
-                    )}
-                  </Box>
-                </SimpleBar>
-              </Grid>
+    <>
+      <ChatDrawer
+        openChatDrawer={openChatDrawer}
+        handleDrawerOpen={handleDrawerOpen} // (Drawer를 닫는 기능이 없다면 이 prop들은 불필요)
+        onStartNewChat={handleStartNewChat}
 
-              {/* MessageInput */}
-              <MessageInput onSend={handleOnSend} />
-              {/*  <Popper
-                id={emojiId}
-                open={emojiOpen}
-                anchorEl={anchorElEmoji}
-                disablePortal
-                sx={{ zIndex: 1200 }}
-                modifiers={[
-                  {
-                    name: 'offset',
-                    options: {
-                      offset: [-20, 20]
-                    }
-                  }
-                ]}
-              >
-                <ClickAwayListener onClickAway={handleCloseEmoji}>
-                  <MainCard
-                    elevation={8}
-                    content={false}
-                    sx={{
-                      '& .EmojiPickerReact': {
-                        backgroundColor: 'background.default',
-                        ...theme.applyStyles('dark', {
-                          borderColor: withAlpha(theme.vars.palette.grey[500], 0.2),
-                          'div:last-child': {
-                            borderColor: withAlpha(theme.vars.palette.grey[500], 0.2)
-                          }
-                        })
-                      },
-                      '& .EmojiPickerReact .epr-emoji-category-label': {
-                        backgroundColor: 'background.paper'
-                      },
-                      '& .epr-search-container input': {
-                        backgroundColor: 'grey.50',
-                        ...theme.applyStyles('dark', {
-                          backgroundColor: 'background.paper',
-                          borderColor: withAlpha(theme.vars.palette.grey[500], 0.2)
-                        }),
-                        '&:focus': {
-                          borderColor: 'primary.main',
-                          ...theme.applyStyles('dark', { borderColor: 'common.white' })
-                        }
-                      }
-                    }}
-                  >
-                    <EmojiPicker onEmojiClick={onEmojiClick} defaultSkinTone={SkinTones.DARK} lazyLoadEmojis={true} />
-                  </MainCard>
-                </ClickAwayListener>
-              </Popper> */}
-            </MainCard>
-          </Grid>
-
-          {/* UserDeatils 패널 (우측 상세정보) */}
-          <Grid sx={{ overflow: 'hidden', display: emailDetails ? 'flex' : 'none' }} size={{ xs: 12, md: 4, xl: 3 }}>
-            <Collapse orientation="horizontal" in={emailDetails && !downMD}>
-              <Box sx={{ display: { xs: 'block', sm: 'none', textAlign: 'right' } }}>
-                <IconButton onClick={handleUserChange} sx={{ mb: -5 }} size="large">
-                  <HighlightOffTwoToneIcon />
-                </IconButton>
-              </Box>
-              {isChatLoading ? (
-                <Stack sx={{ height: 1, justifyContent: 'center', alignItems: 'center' }}>
-                  <CircularProgress color="secondary" />
-                </Stack>
-              ) : (
-                <UserDetails user={user} />
-              )}
-            </Collapse>
-          </Grid>
-          {/* 패널 */}
-          <Dialog onClose={handleUserChange} open={downMD && emailDetails} scroll="body" slotProps={{ paper: { sx: { p: 2 } } }}>
-            {isChatLoading ? (
-              <Stack sx={{ height: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <CircularProgress color="secondary" />
-              </Stack>
-            ) : (
-              <UserDetails user={user} />
-            )}
-          </Dialog>
-        </Grid>
-      </Main>
-    </Box>
+        selectedUser={user}
+        isHistoryLoading={isChatLoading}
+        chatHistoryData={data}
+        onSendMessage={handleOnSend}
+        onCloseChat={goBackToUserList} // '뒤로가기' 용도
+      />
+      <CreateChatRoomModal
+        open={openCreateModal}
+        onClose={handleCloseCreateModal}
+      />
+    </>
   );
 }
