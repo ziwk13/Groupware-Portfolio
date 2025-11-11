@@ -44,7 +44,6 @@ function toDate(v) {
 export default function AddEventForm({ event, range, handleDelete, handleCreate, handleUpdate, onCancel, employeeId, setStatusMessage }) {
   const isCreating = !event;
 
-  // "모달을 연 순간의 now"를 고정 (enableReinitialize와 함께 안정화)
   const openNowRef = useRef(new Date());
 
   const [employeeOptions, setEmployeeOptions] = useState([]);
@@ -97,7 +96,6 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
     { code: 'SC05', value1: 'ETC', value2: '기타 일정' }
   ];
 
-  // initialValues를 안정화 (이 시점의 now를 고정 사용)
   const initialValues = useMemo(() => {
     const baseNow = openNowRef.current;
     const start = toDate(event?.startTime) || toDate(range?.start) || baseNow;
@@ -141,7 +139,6 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
 
         let scheduleId;
         if (event) {
-          // **수정 모드 (Edit)**
           scheduleId = event.scheduleId || event.id;
           if (!isHost) {
             setSnackbar({ open: true, message: '이 일정은 작성자만 수정할 수 있습니다.', severity: 'warning' });
@@ -150,9 +147,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
             return;
           }
           await handleUpdate(scheduleId, data);
-          // Edit에서는 모달 닫기를 부모가 처리
         } else {
-          // **생성 모드 (Add)**
           const created = await handleCreate(data);
           scheduleId = created?.scheduleId;
           if (scheduleId) {
@@ -160,7 +155,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
             setStatusMessage?.('일정이 생성되었습니다.');
           }
           resetForm();
-          onCancel(); // 생성 후 닫기
+          onCancel();
         }
 
         if (scheduleId && values.selectedParticipants?.length > 0) {
@@ -177,7 +172,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
 
   const { values, errors, touched, handleSubmit, isSubmitting, getFieldProps, setFieldValue } = formik;
 
-  // 카테고리 초기 동기화 (event 변경 시 1회만)
+  // 카테고리 초기 동기화
   const catSyncedRef = useRef(false);
   useEffect(() => {
     catSyncedRef.current = false;
@@ -295,6 +290,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                   value={categoryOptions.find((opt) => opt.value1 === values.categoryCode) || null}
                   onChange={(e, val) => setFieldValue('categoryCode', val?.value1 || '')}
                   isOptionEqualToValue={(option, value) => option.value1 === value.value1}
+                  disabled={!isCreating && !isHost}
                   renderInput={(params) => (
                     <TextField
                       {...params}

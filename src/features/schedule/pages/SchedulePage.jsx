@@ -174,7 +174,6 @@ export default function Calendar() {
         ...maybeData,
         startTime: fmtLocal(maybeData.startTime),
         endTime: fmtLocal(maybeData.endTime || maybeData.startTime)
-        // 폼 저장은 원래대로 categoryCode 포함
       };
     }
 
@@ -241,7 +240,6 @@ export default function Calendar() {
               extendedProps: {
                 content: e.content,
                 employeeId: e.employeeId,
-                // ✅ 드래그/리사이즈 안전용: 기존 categoryCode를 함께 싣는다
                 categoryCode: e.categoryCode
               }
             }))}
