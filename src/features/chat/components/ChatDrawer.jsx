@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // material-ui
 import Box from '@mui/material/Box';
@@ -22,7 +22,8 @@ import ChatHeader from './ChatHeader';
 import ChatRoom from './ChatRoom';
 import UserAvatar from './UserAvatar';
 import UserList from './UserList';
-import { leaveRoom } from '../api/Chat';
+import { leaveRoom, getRooms } from '../api/Chat';
+import { useStomp } from 'contexts/StompProvider';
 
 
 // assets
@@ -30,6 +31,15 @@ import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack } from '@mui/material';
 import { IconPlus } from '@tabler/icons-react';
 import useConfig from 'hooks/useConfig';
+
+const mapDtoToUser = (room) => ({
+  id: room.chatRoomId,
+  name: room.name,
+  avatar: room.profile,
+  lastMessage: room.lastMessage,
+  unReadChatCount: room.unreadCount,
+  online_status: 'available'
+});
 
 export default function ChatDrawer({
   handleDrawerOpen,
@@ -91,7 +101,50 @@ export default function ChatDrawer({
       console.error('채팅방 나가기 실패: ', error);
       handleLeaveModalClose();
     }
-  }
+  };
+
+  const [chatRooms, setChatRooms] = useState([]);
+  const { client, isConnected } = useStomp();
+
+  useEffect(() => {
+    if(!selectedUser) {
+      const fetchChatRooms = async () => {
+        try {
+          const roomsDto = await getRooms();
+          const mappedData = roomsDto.map(mapDtoToUser);
+          setChatRooms(mappedData);
+        } catch (error) {
+          console.error("채팅방 목록 초기 로드 실패", error);
+        }
+      };
+      fetchChatRooms();
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if(client && isConnected) {
+      const listUpdateQueue = '/user/queue/chat-list-update';
+
+      const subscription = client.subscribe(listUpdateQueue, (message) => {
+        try {
+          const updatedRoomDto = JSON.parse(message.body);
+          const mappedRoom = mapDtoToUser(updatedRoomDto);
+
+          setChatRooms(currentRooms => {
+            const otherRooms = currentRooms.filter(room => room.id !== mappedRoom.id);
+            return [mappedRoom, ...otherRooms];
+          });
+        } catch (error) {
+          console.error('채팅방 목록 업데이트 파싱 실패', error);
+        }
+      });
+      return () => {
+        if(subscription) {
+          subscription.unsubscribe();
+        }
+      };
+    }
+  }, [client, isConnected]);
 
   return (
     <Drawer
@@ -182,7 +235,10 @@ export default function ChatDrawer({
                 }}
               >
                 <Box sx={{ p: 3, pt: 0 }}>
-                  <UserList setUser={openChatWithUser} />
+                  <UserList 
+                  users={chatRooms}
+                  setUser={openChatWithUser}
+                  />
                 </Box>
               </SimpleBar>
             </>
