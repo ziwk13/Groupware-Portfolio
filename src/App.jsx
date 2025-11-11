@@ -15,6 +15,7 @@ import ThemeCustomization from 'themes';
 // auth provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 import { ChatProvider } from 'contexts/ChatContext';
+import { StompProvider } from './contexts/StompProvider';
 // import { FirebaseProvider as AuthProvider } from 'contexts/FirebaseContext';
 // import { Auth0Provider as AuthProvider } from 'contexts/Auth0Context';
 // import { AWSCognitoProvider as AuthProvider } from 'contexts/AWSCognitoContext';
@@ -27,20 +28,22 @@ export default function App() {
     <>
       <ThemeCustomization>
         <RTLLayout>
-        <Locales>
-          <NavigationScroll>
-            <AuthProvider>
-              <ChatProvider>
-              <>
-                <Notistack>
-                  <RouterProvider router={router} />
-                  <Snackbar />
-                </Notistack>
-              </>
-              </ChatProvider>
-            </AuthProvider>
-          </NavigationScroll>
-        </Locales>
+          <Locales>
+            <NavigationScroll>
+              <AuthProvider>
+                <StompProvider>
+                  <ChatProvider>
+                    <>
+                      <Notistack>
+                        <RouterProvider router={router} />
+                        <Snackbar />
+                      </Notistack>
+                    </>
+                  </ChatProvider>
+                </StompProvider>
+              </AuthProvider>
+            </NavigationScroll>
+          </Locales>
         </RTLLayout>
       </ThemeCustomization>
     </>
