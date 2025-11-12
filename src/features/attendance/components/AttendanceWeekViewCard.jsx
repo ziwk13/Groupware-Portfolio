@@ -11,7 +11,7 @@ import useAuth from 'hooks/useAuth';
 
 export default function AttendanceWeekViewCard({ employeeId: propEmployeeId }) {
   const dispatch = useDispatch();
-  const { selectedWeek, loading } = useSelector((state) => state.attendance);
+  const { selectedWeek, loading, today } = useSelector((state) => state.attendance);
   const { isLoggedIn, isRefreshing, isInitialized, user } = useAuth();
 
   const employeeId = useMemo(() => propEmployeeId || user?.employeeId, [propEmployeeId, user?.employeeId]);
@@ -27,7 +27,7 @@ export default function AttendanceWeekViewCard({ employeeId: propEmployeeId }) {
     if (isInitialized && isLoggedIn && !isRefreshing && employeeId && weekStart) {
       dispatch(fetchSelectedWeekAttendance({ employeeId, weekStart }));
     }
-  }, [weekStart]);
+  }, [dispatch, employeeId, weekStart, isInitialized, isLoggedIn, isRefreshing, today]);
 
   const records = useMemo(() => (selectedWeek?.records ? selectedWeek.records : []), [selectedWeek]);
 
