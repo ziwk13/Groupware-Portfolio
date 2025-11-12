@@ -16,16 +16,11 @@ import {
 import { IconPlus } from '@tabler/icons-react';
 
 // project imports
-import OrganizationModal from 'features/organization/components/OrganizationModal';
 import { useChat } from 'contexts/ChatContext';
 import { createRoom } from '../api/Chat';
-// ... (API imports)
-
-// ------------------------------------
 
 const mapOrgUserToChatUser = (orgUser) => {
   // TODO: 'empId', 'empName' 등 실제 키 값으로 변경 필요
-  console.log('넘어온 유저', orgUser);
   return {
     id: orgUser.employeeId,
     name: orgUser.name,
@@ -33,16 +28,32 @@ const mapOrgUserToChatUser = (orgUser) => {
     position: orgUser.position
   };
 };
-export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
+export default function CreateChatRoomModal({ open, onClose, onSuccess, preSelectedUsers = [] }) {
   // 모달 내부 상태
   const [roomName, setRoomName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [roomNameError, setRoomNameError] = useState('');
-  const [orgModalOpen, setOrgModalOpen] = useState(false);
   const [orgList, setOrgList] = useState([
     { name: '초대자', empList: [] } // 채팅 모달은 '초대자' 목록 하나만 필요
   ]);
   const { openChatWithUser } = useChat();
+
+  useEffect(() => {
+    if (open) {
+      if (preSelectedUsers && preSelectedUsers.length > 0) {
+        // preSelectedUsers(조직도 데이터)를 orgList 및 selectedUsers(채팅 모달 상태)로 변환
+        const newOrgList = [
+          { name: '초대자', empList: preSelectedUsers }
+        ];
+        setOrgList(newOrgList);
+      } else {
+        setRoomName('');
+        setSelectedUsers([]);
+        setRoomNameError('');
+        setOrgList([{ name: '초대자', empList: [] }]);
+      }
+    }
+  }, [open, preSelectedUsers]);
 
   useEffect(() => {
     const inviteeCategory = orgList.find((item) => item.name === '초대자');
@@ -86,7 +97,6 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
     setRoomName('');
     setSelectedUsers([]);
     setRoomNameError('');
-    setOrgModalOpen(false);
     setOrgList([{ name: '초대자', empList: [] }]);
   };
 
@@ -100,12 +110,14 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
 
     let finalRoomName = roomName.trim();
 
-    if (userIds.length === 1) {
-      const otherUser = selectedUsers[0];
-      finalRoomName = `${otherUser.name} ${otherUser.position}`;
-    } else if (userIds.length > 1 && finalRoomName === '') {
+    if (userIds.length > 1 && finalRoomName === '') {
       setRoomNameError('그룹 채팅방 이름을 입력해주세요.');
       return;
+    }
+
+    if(userIds.length === 1) {
+      const otherUser = selectedUsers[0];
+      finalRoomName = `${otherUser.name} ${otherUser.position}`;
     }
 
     try {
@@ -119,18 +131,18 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
       const newRoom = await createRoom(roomData);
 
       const mappedNewRoom = {
-          id: newRoom.chatRoomId, // (예시) 키 이름이 다를 경우
-          name: newRoom.name,
-          avatar: newRoom.profile,
-          lastMessage: '', // 새 방이므로
-          unReadChatCount: 0,
-          online_status: 'available' // (임시)
+        id: newRoom.chatRoomId, // (예시) 키 이름이 다를 경우
+        name: newRoom.name,
+        avatar: newRoom.profile,
+        lastMessage: '', // 새 방이므로
+        unReadChatCount: 0,
+        online_status: 'available' // (임시)
       };
 
       // 생성된 채팅방으로 바로 이동
       openChatWithUser(mappedNewRoom);
-      
-      if(onSuccess) {
+
+      if (onSuccess) {
         onSuccess();
       }
       handleClose(); // 모달 닫기
@@ -160,17 +172,16 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
               helperText={roomNameError}
             />
           )}
+          {(!preSelectedUsers || preSelectedUsers.length === 0) && (
           <Button
             variant="outlined"
             fullWidth
             startIcon={<IconPlus />}
-            onClick={() => setOrgModalOpen(true)}
             sx={{ mb: 2 }}
           >
             초대 사원 선택
           </Button>
-
-          {/* 사용자 검색 입력란 */}
+          )}
 
           {/* 선택된 사용자 칩 표시 */}
           {selectedUsers.length > 0 && (
@@ -185,7 +196,7 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
               ))}
             </Box>
           )}
-          {selectedUsers.length === 0 && (
+          {selectedUsers.length === 0 && (!preSelectedUsers || preSelectedUsers.length === 0) && (
             <Typography variant="body2" color="textSecondary" align="center">
               '초대 사원 선택' 버튼을 눌러
               <br />
@@ -204,12 +215,6 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
           </Button>
         </DialogActions>
       </Dialog>
-      <OrganizationModal
-        open={orgModalOpen}
-        onClose={() => setOrgModalOpen(false)}
-        list={orgList}
-        setList={setOrgList}
-      />
     </>
   );
 }
@@ -217,5 +222,6 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess }) {
 CreateChatRoomModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onSuccess: PropTypes.func
+  onSuccess: PropTypes.func,
+  preSelectedUsers: PropTypes.array
 };
