@@ -17,6 +17,7 @@ export default function EmployeeList({
 }) {
   const [employees, setEmployees] = useState([]);
 
+  // 부서를 클릭할 때마다 그 부서의 직원 목록을 새로 불러옴
   useEffect(() => {
     if (!selectedDept) return;
 
@@ -122,7 +123,7 @@ export default function EmployeeList({
                     // 드래그 끝나면 프리뷰 제거
                     setTimeout(() => document.body.removeChild(dragPreview), 0);
                   }}
-                  selected={selectedEmployeeId === emp.employeeId}
+                  selected={selectedEmployeeId === emp.employeeId} // 선택된 직원이면 시각적으로 강조
                   onClick={() => onSelectEmployee(emp)}
                   sx={{ px: 2, py: 1.25, cursor: 'grab' }}
                 >

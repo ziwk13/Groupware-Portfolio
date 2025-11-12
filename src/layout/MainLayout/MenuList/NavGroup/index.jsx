@@ -27,6 +27,7 @@ import { MenuOrientation } from 'config';
 import useConfig from 'hooks/useConfig';
 import Transitions from 'ui-component/extended/Transitions';
 import { useGetMenuMaster } from 'api/menu';
+import useAuth from 'hooks/useAuth';
 
 // assets
 import { IconChevronDown, IconChevronRight, IconMinusVertical } from '@tabler/icons-react';
@@ -35,6 +36,7 @@ import { IconChevronDown, IconChevronRight, IconMinusVertical } from '@tabler/ic
 
 export default function NavGroup({ item, lastItem, remItems, lastItemId, selectedID, setSelectedID }) {
   const theme = useTheme();
+  const { user } = useAuth();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
   const { pathname } = useLocation();
 
@@ -112,6 +114,11 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, selecte
 
   // menu list collapse & items
   const items = currentItem.children?.map((menu) => {
+    // 관리자 메뉴는 권한 체크
+    if (menu.admin && (!user || user.role !== 'ROLE_ADMIN')) {
+      return null;
+    }
+
     switch (menu?.type) {
       case 'collapse':
         return <NavCollapse key={menu.id} menu={menu} level={1} parentId={currentItem.id} />;
