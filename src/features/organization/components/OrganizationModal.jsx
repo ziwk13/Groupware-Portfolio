@@ -1,4 +1,6 @@
-// OrganizationModal.jsx
+// ==============================|| ORGANIZATION MODAL ||============================== //
+// 조직도 모달: 부서 트리 + 직원 목록 + 수신/참조/숨은참조자 선택 UI
+
 import {
   Box,
   Button,
@@ -12,7 +14,8 @@ import {
   IconButton,
   Avatar,
   Stack,
-  ListItemButton
+  ListItemButton,
+  Alert
 } from '@mui/material';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -27,6 +30,7 @@ import DefaultAvatar from 'assets/images/profile/default_profile.png';
 import { getImageUrl } from 'utils/getImageUrl';
 
 export default function OrganizationModal({ open, onClose, list = [], setList }) {
+  // 상태 관리
   const [selectedDept, setSelectedDept] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -34,47 +38,67 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
   const [tempList, setTempList] = useState([]);
   const scrollRefs = useRef([]);
 
+  // 알림창 상태
+  const [alertInfo, setAlertInfo] = useState({
+    open: false,
+    message: '',
+    severity: 'warning'
+  });
+
+  // 모달 열릴 때 리스트 복제
   useEffect(() => {
     if (open) setTempList(JSON.parse(JSON.stringify(list)));
   }, [open, list]);
 
+  // 직원 선택
   const handleSelectEmployee = (employee) => setSelectedEmployee(employee);
 
-  // 중복 방지 로직 추가 (드래그 및 클릭 둘 다 작동)
+  // 알림창 표시
+  const showAlert = (message, severity = 'warning') => {
+    setAlertInfo({ open: true, message, severity });
+  };
+
+  // 직원 추가
   const handleAddEmployee = (type, employeeData = selectedEmployee, idxParam) => {
-    if (!employeeData) return;
+    if (!employeeData) {
+      showAlert('직원을 선택해주세요.', 'warning');
+      return;
+    }
 
     const updated = [...tempList];
     const idx = updated.findIndex((item) => item.name === type);
     if (idx === -1) return;
 
-    // 모든 박스에 대해 중복 확인
+    // 다른 구분에 이미 포함된 경우
     const alreadyExists = updated.some((box) =>
       box.empList.some((emp) => emp.employeeId === employeeData.employeeId)
     );
-
     if (alreadyExists) {
-      console.warn('이미 다른 구분(결재자/참조자 등)에 포함된 직원입니다.');
-      return; // alert() 사용 안 함 → 드래그 이벤트 유지
+      showAlert(`${employeeData.name} 님은 이미 다른 구분에 추가되어 있습니다.`, 'warning');
+      return;
     }
 
-    // 현재 박스 내 중복 방지
+    // 같은 구분 내 중복 방지
     const exists = updated[idx].empList.some(
       (emp) => emp.employeeId === employeeData.employeeId
     );
-    if (!exists) {
-      updated[idx].empList.push(employeeData);
-      setTempList(updated);
-
-      // 추가 후 해당 박스로 스크롤 이동
-          const scrollIndex = idxParam ?? idx;
-      setTimeout(() => {
-        const ref = scrollRefs.current[scrollIndex];
-        if (ref) ref.scrollTo({ top: ref.scrollHeight, behavior: 'smooth' });
-      }, 50);
+    if (exists) {
+      showAlert(`${employeeData.name} 님은 이미 ${type}에 포함되어 있습니다.`, 'warning');
+      return;
     }
+
+    // 직원 추가 및 스크롤 이동
+    updated[idx].empList.push(employeeData);
+    setTempList(updated);
+
+    const scrollIndex = idxParam ?? idx;
+    setTimeout(() => {
+      const ref = scrollRefs.current[scrollIndex];
+      if (ref) ref.scrollTo({ top: ref.scrollHeight, behavior: 'smooth' });
+    }, 50);
   };
 
+  // 직원 전체삭제
   const handleClearEmployees = (type) => {
     const updated = [...tempList];
     const idx = updated.findIndex((item) => item.name === type);
@@ -83,6 +107,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
     setTempList(updated);
   };
 
+  // 직원 개별삭제
   const handleRemoveEmployee = (type, employeeId) => {
     const updated = [...tempList];
     const idx = updated.findIndex((item) => item.name === type);
@@ -93,19 +118,21 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
     setTempList(updated);
   };
 
+  // 적용 버튼
   const handleApply = () => {
     setList(tempList);
     onClose();
   };
 
-
+  // 박스 높이 계산
   const getBoxHeight = () => {
-    if (tempList.length === 1) return '100%';
+    if (tempList.length === 1) return '75%';
     if (tempList.length === 2) return '49%';
     if (tempList.length === 3) return '33.33%';
     return '100%';
   };
 
+  // 모달 UI
   return (
     <Dialog
       open={open}
@@ -132,14 +159,72 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
         }
       }}
     >
-      <DialogTitle sx={{ textAlign: 'center', fontWeight: 700, fontSize: '1.4rem' }}>조직도</DialogTitle>
+      {/* 제목 + Alert */}
+      <DialogTitle
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontWeight: 700,
+          fontSize: '1.4rem'
+        }}
+      >
+        조직도
+        {alertInfo.open && (
+          <Alert
+            severity={alertInfo.severity}
+            onClose={() => setAlertInfo({ ...alertInfo, open: false })}
+            sx={{
+              alignItems: 'center',
+              ml: 2,
+              flexShrink: 0,
+              py: 0,
+              px: 2,
+              height: '35px',
+              display: 'flex',
+            }}
+          >
+            {alertInfo.message}
+          </Alert>
+        )}
+      </DialogTitle>
+
       <Divider sx={{ mb: 2 }} />
 
-      <DialogContent sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <Grid container spacing={gridSpacing} justifyContent="center" wrap="nowrap" sx={{ flex: 1, alignItems: 'stretch', overflow: 'hidden', minHeight: '400px' }}>
+      {/* 본문 */}
+      <DialogContent
+        sx={{
+          flex: 1,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Grid
+          container
+          spacing={gridSpacing}
+          justifyContent="center"
+          wrap="nowrap"
+          sx={{
+            flex: 1,
+            alignItems: 'stretch',
+            overflow: 'hidden',
+            minHeight: '400px'
+          }}
+        >
           {/* 부서 */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <MainCard title="부서" content={false} sx={{ height: '100%', display: 'flex', flexDirection: 'column', border: '1px solid', '& .MuiCardHeader-root': { padding: 1.5 } }}>
+            <MainCard
+              title="부서"
+              content={false}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                border: '1px solid',
+                '& .MuiCardHeader-root': { padding: 1.5 }
+              }}
+            >
               <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
                 <OrganizationTree setSelectedDept={setSelectedDept} />
               </Box>
@@ -149,45 +234,92 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
           {/* 직원 목록 */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', height: '100%' }}>
-              <EmployeeList selectedDept={selectedDept?.commonCodeId} onSelectEmployee={handleSelectEmployee} />
+              <EmployeeList
+                selectedDept={selectedDept?.commonCodeId}
+                onSelectEmployee={handleSelectEmployee}
+              />
             </Box>
           </Grid>
 
-          {/* 오른쪽 박스 영역 */}
+          {/* 오른쪽 선택 박스 */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <Box sx={{ height: '100%', flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: tempList.length > 0 ? 1 : 0 }}>
+            <Box
+              sx={{
+                height: '100%',
+                flex: 1,
+                minHeight: 0,
+                overflow: 'hidden',
+                display: 'block',
+                flexDirection: 'column',
+                justifyContent: 'flex-start',
+                gap: tempList.length > 0 ? 1 : 0
+              }}
+            >
+              {/* 직원 없을 때 */}
               {tempList.length === 0 ? (
                 <EmployeeDetail employee={selectedEmployee} />
               ) : (
+                // 직원 구분별 박스
                 tempList.map((item, idx) => (
-                  <Box key={idx} sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 0, height: getBoxHeight() }}>
-                    <IconButton color="primary" onClick={() => handleAddEmployee(item.name)} sx={{ flexShrink: 0, left: '-9px', top: '8px' }}>
+                  <Box
+                    key={idx}
+                    sx={{
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0,
+                      height: getBoxHeight()
+                    }}
+                  >
+                    {/* 직원 추가 버튼 */}
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleAddEmployee(item.name)}
+                      sx={{ flexShrink: 0, left: '-9px', top: '8px' }}
+                    >
                       <ForwardIcon />
                     </IconButton>
 
+                    {/* 직원 박스 */}
                     <MainCard
                       title={
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1.5 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: '0.9rem', pl: 1 }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            pr: 1.5
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: 500, fontSize: '0.9rem', pl: 1 }}
+                          >
                             {item.name}
                           </Typography>
-                          <IconButton color="error" size="small" onClick={() => {
-                            if (item.empList.length === 0) return;
-                            setTargetType(item.name);
-                            setOpenConfirm(true);
-                          }} sx={{ width: 30, height: 30, mr: 0.9 }}>
+                          {/* 전체 삭제 버튼 */}
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => {
+                              if (item.empList.length === 0) return;
+                              setTargetType(item.name);
+                              setOpenConfirm(true);
+                            }}
+                            sx={{ width: 30, height: 30, mr: 0.9 }}
+                          >
                             <DeleteForeverIcon fontSize="small" />
                           </IconButton>
                         </Box>
                       }
                       content={false}
-                      onDragOver={(e) => e.preventDefault()} 
+                      onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => {
                         e.preventDefault();
                         const droppedData = e.dataTransfer.getData('employee');
                         if (!droppedData) return;
                         const draggedEmp = JSON.parse(droppedData);
-                        handleAddEmployee(item.name, draggedEmp); // 드롭 시 추가
+                        handleAddEmployee(item.name, draggedEmp);
                       }}
                       sx={{
                         flex: 1,
@@ -200,6 +332,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
                         justifyContent: 'flex-start'
                       }}
                     >
+                      {/* 직원 리스트 */}
                       <Box
                         ref={(el) => (scrollRefs.current[idx] = el)}
                         sx={{
@@ -210,29 +343,76 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
                           flexDirection: 'column',
                           justifyContent: 'flex-start',
                           alignItems: 'stretch',
-                          p: 0,
-                          '&::-webkit-scrollbar': { width: '6px' },
-                          '&::-webkit-scrollbar-thumb': { borderRadius: '3px' }
+                          p: 0
                         }}
                       >
+                        {/* 직원 있음 */}
                         {item.empList.length > 0 ? (
                           item.empList.map((emp, i) => (
-                            <ListItemButton key={i} sx={{ px: 1.2, py: 0.8, borderRadius: 0, height: '58px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: '0 0 auto' }}>
+                            <ListItemButton
+                              key={i}
+                              sx={{
+                                px: 1.2,
+                                py: 0.8,
+                                height: '58px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                flex: 'unset'
+                              }}
+                            >
+                              {/* 프로필 + 이름 */}
                               <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                                <Avatar alt={emp.name} src={emp.profileImg ? getImageUrl(emp.profileImg) : DefaultAvatar} sx={{ width: 36, height: 36 }} />
+                                <Avatar
+                                  alt={emp.name}
+                                  src={
+                                    emp.profileImg
+                                      ? getImageUrl(emp.profileImg)
+                                      : DefaultAvatar
+                                  }
+                                  sx={{ width: 36, height: 36 }}
+                                />
                                 <Stack sx={{ lineHeight: 1 }}>
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: '0.9rem' }}>{`${emp.name} ${emp.position}`}</Typography>
-                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>{emp.departmentName}</Typography>
+                                  <Typography
+                                    variant="subtitle1"
+                                    sx={{ fontWeight: 500, fontSize: '0.9rem' }}
+                                  >{`${emp.name} ${emp.position}`}</Typography>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{ fontSize: '0.75rem' }}
+                                  >
+                                    {emp.departmentName}
+                                  </Typography>
                                 </Stack>
                               </Stack>
-                              <IconButton sx={{ position: 'relative', right: '2px' }} size="small" color="error" onClick={() => handleRemoveEmployee(item.name, emp.employeeId)}>
+                              {/* 직원 개별 삭제 */}
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() =>
+                                  handleRemoveEmployee(item.name, emp.employeeId)
+                                }
+                              >
                                 <PersonRemoveIcon fontSize="small" />
                               </IconButton>
                             </ListItemButton>
                           ))
                         ) : (
-                          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Typography variant="body2" color="text.secondary" textAlign="center">
+                          // 직원 없음
+                          <Box
+                            sx={{
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              textAlign="center"
+                            >
                               직원이 없습니다.
                             </Typography>
                           </Box>
@@ -248,23 +428,52 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
       </DialogContent>
 
       {/* 삭제 확인 다이얼로그 */}
-      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)} sx={{ '& .MuiDialog-paper': { borderRadius: 3, backgroundColor: 'primary', minWidth: 360 } }}>
-        <DialogTitle textAlign="center" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>{`${targetType || ''} 전체 삭제`}</DialogTitle>
+      <Dialog
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: 3,
+            backgroundColor: 'primary',
+            minWidth: 360
+          }
+        }}
+      >
+        <DialogTitle
+          textAlign="center"
+          sx={{ fontWeight: 700, fontSize: '1.1rem' }}
+        >{`${targetType || ''} 전체 삭제`}</DialogTitle>
         <DialogContent>
-          <Typography sx={{ textAlign: 'center', fontSize: '0.9rem' }}>모든 {targetType || '직원'}을 삭제하시겠습니까?</Typography>
+          <Typography sx={{ textAlign: 'center', fontSize: '0.9rem' }}>
+            모든 {targetType || '직원'}을 삭제하시겠습니까?
+          </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-          <Button onClick={() => { handleClearEmployees(targetType); setOpenConfirm(false); }} color="error">삭제</Button>
-          <Button onClick={() => setOpenConfirm(false)} sx={{ color: 'primary' }}>취소</Button>
+          <Button
+            onClick={() => {
+              handleClearEmployees(targetType);
+              setOpenConfirm(false);
+            }}
+            color="error"
+          >
+            삭제
+          </Button>
+          <Button onClick={() => setOpenConfirm(false)} sx={{ color: 'primary' }}>
+            취소
+          </Button>
         </DialogActions>
       </Dialog>
 
+      {/* 하단 버튼 */}
       <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-        {
-          list && list.length >= 1 && 
-          <Button variant="contained" color="primary" onClick={handleApply}>적용</Button>
-        }  
-        <Button onClick={onClose} variant="outlined" color="inherit">닫기</Button>
+        {list && list.length >= 1 && (
+          <Button variant="contained" color="primary" onClick={handleApply}>
+            적용
+          </Button>
+        )}
+        <Button onClick={onClose} variant="outlined" color="inherit">
+          닫기
+        </Button>
       </DialogActions>
     </Dialog>
   );
