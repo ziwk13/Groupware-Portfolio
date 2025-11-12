@@ -27,7 +27,6 @@ import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { useChat } from 'contexts/ChatContext';
 import ChatPage from '../../features/chat/pages/ChatPage';
 
-import { appDrawerWidth as drawerWidth } from 'store/constant'; 
 import { Badge } from '@mui/material';
 
 // ==============================|| MAIN LAYOUT ||============================== //
@@ -42,7 +41,7 @@ export default function MainLayout() {
   const { menuMaster, menuMasterLoading } = useGetMenuMaster();
   const drawerOpen = menuMaster?.isDashboardDrawerOpened;
 
-  const { isChatOpen, closeChat, toggleChat, selectedUser, totalUnreadCount } = useChat();
+  const { isChatOpen, closeChat, toggleChat, totalUnreadCount } = useChat();
 
   useEffect(() => {
     handlerDrawerOpen(!miniDrawer);
@@ -109,18 +108,11 @@ export default function MainLayout() {
         onClose={closeChat}
         ModalProps={{
           disableEnforceFocus: true, // Drawer가 포커스를 강제로 잡는 것을 막아, 뒷 페이지 클릭을 허용합니다.
-          sx: {
-            // 2. Backdrop을 투명하게 만들어 시각적으로 숨김
-            '& .MuiBackdrop-root': {
-              backgroundColor: 'transparent'
-            }
-          }
         }}
-        
         sx={{
           '& .MuiDrawer-paper': {
             width: '100%',
-            maxWidth: selectedUser ? 900 : drawerWidth, 
+            maxWidth: 400,
             height: '100vh',
             overflow: 'hidden', 
             border: 'none',
