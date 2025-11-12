@@ -26,7 +26,6 @@ import { IconArrowLeft } from '@tabler/icons-react';
 export default function ChatHeader({ 
   user, 
   onClose, 
-  onUserDetailsToggle, 
   isUserDetailsOpen,
   onLeaveRoom
 }) {
