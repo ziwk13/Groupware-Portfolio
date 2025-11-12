@@ -28,6 +28,7 @@ import { useChat } from 'contexts/ChatContext';
 import ChatPage from '../../features/chat/pages/ChatPage';
 
 import { appDrawerWidth as drawerWidth } from 'store/constant'; 
+import { Badge } from '@mui/material';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -41,7 +42,7 @@ export default function MainLayout() {
   const { menuMaster, menuMasterLoading } = useGetMenuMaster();
   const drawerOpen = menuMaster?.isDashboardDrawerOpened;
 
-  const { isChatOpen, closeChat, toggleChat, selectedUser } = useChat();
+  const { isChatOpen, closeChat, toggleChat, selectedUser, totalUnreadCount } = useChat();
 
   useEffect(() => {
     handlerDrawerOpen(!miniDrawer);
@@ -83,19 +84,25 @@ export default function MainLayout() {
           <Footer />
         </Container>
       </MainContentStyled>
-      <Fab
-        color="primary" // 색상 (primary, secondary 등)
-        aria-label="open chat"
-        onClick={toggleChat} // 클릭 시 채팅 토글
+      <Badge
+        badgeContent={totalUnreadCount}
+        color="error"
+        max={99} // 99개 초과 시 '99+'로 표시
         sx={{
           position: 'fixed', // 화면에 고정
           bottom: theme.spacing(4), // 하단에서 32px (4 * 8px)
           right: theme.spacing(4), // 우측에서 32px (4 * 8px)
           zIndex: theme.zIndex.speedDial // 다른 요소들 위에 보이도록 z-index 설정
         }}
+        >
+      <Fab
+        color="primary" // 색상 (primary, secondary 등)
+        aria-label="open chat"
+        onClick={toggleChat} // 클릭 시 채팅 토글
       >
         <ChatBubbleOutlineIcon />
       </Fab>
+      </Badge>
       <Drawer
         anchor="right"
         open={isChatOpen}
