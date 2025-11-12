@@ -1,16 +1,16 @@
 // OrganizationTree
 // 조직도 - 좌측 부서 컴포넌트
-// - 조직도 모달 / 페이지의 왼쪽 영역에 표시되는 부서 구조
+// - 조직도 모달 왼쪽 영역에 표시되는 부서 구조
 // - 공통코드 (CommonCode)에서 부서 목록을 불러와 트리 형태로 렌더링
 // - 선택된 부서 코드를 부모 컴포넌트로 전달 (setSelectedDept)
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"; // useState - 부서목록 저장용 state
 import { organizationAPI } from "../api/organizationApi";
 
 // MUI TreeView
 import Collapse from '@mui/material/Collapse';
 import { styled } from '@mui/material/styles';
-import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
+import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";  // MUI에서 제공하는 트리 컴포넌트 (폴더 구조처럼 보이게)
 import { TreeItem, treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import FolderSharedIcon from '@mui/icons-material/FolderShared';
 
@@ -44,10 +44,10 @@ function CloseSquare(props) {
 }
 
 // TreeItem의 기본 스타일 
-const TransitionComponent = (props) => <Collapse {...props} />;
+const TransitionComponent = (props) => <Collapse {...props} />; // Collapse - 요소를 부드럽게 열고 닫는 애니메이션 컴포넌트
 const StyledTreeItem = styled((props) => (
   <TreeItem {...props} slots={{ groupTransition: TransitionComponent }} />
-))(({ theme }) => ({
+))(({ theme }) => ({  // theme - MUI전역 스타일 시스템.
   [`& .${treeItemClasses.iconContainer}`]: {
     '& .close': { opacity: 0.3 },
   },
@@ -70,7 +70,7 @@ export default function OrganizationTree({ setSelectedDept }) {
       .catch((err) => console.error("부서 가져오기 실패", err));
   }, []);
 
-  // 2. 부서 클릭 시 선택 이벤트 처리
+  // 2. 부서 클릭 시 선택 이벤트 처리 (트리에서 항목이 선택될 떄 실행.)
   const handleSelect = (event, itemIds) => {
     const selectedId = Array.isArray(itemIds) ? itemIds[0] : itemIds;
 
@@ -79,12 +79,13 @@ export default function OrganizationTree({ setSelectedDept }) {
       return;
     }
 
+    // 선택된 부서를 찾는 부분.
     const selectedDept = departments.find(
       (dept) => String(dept.commonCodeId) === selectedId
     );
 
     if (selectedDept) {
-      setSelectedDept(selectedDept);
+      setSelectedDept(selectedDept); // 부모컴포넌트(Modal)에서 전달된 props 함수
     } else {
       console.warn("선택된 ID에 해당하는 부서를 찾을 수 없음:", selectedId);
       setSelectedDept(null);
@@ -95,13 +96,13 @@ export default function OrganizationTree({ setSelectedDept }) {
   const renderTree = (parentCode) => {
     // 현재 parentCode를 부모로 갖는 자식 부서 필터링
     const children = departments.filter((d) => (d.value2 ?? null) === parentCode);
-    if (children.length === 0) return null;
+    if (children.length === 0) return null; // 재귀함수의 종료 조건
 
     return children.map((child) => (
       <StyledTreeItem
         key={child.commonCodeId}
         itemId={String(child.commonCodeId)}
-        label={child.value1}
+        label={child.value1} // 트리에 표시할 이름
       >
         {renderTree(child.code)}
       </StyledTreeItem>
