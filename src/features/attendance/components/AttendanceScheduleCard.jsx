@@ -1,10 +1,9 @@
 // ==============================|| AttendanceScheduleCard.jsx ||============================== //
-
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'store';
 import { getEvents } from 'features/schedule/slices/scheduleSlice';
 import MainCard from 'ui-component/cards/MainCard';
-import { Typography, Box, Divider, useTheme } from '@mui/material';
+import { Typography, Box, Divider } from '@mui/material';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import useAuth from 'hooks/useAuth';
@@ -32,16 +31,35 @@ export default function AttendanceScheduleCard() {
       const start = dayjs(event.startTime);
       return start.isAfter(startOfWeek.startOf('day')) && start.isBefore(endOfWeek.endOf('day'));
     });
-  }, [events]);
+  }, [events]); // 주차 바뀔 때 갱신하려면 [events, startOfWeek, endOfWeek]
+
+  // 카드 고정 높이
+  const CARD_HEIGHT = 300;
 
   return (
     <MainCard
       title="이번 주 일정"
       sx={{
-        height: '100%',
+        height: CARD_HEIGHT,
+        display: 'flex',
+        flexDirection: 'column',
         borderRadius: 2,
-        p: 1,
-        overflowY: 'auto'
+        minHeight: 0,
+        '& .MuiCardHeader-root': {
+          px: 1.5,
+          py: 1.7,
+          alignItems: 'center'
+        },
+        '& .MuiCardHeader-title': {
+          fontSize: '1.1rem',
+          fontWeight: 700
+        }
+      }}
+      contentSX={{
+        p: 2,
+        flex: 1,
+        overflowY: 'auto',
+        minHeight: 0
       }}
     >
       {loading ? (
@@ -58,11 +76,7 @@ export default function AttendanceScheduleCard() {
             <Typography
               variant="subtitle1"
               color="text.primary"
-              sx={{
-                mb: 1,
-                cursor: 'pointer',
-                transition: 'color 0.2s ease'
-              }}
+              sx={{ mb: 2, cursor: 'pointer', transition: 'color 0.2s ease' }}
               onClick={() => navigate(`/schedule?modal=edit&id=${e.scheduleId}`)}
             >
               {e.title}
