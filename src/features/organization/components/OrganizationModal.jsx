@@ -70,18 +70,14 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
     if (idx === -1) return;
 
     // 다른 구분에 이미 포함된 경우
-    const alreadyExists = updated.some((box) =>
-      box.empList.some((emp) => emp.employeeId === employeeData.employeeId)
-    );
+    const alreadyExists = updated.some((box) => box.empList.some((emp) => emp.employeeId === employeeData.employeeId));
     if (alreadyExists) {
       showAlert(`${employeeData.name} 님은 이미 다른 구분에 추가되어 있습니다.`, 'warning');
       return;
     }
 
     // 같은 구분 내 중복 방지
-    const exists = updated[idx].empList.some(
-      (emp) => emp.employeeId === employeeData.employeeId
-    );
+    const exists = updated[idx].empList.some((emp) => emp.employeeId === employeeData.employeeId);
     if (exists) {
       showAlert(`${employeeData.name} 님은 이미 ${type}에 포함되어 있습니다.`, 'warning');
       return;
@@ -112,9 +108,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
     const updated = [...tempList];
     const idx = updated.findIndex((item) => item.name === type);
     if (idx === -1) return;
-    updated[idx].empList = updated[idx].empList.filter(
-      (emp) => emp.employeeId !== employeeId
-    );
+    updated[idx].empList = updated[idx].empList.filter((emp) => emp.employeeId !== employeeId);
     setTempList(updated);
   };
 
@@ -181,7 +175,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
               py: 0,
               px: 2,
               height: '35px',
-              display: 'flex',
+              display: 'flex'
             }}
           >
             {alertInfo.message}
@@ -234,10 +228,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
           {/* 직원 목록 */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', height: '100%' }}>
-              <EmployeeList
-                selectedDept={selectedDept?.commonCodeId}
-                onSelectEmployee={handleSelectEmployee}
-              />
+              <EmployeeList selectedDept={selectedDept?.commonCodeId} onSelectEmployee={handleSelectEmployee} />
             </Box>
           </Grid>
 
@@ -291,10 +282,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
                             pr: 1.5
                           }}
                         >
-                          <Typography
-                            variant="subtitle1"
-                            sx={{ fontWeight: 500, fontSize: '0.9rem', pl: 1 }}
-                          >
+                          <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: '0.9rem', pl: 1 }}>
                             {item.name}
                           </Typography>
                           {/* 전체 삭제 버튼 */}
@@ -365,11 +353,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
                               <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
                                 <Avatar
                                   alt={emp.name}
-                                  src={
-                                    emp.profileImg
-                                      ? getImageUrl(emp.profileImg)
-                                      : DefaultAvatar
-                                  }
+                                  src={emp.profileImg ? getImageUrl(emp.profileImg) : DefaultAvatar}
                                   sx={{ width: 36, height: 36 }}
                                 />
                                 <Stack sx={{ lineHeight: 1 }}>
@@ -377,23 +361,13 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
                                     variant="subtitle1"
                                     sx={{ fontWeight: 500, fontSize: '0.9rem' }}
                                   >{`${emp.name} ${emp.position}`}</Typography>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    sx={{ fontSize: '0.75rem' }}
-                                  >
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
                                     {emp.departmentName}
                                   </Typography>
                                 </Stack>
                               </Stack>
                               {/* 직원 개별 삭제 */}
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() =>
-                                  handleRemoveEmployee(item.name, emp.employeeId)
-                                }
-                              >
+                              <IconButton size="small" color="error" onClick={() => handleRemoveEmployee(item.name, emp.employeeId)}>
                                 <PersonRemoveIcon fontSize="small" />
                               </IconButton>
                             </ListItemButton>
@@ -408,11 +382,7 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
                               justifyContent: 'center'
                             }}
                           >
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              textAlign="center"
-                            >
+                            <Typography variant="body2" color="text.secondary" textAlign="center">
                               직원이 없습니다.
                             </Typography>
                           </Box>
@@ -439,14 +409,9 @@ export default function OrganizationModal({ open, onClose, list = [], setList })
           }
         }}
       >
-        <DialogTitle
-          textAlign="center"
-          sx={{ fontWeight: 700, fontSize: '1.1rem' }}
-        >{`${targetType || ''} 전체 삭제`}</DialogTitle>
+        <DialogTitle textAlign="center" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>{`${targetType || ''} 전체 삭제`}</DialogTitle>
         <DialogContent>
-          <Typography sx={{ textAlign: 'center', fontSize: '0.9rem' }}>
-            모든 {targetType || '직원'}을 삭제하시겠습니까?
-          </Typography>
+          <Typography sx={{ textAlign: 'center', fontSize: '0.9rem' }}>모든 {targetType || '직원'}을 삭제하시겠습니까?</Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
           <Button
