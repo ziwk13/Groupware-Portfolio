@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { useChat } from 'contexts/ChatContext';
 
 // material-ui
 import CloseIcon from '@mui/icons-material/Close';
@@ -18,6 +19,7 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
   const { notificationId: id, title, content, createdAt, readAt, ownerType, url } = notification;
   const navigate = useNavigate();
   const containerSX = { gap: 2, pl: 7 };
+  const { openChatWithUrl } = useChat();
 
   // 새 알림 Chip을 표시할 시간
   const NEW_THRESHOLD_MINUTES = 5;
@@ -71,7 +73,13 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
           // API 파일에서 콘솔 에러 출력
         });
     }
-    if (url) {
+    if (ownerType === 'TEAMCHATNOTI') {
+      if(url) {
+        openChatWithUrl(url);
+      } else {
+        openChatWithUrl(null);
+      }
+    } else if(url) {
       navigate(url);
     }
     if (onClose) {
