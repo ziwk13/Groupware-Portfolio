@@ -5,7 +5,7 @@ import {Button, Grid, Stack, Typography} from '@mui/material';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
-import UploadAvatar from 'ui-component/third-party/dropzone/Avatar';
+import UploadAvatar from 'features/attachment/components/Avatar';
 import { gridSpacing } from 'store/constant';
 
 

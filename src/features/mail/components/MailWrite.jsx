@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import AttachmentDropzone from 'ui-component/extended/AttachmentDropzone';
+import AttachmentDropzone from 'features/attachment/components/AttachmentDropzone';
 
 // material-ui
 import { useColorScheme } from '@mui/material/styles';

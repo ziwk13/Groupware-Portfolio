@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import DownloadIcon from '@mui/icons-material/Download';
 import { Typography, Box } from '@mui/material';
-import axiosServices from '../../../utils/axios';
+import axiosServices from 'api/axios';
 
 
 const AttachmentListBox = styled('div')(({ theme }) => ({

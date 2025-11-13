@@ -6,7 +6,7 @@ import {Box, Grid, Button } from '@mui/material';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
-import AttachmentListView from 'ui-component/extended/AttachmentListView';
+import AttachmentListView from 'features/attachment/components/AttachmentListView';
 
 import { detailMail } from '../api/mailAPI';
 
