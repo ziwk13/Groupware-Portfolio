@@ -38,7 +38,7 @@ export default function GridPaginationActions({
   };
 
   return (
-    <Grid sx={{ p: 3 }} size={12}>
+    <Grid sx={{ pt: 0, pb: 3, px: 3 }} size={12}>
       <Grid container spacing={3} sx={{ justifyContent: 'space-between' }}>
         <Grid>
           <Pagination count={totalPages} page={page} onChange={onPageChange} color="primary" disabled={isDisabled} />
