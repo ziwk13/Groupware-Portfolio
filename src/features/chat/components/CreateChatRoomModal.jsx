@@ -125,8 +125,6 @@ export default function CreateChatRoomModal({ open, onClose, onSuccess, preSelec
         inviteeEmployeeIds: userIds
       };
 
-      console.log('API 요청:', roomData); // 디버깅용
-
       const newRoom = await createRoom(roomData);
 
       let avatar = null;

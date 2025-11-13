@@ -65,12 +65,10 @@ export default function ChatRoom({ roomId, user, theme }) {
         console.error('STOMP: 메시지 파싱 실패', error);
       }
     });
-    console.log(`ChatRoom: [${chatRoomTopic}] 구독 시작`);
 
     // useEffect의 cleanup 함수 (구독 해제)
     return () => {
       subscription.unsubscribe();
-      console.log(`ChatRoom: [${chatRoomTopic}] 구독 해제`);
     };
 
     // 의존성 배열에 client와 isConnected 추가

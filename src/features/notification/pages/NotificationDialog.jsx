@@ -93,8 +93,6 @@ export default function NotificationSection() {
   useEffect(() => {
     // 서비스에 연결 요청
 if (client && isConnected) {
-      console.log('STOMP (Context): 연결 확인. 알림 구독 시작.');
-
       // 구독할 경로
       const notificationTopic = '/user/queue/notifications';
 
