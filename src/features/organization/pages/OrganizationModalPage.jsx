@@ -6,7 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 
 // project imports
-import OrganizationModal from 'features/organization/components/OrganizationModal'; // 새로 추가할 조직도 모달 컴포넌트
+import OrganizationModal from '../components/OrganizationModal';
 // assets
 import { IconSitemap } from '@tabler/icons-react';
 

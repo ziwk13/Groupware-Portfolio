@@ -1,4 +1,4 @@
-import axiosServices from "utils/axios"; // 공통 axios 설정 불러오기
+import axiosServices from "api/axios"; // 공통 axios 설정 불러오기
 
 // 백엔드 주소
 const API_BASE_URL = "http://localhost:8080/api"; // 백엔드의 기본 주소
