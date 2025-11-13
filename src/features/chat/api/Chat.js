@@ -1,7 +1,7 @@
 
 // --- 채팅방 목록 ---
 
-import axiosServices from "../../../utils/axios";
+import axiosServices from "api/axios";
 
 /**
  * (UserList.jsx 용)
@@ -98,6 +98,19 @@ export const updateLastRead = async (roomId, lastMessageId) => {
     return response.data;
   } catch (error) {
     console.error('마지막 읽은 메시지 갱신에 실패 하였습니다. : ', error);
+    throw error;
+  }
+};
+
+/**
+ * ID로 특정 채팅방 정보를 가져옵니다.
+ */
+export const getRoomById = async (roomId) => {
+  try {
+    const response = await axiosServices.get(`/api/chat/rooms/${roomId}`);
+    return response.data;
+  } catch (error) {
+    console.error("API: 채팅방 정보(ID) 가져오기 실패", error);
     throw error;
   }
 };
