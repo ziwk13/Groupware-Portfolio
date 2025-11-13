@@ -18,7 +18,7 @@ import { Button } from '@mui/material';
 import { IconBell } from '@tabler/icons-react';
 
 // project imports
-import { deleteAllNotifications, getUnreadCount, markAllAsRead } from 'api/notification';
+import { deleteAllNotifications, getUnreadCount, markAllAsRead } from '../api/notification';
 import NotificationList from '../components/NotificationList';
 
 // assets

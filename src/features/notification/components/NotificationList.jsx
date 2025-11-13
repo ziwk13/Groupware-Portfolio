@@ -8,7 +8,7 @@ import { useEffect, useState, forwardRef, useImperativeHandle, useCallback } fro
 import PropTypes from 'prop-types';
 import NotificationItem from './NotificationItem';
 import ListItemWrapper from './ListItemWrapper';
-import { getNotifications } from 'api/notification';
+import { getNotifications } from '../api/notification';
 import EmptyNotificationIcon from 'assets/icons/EmptyNotificationIcon';
 
 
