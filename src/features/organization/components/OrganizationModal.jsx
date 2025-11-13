@@ -27,7 +27,7 @@ import EmployeeDetail from './EmployeeDetailBase';
 import EmployeeList from './EmployeeList';
 import OrganizationTree from './OrganizationTree';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
-import { getImageUrl } from 'utils/getImageUrl';
+import { getImageUrl } from 'api/getImageUrl';
 
 export default function OrganizationModal({ open, onClose, list = [], setList }) {
   // 상태 관리

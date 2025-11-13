@@ -6,7 +6,7 @@ import Avatar from 'ui-component/extended/Avatar';
 import Stack from '@mui/material/Stack';
 import MainCard from 'ui-component/cards/MainCard';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
-import { getImageUrl } from 'utils/getImageUrl';
+import { getImageUrl } from 'api/getImageUrl'
 
 export default function EmployeeList({
   selectedDept,
