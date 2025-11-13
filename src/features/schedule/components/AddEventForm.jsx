@@ -30,11 +30,11 @@ import { useNavigate } from 'react-router-dom';
 import { gridSpacing } from 'store/constant';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { dispatch } from 'store';
-import axios from 'utils/axios';
-import { inviteParticipants, getEvents, updateParticipantStatus } from '../slices/scheduleSlice';
+import axios from 'api/axios';
+import { inviteParticipants, getEvents, updateParticipantStatus } from 'features/schedule/api/scheduleApi';
 import useAuth from 'hooks/useAuth';
 import OrganizationModal from 'features/organization/components/OrganizationModal';
-import StartAndEndDateTime from 'features/date/StartAndEndDateTime';
+import StartAndEndDateTime from 'faetures/date/components/StartAndEndDateTime';
 
 // ==============================|| ADD / EDIT EVENT FORM ||============================== //
 
@@ -426,11 +426,11 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
               <Grid>
                 <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
                   <Button type="button" variant="outlined" onClick={onCancel}>
-                    Cancel
+                    취소
                   </Button>
                   {(!event || isHost) && (
                     <Button type="submit" variant="contained" disabled={isSubmitting}>
-                      {event ? 'Edit' : 'Add'}
+                      {event ? '수정' : '추가'}
                     </Button>
                   )}
                 </Stack>

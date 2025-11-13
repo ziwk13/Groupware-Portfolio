@@ -1,17 +1,17 @@
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
-// material-ui
 import { useColorScheme, useTheme } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { Menu, MenuItem } from '@mui/material';
+import { Menu, MenuItem, Alert } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-// redux
 import { useDispatch, useSelector } from 'react-redux';
+
+// 절대경로로 수정된 부분
 import {
   fetchTodayAttendance,
   clockIn,
@@ -19,16 +19,14 @@ import {
   updateWorkStatus,
   fetchThisWeekAttendance,
   resetAttendanceState
-} from 'features/attendance/slices/attendanceSlice';
+} from 'features/attendance/api/attendanceApi';
 
-// project imports
 import useAuth from 'hooks/useAuth';
 import useConfig from 'hooks/useConfig';
 import SkeletonTotalGrowthBarChart from 'ui-component/cards/Skeleton/TotalGrowthBarChart';
 import MainCard from 'ui-component/cards/MainCard';
 import WorkProgressBar from '../WorkProgressBar';
 
-// chart data
 import barChartOptions from './total-growth-bar-chart';
 
 export default function AttendanceBasicCard({ isLoading }) {
@@ -38,10 +36,19 @@ export default function AttendanceBasicCard({ isLoading }) {
   const { colorScheme } = useColorScheme();
   const { user, isLoggedIn } = useAuth();
 
-  // Redux 상태
   const { today, loading, thisWeek } = useSelector((state) => state.attendance);
 
   const employeeId = user?.employeeId;
+
+  // 알림 메시지
+  const [statusMessage, setStatusMessage] = useState('');
+
+  // 알림 자동 사라짐
+  useEffect(() => {
+    if (!statusMessage) return;
+    const timer = setTimeout(() => setStatusMessage(''), 2000);
+    return () => clearTimeout(timer);
+  }, [statusMessage]);
 
   // 현재 시간
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -57,7 +64,7 @@ export default function AttendanceBasicCard({ isLoading }) {
     currentTime.getMinutes()
   ).padStart(2, '0')}:${String(currentTime.getSeconds()).padStart(2, '0')}`;
 
-  // 초기 데이터
+  // 초기 데이터 로드
   useEffect(() => {
     if (!isLoggedIn || !employeeId) {
       dispatch(resetAttendanceState());
@@ -73,13 +80,19 @@ export default function AttendanceBasicCard({ isLoading }) {
     return () => clearInterval(interval);
   }, [dispatch, user]);
 
+  // ===== 출근 =====
   const handleClockIn = async () => {
+    if (today?.startTime) return setStatusMessage('이미 출근이 완료되었습니다.');
+    if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
     await dispatch(clockIn(employeeId));
     dispatch(fetchTodayAttendance(employeeId));
     dispatch(fetchThisWeekAttendance(employeeId));
   };
 
+  // ===== 퇴근 =====
   const handleClockOut = async () => {
+    if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
+    if (!today?.startTime) return setStatusMessage('출근 기록이 있어야 퇴근이 가능합니다.');
     await dispatch(clockOut(employeeId));
     dispatch(fetchTodayAttendance(employeeId));
     dispatch(fetchThisWeekAttendance(employeeId));
@@ -87,7 +100,14 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
+
+  // ===== 근무상태 변경 =====
+  const handleWorkStatusClick = (event) => {
+    if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
+    if (!today?.startTime) return setStatusMessage('출근 기록이 있어야 근무상태 변경이 가능합니다.');
+    setAnchorEl(event.currentTarget);
+  };
+
   const handleClose = () => setAnchorEl(null);
 
   const handleWorkStatusChange = (statusCode) => {
@@ -130,16 +150,37 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   return (
     <>
-      {isLoading ? (
-        <SkeletonTotalGrowthBarChart />
-      ) : (
+      {/* ===== Alert: 카드 완전 밖에서 겹쳐 띄우기 (절대 크기 영향 없음) ===== */}
+      <Box sx={{ position: 'relative' }}>
+        {statusMessage && (
+          <Alert
+            severity={statusMessage.includes('가능') || statusMessage.includes('완료') ? 'error' : 'success'}
+            sx={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              zIndex: 50,
+              p: 0.7,
+              px: 1.5,
+              fontSize: '0.875rem',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {statusMessage}
+          </Alert>
+        )}
+
+        {/* ===== Main 카드 (원래 크기 유지됨) ===== */}
         <MainCard>
           <Stack spacing={1}>
-            {/* ===== 헤더 ===== */}
-            <Typography variant={isSmall ? 'h5' : 'h3'} color="text.primary">
-              {formattedTime}
-            </Typography>
+            {/* ===== 시간 라인 ===== */}
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography variant={isSmall ? 'h5' : 'h3'} color="text.primary">
+                {formattedTime}
+              </Typography>
+            </Stack>
 
+            {/* 근무시간 바 */}
             <Box sx={{ mt: 1, mb: 1 }}>
               <WorkProgressBar currentMinutes={thisWeek?.totalMinutes || 0} targetMinutes={thisWeek?.targetMinutes || 2400} />
             </Box>
@@ -148,7 +189,6 @@ export default function AttendanceBasicCard({ isLoading }) {
             <Box
               sx={{
                 p: 2,
-
                 borderRadius: 2,
                 display: 'flex',
                 alignItems: 'center',
@@ -230,8 +270,7 @@ export default function AttendanceBasicCard({ isLoading }) {
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={handleClick}
-                disabled={['CLOCK_OUT', 'OFF', 'EARLY_LEAVE'].includes(today?.workStatus)}
+                onClick={handleWorkStatusClick}
                 sx={{ borderRadius: 2, width: isSmall ? 80 : 110, height: isSmall ? 35 : 40 }}
               >
                 근무상태 변경
@@ -245,17 +284,12 @@ export default function AttendanceBasicCard({ isLoading }) {
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
               >
                 <MenuItem onClick={() => handleWorkStatusChange('out-on-business')}>외근</MenuItem>
-                <MenuItem
-                  onClick={() => handleWorkStatusChange('return-to-office')}
-                  disabled={['NORMAL', 'LATE'].includes(today?.workStatus)}
-                >
-                  사내 복귀
-                </MenuItem>
+                <MenuItem onClick={() => handleWorkStatusChange('return-to-office')}>사내 복귀</MenuItem>
               </Menu>
             </Stack>
           </Stack>
         </MainCard>
-      )}
+      </Box>
     </>
   );
 }

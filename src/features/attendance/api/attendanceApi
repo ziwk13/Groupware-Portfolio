@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'utils/axios';
+import axios from 'api/axios';
 
 //  오늘 근태 조회
 

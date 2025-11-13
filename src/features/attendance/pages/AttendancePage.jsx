@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import AttendanceBasicCard from '../components/chart-data/AttendanceBasicCard';
-import AttendanceScheduleCard from '../components/AttendanceScheduleCard';
-import AttendanceWeekViewCard from '../components/AttendanceWeekViewCard';
-import AttendanceSummaryCard from '../components/AttendanceSummaryCard';
+import AttendanceBasicCard from 'features/attendance/components/chart-data/AttendanceBasicCard';
+import AttendanceScheduleCard from 'features/attendance/components/AttendanceScheduleCard';
+import AttendanceWeekViewCard from 'features/attendance/components/AttendanceWeekViewCard';
+import AttendanceSummaryCard from 'features/attendance/components/AttendanceSummaryCard';
 
 export default function Dashboard() {
   const [isLoading, setLoading] = useState(true);
