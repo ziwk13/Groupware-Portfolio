@@ -186,7 +186,7 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, selecte
                     marginTop: 1.25
                   }}
                 >
-                  <FormattedMessage id={currentItem.title} />
+                  {currentItem.title}
                   {currentItem.caption && (
                     <Typography
                       gutterBottom
@@ -199,7 +199,7 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, selecte
                         lineHeight: 1.66
                       }}
                     >
-                      <FormattedMessage id={currentItem.caption} />
+                      {currentItem.caption}
                     </Typography>
                   )}
                 </Typography>
@@ -240,7 +240,7 @@ export default function NavGroup({ item, lastItem, remItems, lastItemId, selecte
               sx={{ mr: 1, mb: 0.25 }}
               primary={
                 <Typography variant={isSelected ? 'h5' : 'body1'} sx={{ color: 'inherit' }}>
-                  {currentItem.id === lastItemId ? <FormattedMessage id="more-items" /> : <FormattedMessage id={currentItem.title} />}
+                  {currentItem.id === lastItemId ? <FormattedMessage id="more-items" /> : currentItem.title}
                 </Typography>
               }
             />

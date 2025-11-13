@@ -31,7 +31,7 @@ function BTitle({ title }) {
   return (
     <Grid>
       <Typography variant="h4" sx={{ fontWeight: 500 }}>
-        <FormattedMessage id={title} />
+        {title}
       </Typography>
     </Grid>
   );
@@ -147,7 +147,7 @@ export default function Breadcrumbs({
         color={window.location.pathname === main.url ? 'text.primary' : 'text.secondary'}
       >
         {icons && <CollapseIcon style={{ ...iconSX, ...(themeDirection === ThemeDirection.RTL && { marginLeft: 6, marginRight: 0 }) }} />}
-        <FormattedMessage id={main.title} />
+        {main.title}
       </Typography>
     );
   }
@@ -207,7 +207,7 @@ export default function Breadcrumbs({
         }}
       >
         {icons && <ItemIcon style={{ ...iconSX, ...(themeDirection === ThemeDirection.RTL && { marginLeft: 6, marginRight: 0 }) }} />}
-        <FormattedMessage id={itemTitle} />
+        {itemTitle}
       </Typography>
     );
 

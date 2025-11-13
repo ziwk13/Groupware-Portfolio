@@ -244,7 +244,7 @@ export default function NavCollapse({ menu, level, parentId }) {
               </ListItemIcon>
             )}
             {(drawerOpen || (!drawerOpen && level !== 1)) && (
-              <Tooltip title={<FormattedMessage id={menu.title} />} disableHoverListener={!hoverStatus}>
+              <Tooltip title={menu.title} disableHoverListener={!hoverStatus}>
                 <ListItemText
                   primary={
                     <Typography
@@ -259,7 +259,7 @@ export default function NavCollapse({ menu, level, parentId }) {
                         ...(themeDirection === ThemeDirection.RTL && { textAlign: 'end', direction: 'rtl' })
                       }}
                     >
-                      <FormattedMessage id={menu.title} />
+                      {menu.title}
                     </Typography>
                   }
                   secondary={
@@ -275,7 +275,7 @@ export default function NavCollapse({ menu, level, parentId }) {
                           lineHeight: 1.66
                         }}
                       >
-                        <FormattedMessage id={menu.caption} />
+                        {menu.caption}
                       </Typography>
                     )
                   }
@@ -377,7 +377,7 @@ export default function NavCollapse({ menu, level, parentId }) {
             sx={{ mb: 0.25 }}
             primary={
               <Typography variant={isSelected ? 'h5' : 'body1'} sx={{ my: 'auto', color: 'inherit' }}>
-                <FormattedMessage id={menu.title} />
+                {menu.title}
               </Typography>
             }
           />

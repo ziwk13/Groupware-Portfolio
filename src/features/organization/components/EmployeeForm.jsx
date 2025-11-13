@@ -19,7 +19,6 @@ import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
 
 function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler, onOpenModal }) {
-  console.log('commonCodes', commonCodes);
   // 1. 폼 데이터가 없을 때 (초기 상태)
   if (!formData) {
     return (
@@ -64,7 +63,6 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, re
 
   // (2) Autocomplete 변경 핸들러
   const handleAutocompleteChange = (name, newValue) => {
-    console.log('Autocomplete change:', name, newValue);
     setFormData((prev) => ({
       ...prev,
       [name]: newValue ? newValue.commonCodeId : null // ID 값만 저장
