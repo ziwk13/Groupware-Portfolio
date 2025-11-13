@@ -20,7 +20,7 @@ import ChatHeader from './ChatHeader';
 import ChatRoom from './ChatRoom';
 import UserAvatar from './UserAvatar';
 import UserList from './UserList';
-import { leaveRoom, getRooms, inviteToRoom } from '../api/Chat';
+import { leaveRoom, getRooms, inviteToRoom, getRoomById } from '../api/Chat';
 import { useStomp } from 'contexts/StompProvider';
 import OrganizationModal from '../../organization/components/OrganizationModal';
 
@@ -44,7 +44,8 @@ const mapDtoToUser = (room) => ({
 export default function ChatDrawer({
   onStartNewChat,
   selectedUser,
-  onCloseChat
+  onCloseChat,
+  roomId
 }) {
   const theme = useTheme();
   const { colorScheme } = useColorScheme();
@@ -56,22 +57,11 @@ export default function ChatDrawer({
 
   const { openChatWithUser } = useChat();
 
-  // show menu to set current user status
-  const [anchorEl, setAnchorEl] = useState();
-  const handleClickRightMenu = (event) => {
-    setAnchorEl(event?.currentTarget);
-  };
 
-  const handleCloseRightMenu = () => {
-    setAnchorEl(null);
-  };
-
-  // set user status on status menu click
-  const [status, setStatus] = useState('available');
-  const handleRightMenuItemClick = (userStatus) => () => {
-    setStatus(userStatus);
-    handleCloseRightMenu();
-  };
+  // 상태 추가(알림 클릭 대응)
+  const [currentRoom, setCurrentRoom] = useState(selectedUser);
+  // 채팅방 정보를 fetch 중인지 여부
+  const [isLoadingRoom, setIsLoadingRoom] = useState(false);
 
   // 채팅방 나가기 모달 상태
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
@@ -82,6 +72,7 @@ export default function ChatDrawer({
   const initialInviteList = [{ name: '초대 대상자', empList: [] }];
   const [inviteList, setInviteList] = useState(initialInviteList);
 
+  const effectiveRoomId = currentRoom ? currentRoom.id : null;
 
   // 채팅방 나가기 메뉴 클릭
   const handleLeaveClick = () => {
@@ -95,7 +86,7 @@ export default function ChatDrawer({
 
   // 모달 나가기
   const handleConfirmLeave = async () => {
-    if (!selectedUser || !selectedUser.id) return;
+    if (!effectiveRoomId) return;
 
     try {
       await leaveRoom(selectedUser.id);
@@ -121,7 +112,7 @@ export default function ChatDrawer({
   // 초대 모달 '적용' 버튼 클릭 핸들러 (API 호출)
   const handleInviteApply = async (appliedList) => {
     // 현재 채팅방 ID (selectedUser.id)가 있는지 확인
-    if (!selectedUser || !selectedUser.id) return;
+    if (!effectiveRoomId) return;
 
     // OrganizationModal에서 '초대 대상자' 박스의 empList를 찾음
     const inviteeBox = appliedList.find(item => item.name === '초대 대상자');
@@ -133,14 +124,12 @@ export default function ChatDrawer({
 
     // API가 요구하는 형식 [1, 2, 3] 으로 변환
     const inviteeEmployeeIds = inviteeBox.empList.map(emp => emp.employeeId);
-    const roomId = selectedUser.id; // 현재 채팅방 ID
 
     try {
       // 백엔드 API 호출 (API 파일에 inviteToRoom이 정의되어 있어야 함)
       // API는 (roomId, body) 형태를 받는다고 가정
-      await inviteToRoom(roomId, inviteeEmployeeIds);
-      
-      console.log('초대 성공!');
+      await inviteToRoom(effectiveRoomId, inviteeEmployeeIds);
+
       handleInviteModalClose(); // 성공 시 모달 닫기
     } catch (error) {
       console.error('초대 실패:', error);
@@ -152,6 +141,38 @@ export default function ChatDrawer({
   const [chatRooms, setChatRooms] = useState([]);
   const { client, isConnected } = useStomp();
 
+  // 알림 클릭 시 방 정보 로드
+  useEffect(() => {
+    // 목록에서 클릭
+    if (selectedUser) {
+      setCurrentRoom(selectedUser);
+      setIsLoadingRoom(false);
+    }
+    // 알림 클릭 흐름
+    else if (roomId) {
+      setIsLoadingRoom(true);
+
+      getRoomById(roomId) // 백엔드 API 호출
+        .then(roomDto => {
+          const mappedRoom = mapDtoToUser(roomDto);
+          setCurrentRoom(mappedRoom);
+        })
+        .catch(err => {
+          console.error("Failed to fetch room details by ID", err);
+          onCloseChat(); // 실패 시 목록으로 복귀
+        })
+        .finally(() => {
+          setIsLoadingRoom(false);
+        });
+    }
+    // 둘 다 null (채팅방 닫힘)
+    else {
+      setCurrentRoom(null);
+      setIsLoadingRoom(false);
+    }
+  }, [selectedUser, roomId, onCloseChat]);
+
+  // 채팅방 목록 로드
   useEffect(() => {
     if (!selectedUser) {
       const fetchChatRooms = async () => {
@@ -207,7 +228,7 @@ export default function ChatDrawer({
         boxSizing: 'border-box'
       }}
     >
-      {!selectedUser ? (
+      {!(currentRoom || isLoadingRoom) ? (
         <>
           <Box sx={{ p: 3, pb: 2 }}>
             <Grid container spacing={gridSpacing}>
@@ -215,7 +236,7 @@ export default function ChatDrawer({
                 <Grid container spacing={2} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
                   <Grid>
                     <UserAvatar user={{
-                      online_status: status,
+                      online_status: 'available',
                       avatar: user?.avatar || 'avatar-5.png',
                       name: user?.name || 'User'
                     }} />
@@ -262,19 +283,25 @@ export default function ChatDrawer({
       ) : (
         <>
           <Box sx={{ p: 3, pb: 2 }}>
-            <ChatHeader
-              user={selectedUser}
-              onClose={onCloseChat}
-              onLeaveRoom={handleLeaveClick}
-              onInviteClick={handleInviteClick}
-            />
+            {isLoadingRoom ? (
+              <Typography>채팅방 정보 로딩 중...</Typography>
+            ) : (
+              <ChatHeader
+                user={currentRoom}
+                onClose={onCloseChat}
+                onLeaveRoom={handleLeaveClick}
+                onInviteClick={handleInviteClick}
+              />
+            )}
           </Box>
           <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-            <ChatRoom
-              roomId={selectedUser.id}
-              user={{id: user.employeeId, name: user.name }}
-              theme={theme}
-            />
+            {!isLoadingRoom && (
+              <ChatRoom
+                roomId={effectiveRoomId}
+                user={{ id: user.employeeId, name: user.name }}
+                theme={theme}
+              />
+            )}
           </Box>
 
           <Dialog
@@ -316,9 +343,8 @@ export default function ChatDrawer({
 }
 
 ChatDrawer.propTypes = {
-  handleDrawerOpen: PropTypes.func,
-  openChatDrawer: PropTypes.oneOfType([PropTypes.bool, PropTypes.any]),
   onStartNewChat: PropTypes.func,
   selectedUser: PropTypes.object,
-  onCloseChat: PropTypes.func
+  onCloseChat: PropTypes.func,
+  roomId: PropTypes.string
 };
