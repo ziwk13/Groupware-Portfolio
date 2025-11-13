@@ -10,7 +10,7 @@ import SearchSection from './SearchSection';
 import MobileSection from './MobileSection';
 import ProfileSection from './ProfileSection';
 import FullScreenSection from './FullScreenSection';
-import NotificationSection from './NotificationSection';
+import NotificationSection from 'features/Notification/pages/NotificationPage';
 import OrganizationSection from './OrganizationSection';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';

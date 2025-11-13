@@ -20,7 +20,7 @@ import { IconBellCheck } from '@tabler/icons-react';
 
 // project imports
 import { deleteAllNotifications, getUnreadCount, markAllAsRead } from 'api/notification';
-import NotificationList from './components/NotificationList';
+import NotificationList from '../components/NotificationList';
 
 // assets
 import MainCard from 'ui-component/cards/MainCard';
