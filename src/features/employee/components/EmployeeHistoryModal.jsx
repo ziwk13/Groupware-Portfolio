@@ -1,27 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  Pagination,
-  Menu,
-  MenuItem
-} from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-
+import GridPaginationActions from 'features/list/components/GridPaginationActions';
 import { getEmployeeHistory } from 'features/employee/api/employeeAPI';
 
 export default function EmployeeHistoryModal({ open, onClose, employee }) {
   const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [anchorEl, setAnchorEl] = useState(null);
+  // 페이지네이션 상태
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
@@ -78,22 +66,15 @@ export default function EmployeeHistoryModal({ open, onClose, employee }) {
     [employee]
   );
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
+  // 페이지 변경 핸들러
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
   };
 
-  const handleRowsChange = (newSize) => {
+  // 페이지 당 행 수 변경 핸들러
+  const handleRowsPerPageChange = (newSize) => {
     setRowsPerPage(newSize);
-    setPage(1);
-    handleClose();
+    setPage(1); // 페이지 크기 변경 시 1페이지로 리셋
   };
   // -----------------------------------
 
@@ -137,7 +118,6 @@ export default function EmployeeHistoryModal({ open, onClose, employee }) {
       setTotalPages(0);
       setPage(1); // 1-based
       setRowsPerPage(10);
-      setAnchorEl(null);
     }
   }, [open]);
 
@@ -183,41 +163,17 @@ export default function EmployeeHistoryModal({ open, onClose, employee }) {
         />
       </DialogContent>
 
-      {/* 페이지네이션*/}
-      {
-        totalPages > 0 && (
-        <Grid sx={{ p: 2, pt: 1 }} container spacing={2} justifyContent="space-between" alignItems="center">
-          <Grid item>
-            <Pagination count={totalPages} page={page} onChange={handlePageChange} color="primary" />
-          </Grid>
-          <Grid item>
-            <Button size="large" sx={{ color: 'grey.900' }} color="secondary" endIcon={<ExpandMoreRoundedIcon />} onClick={handleClick}>
-              {rowsPerPage} 개씩
-            </Button>
-            <Menu
-              id="menu-history-list-style1"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              variant="selectedMenu"
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-            >
-              <MenuItem onClick={() => handleRowsChange(10)}> 10개씩</MenuItem>
-              <MenuItem onClick={() => handleRowsChange(20)}> 20개씩</MenuItem>
-              <MenuItem onClick={() => handleRowsChange(50)}> 50개씩 </MenuItem>
-            </Menu>
-          </Grid>
-        </Grid>
-        )
-      }
+      {totalPages > 0 && (
+        <GridPaginationActions
+          totalPages={totalPages}
+          page={page}
+          onPageChange={handlePageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleRowsPerPageChange}
+          loading={isLoading}
+          rowsPerPageOptions={[10, 20, 50]}
+        />
+      )}
 
       <DialogActions sx={{ justifyContent: 'center', pb: 2, pt: 0 }}>
         <Button onClick={onClose} variant="contained" color="primary">
