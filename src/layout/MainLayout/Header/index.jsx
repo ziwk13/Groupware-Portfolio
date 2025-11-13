@@ -10,8 +10,8 @@ import SearchSection from './SearchSection';
 import MobileSection from './MobileSection';
 import ProfileSection from './ProfileSection';
 import FullScreenSection from './FullScreenSection';
-import NotificationSection from './NotificationSection';
-import OrganizationSection from './OrganizationSection';
+import NotificationDialog from 'features/notification/pages/NotificationDialog';
+import OrganizationSection from 'features/organization/pages/OrganizationModalPage';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation } from 'config';
@@ -76,7 +76,7 @@ export default function Header() {
       <Box sx={{ flexGrow: 1 }} />
 
       {/* notification */}
-      <NotificationSection />
+      <NotificationDialog />
 
       {/* organizationSection */}
       <OrganizationSection/>

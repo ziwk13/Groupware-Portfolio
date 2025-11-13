@@ -1,7 +1,7 @@
 // ==============================|| AttendanceScheduleCard.jsx ||============================== //
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'store';
-import { getEvents } from 'features/schedule/slices/scheduleSlice';
+import { getEvents } from 'features/schedule/api/scheduleApi';
 import MainCard from 'ui-component/cards/MainCard';
 import { Typography, Box, Divider } from '@mui/material';
 import dayjs from 'dayjs';

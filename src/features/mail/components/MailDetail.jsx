@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import ReactQuill from 'ui-component/third-party/ReactQuill';
+import ReactQuill from 'features/editor/components/ReactQuill';
 // material-ui
 import {Box, Grid, Button } from '@mui/material';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
-import AttachmentListView from 'ui-component/extended/AttachmentListView';
+import AttachmentListView from 'features/attachment/components/AttachmentListView';
 
 import { detailMail } from '../api/mailAPI';
 

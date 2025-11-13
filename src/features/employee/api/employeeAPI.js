@@ -1,4 +1,4 @@
-import axiosServices from 'utils/axios';
+import axiosServices from 'api/axios';
 
 /**
  * (GET) 내 정보 조회 API

@@ -1,4 +1,4 @@
-import axiosServices from '../../../utils/axios';
+import axiosServices from 'api/axios';
 
 // 첨부파일 업로드 함수 (테스트용)
 export const uploadAttachments = async (formData) => {

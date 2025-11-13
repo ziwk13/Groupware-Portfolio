@@ -3,8 +3,8 @@ import { combineReducers } from 'redux';
 
 // project imports
 import snackbarReducer from './slices/snackbar';
-import scheduleReducer from '../features/schedule/slices/scheduleSlice';
-import attendanceReducer from '../features/attendance/slices/attendanceSlice';
+import scheduleReducer from 'features/schedule/api/scheduleApi';
+import attendanceReducer from 'features/attendance/api/attendanceApi';
 
 // ==============================|| COMBINE REDUCER ||============================== //
 

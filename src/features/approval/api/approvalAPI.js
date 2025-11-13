@@ -1,4 +1,4 @@
-import axiosServices from '../../../utils/axios';
+import axiosServices from '../../../api/axios';
 
 // status 값(FE)을 실제 API 엔드포인트(BE)로 매핑
 const urlMapping = {

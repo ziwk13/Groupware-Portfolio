@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Grid, Typography, Box, useTheme } from '@mui/material';
-import axios from 'utils/axios';
+import axios from 'api/axios';
 import MainCard from 'ui-component/cards/MainCard';
 import useAuth from 'hooks/useAuth';
 

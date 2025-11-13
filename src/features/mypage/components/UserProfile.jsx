@@ -28,7 +28,7 @@ import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
-import AttachmentProfile from 'ui-component/extended/AttachmentProfile';
+import AttachmentProfile from 'features/attachment/components/AttachmentProfile';
 
 export default function UserProfile() {
   const { user, updateProfile } = useAuth();

@@ -14,7 +14,7 @@ import Box from '@mui/material/Box';
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import SkeletonEarningCard from 'ui-component/cards/Skeleton/EarningCard';
-import Button from './Buttons';
+import Button from 'features/attendance/components/Buttons';
 
 export default function EarningCard({ isLoading }) {
   const theme = useTheme();

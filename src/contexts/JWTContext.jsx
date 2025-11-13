@@ -9,9 +9,9 @@ import accountReducer from 'store/accountReducer';
 
 // project imports
 import Loader from 'ui-component/Loader';
-import axios from 'utils/axios';
-import * as employeeAPI from '../features/employee/api/employeeAPI'; // employeeAPI만 사용
-import { getImageUrl } from 'utils/getImageUrl';
+import axios from 'api/axios';
+import * as employeeAPI from 'features/employee/api/employeeAPI'; // employeeAPI만 사용
+import { getImageUrl } from 'api/getImageUrl';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
 // constant

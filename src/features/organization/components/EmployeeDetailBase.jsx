@@ -10,7 +10,7 @@ import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
-import { getImageUrl } from 'utils/getImageUrl';
+import { getImageUrl } from 'api/getImageUrl';
 
 function EmployeeDetail({ employee }) {
   if (!employee) {

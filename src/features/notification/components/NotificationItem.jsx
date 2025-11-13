@@ -9,7 +9,7 @@ import { IconBadge, IconBug, IconFileCheck, IconMail, IconCalendar } from '@tabl
 import EmployeeIcon from 'assets/icons/EmployeeIcon';
 
 // date-fns 라이브러리
-import { deleteNotification, markAsRead } from 'api/notification';
+import { deleteNotification, markAsRead } from '../api/notification';
 import ChatIcon from 'assets/icons/ChatIcon';
 import { formatRelativeTime } from 'utils/formatDate';
 import ListItemWrapper from './ListItemWrapper';

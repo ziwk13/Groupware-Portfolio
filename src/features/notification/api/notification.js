@@ -1,4 +1,4 @@
-import axiosServices from "../utils/axios";
+import axiosServices from "api/axios";
 
 
 // 읽지 않은 알림 개수 조회 (index.jsx)

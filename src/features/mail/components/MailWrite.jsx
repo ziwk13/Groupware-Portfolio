@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import AttachmentDropzone from 'ui-component/extended/AttachmentDropzone';
+import AttachmentDropzone from 'features/attachment/components/AttachmentDropzone';
 
 // material-ui
 import { useColorScheme } from '@mui/material/styles';
@@ -16,7 +16,7 @@ import Box from '@mui/material/Box';
 import MainCard from 'ui-component/cards/MainCard';
 import { ThemeMode } from 'config';
 import { gridSpacing } from 'store/constant';
-import ReactQuill from 'ui-component/third-party/ReactQuill';
+import ReactQuill from 'features/editor/components/ReactQuill';
 
 
 // animation
