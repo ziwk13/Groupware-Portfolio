@@ -16,7 +16,7 @@ import Box from '@mui/material/Box';
 import MainCard from 'ui-component/cards/MainCard';
 import { ThemeMode } from 'config';
 import { gridSpacing } from 'store/constant';
-import ReactQuill from 'ui-component/third-party/ReactQuill';
+import ReactQuill from 'features/editor/components/ReactQuill';
 
 
 // animation

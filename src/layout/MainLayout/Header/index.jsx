@@ -11,7 +11,7 @@ import MobileSection from './MobileSection';
 import ProfileSection from './ProfileSection';
 import FullScreenSection from './FullScreenSection';
 import NotificationDialog from 'features/notification/pages/NotificationDialog';
-import OrganizationSection from './OrganizationSection';
+import OrganizationSection from 'features/organization/pages/OrganizationModalPage';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation } from 'config';

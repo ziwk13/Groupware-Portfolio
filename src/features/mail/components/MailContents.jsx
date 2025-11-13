@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 // material-ui
 import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox, Typography} from '@mui/material';
 import {IconMail, IconMailOpened } from '@tabler/icons-react';
-import axiosServices from 'utils/axios';
+import axiosServices from 'api/axios';
 
 export default function MailContents({mailboxType}) {
   const [mails, setMails] = useState([]);

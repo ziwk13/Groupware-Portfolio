@@ -1,7 +1,7 @@
 // ==============================|| scheduleSlice.js ||============================== //
 
 import { createSlice } from '@reduxjs/toolkit';
-import axios from 'utils/axios';
+import axios from 'api/axios';
 import { dispatch } from 'store';
 
 const initialState = {

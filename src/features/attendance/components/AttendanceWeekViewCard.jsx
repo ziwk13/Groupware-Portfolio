@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'store';
 import { Box, Typography, IconButton, Stack, Button } from '@mui/material';
-import { fetchSelectedWeekAttendance } from '../slices/attendanceSlice';
+import { fetchSelectedWeekAttendance } from 'features/attendance/api/attendanceApi';
 import dayjs from 'dayjs';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
