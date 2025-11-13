@@ -6,7 +6,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Stack from '@mui/material/Stack';
 
 // project imports
-import UploadMultiFile from 'ui-component/third-party/dropzone/MultiFileUpload';
+import UploadMultiFile from 'features/attachment/components/MultiFileUpload';
 import { gridSpacing } from 'store/constant';
 
 export default function AttachmentDropzone({attachments, setAttachments, height}) {
