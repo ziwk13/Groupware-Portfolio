@@ -82,8 +82,8 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   // ===== 출근 =====
   const handleClockIn = async () => {
-    if (today?.startTime) return setStatusMessage('이미 출근이 완료되었습니다.');
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
+    if (today?.startTime) return setStatusMessage('이미 출근이 완료되었습니다.');
     await dispatch(clockIn(employeeId));
     dispatch(fetchTodayAttendance(employeeId));
     dispatch(fetchThisWeekAttendance(employeeId));
