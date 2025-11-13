@@ -111,6 +111,7 @@ export default function OrganizationTree({ setSelectedDept }) {
 
   // 4. 최상위 부서
   const roots = departments.filter((d) => (d.value2 ?? null) === null);
+  if(roots.length === 0) return null;
 
   // 5. 트리 렌더링
   return (
