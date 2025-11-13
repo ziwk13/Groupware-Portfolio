@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import ReactQuill from 'ui-component/third-party/ReactQuill';
+import ReactQuill from 'features/editor/components/ReactQuill';
 // material-ui
 import {Box, Grid, Button } from '@mui/material';
 
