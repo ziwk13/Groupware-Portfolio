@@ -14,7 +14,7 @@ import SecurityTwoToneIcon from '@mui/icons-material/SecurityTwoTone';
 import FingerprintTwoToneIcon from '@mui/icons-material/FingerprintTwoTone';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import {getImageUrl} from 'utils/getImageUrl';
+import {getImageUrl} from 'api/getImageUrl';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
 

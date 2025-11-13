@@ -12,7 +12,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
-import {getImageUrl} from 'utils/getImageUrl';
+import {getImageUrl} from 'api/getImageUrl';
 
 // project imports
 import Avatar from 'ui-component/extended/Avatar';

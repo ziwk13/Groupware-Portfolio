@@ -11,7 +11,7 @@ import ApprovalForm from './ApprovalForm';
 import { useState } from 'react';
 
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
-import { getImageUrl } from 'utils/getImageUrl';
+import { getImageUrl } from 'api/getImageUrl';
 
 import OrganizationModal from 'features/organization/components/OrganizationModal';
 
