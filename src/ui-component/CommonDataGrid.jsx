@@ -91,10 +91,3 @@ export default function CommonDataGrid({ rows, columns, loading, error, ...props
     </Box>
   );
 }
-
-CommonDataGrid.propTypes = {
-  rows: PropTypes.array.isRequired,
-  columns: PropTypes.array.isRequired,
-  loading: PropTypes.bool,
-  error: PropTypes.string // ApprovalList에서 문자열(message)을 전달하므로 string
-};
