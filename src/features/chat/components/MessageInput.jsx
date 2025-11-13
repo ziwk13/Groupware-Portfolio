@@ -40,9 +40,6 @@ export default function MessageInput({ onSend }) {
         <IconButton size="large" aria-label="attachment file">
           <AttachmentTwoToneIcon />
         </IconButton>
-        {/* <IconButton size="large" aria-label="emoji"> */}
-          <MoodTwoToneIcon />
-        {/* </IconButton> */}
       </Grid>
       <Grid size={{ xs: 12, sm: 'grow' }}>
         <OutlinedInput
