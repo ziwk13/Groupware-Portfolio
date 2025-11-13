@@ -43,8 +43,6 @@ const pages = {
   type: 'group',
   children: [
     {
-      id: 'attendance',
-
       id: 'organization',
       title: '인사관리',
       type: 'item',
