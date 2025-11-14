@@ -52,3 +52,15 @@ export const updatePassword = (data) => {
 export const getEmployeeHistory = (employeeId, params) => {
   return axiosServices.get(`/api/employees/history/${employeeId}`, { params });
 };
+
+/**
+ * (post) 인사 정보 동기화 (CSV 파일 업로드)
+ * @param {object} data - FormData { multipartFile }
+ */
+export const syncHR = (data) => {
+  return axiosServices.post('/api/auth/synchr', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
