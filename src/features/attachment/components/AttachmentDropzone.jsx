@@ -9,13 +9,11 @@ import Stack from '@mui/material/Stack';
 import UploadMultiFile from 'features/attachment/components/MultiFileUpload';
 import { gridSpacing } from 'store/constant';
 
-export default function AttachmentDropzone({attachments, setAttachments, height}) {
+export default function AttachmentDropzone({attachments, setAttachments, height, multiple, accept, maxSize}) {
   const [list, setList] = useState(false);
-  const [error, setError] = useState('');
 
   // 파일 변경 시 부모로 전달
   const handleFilesChange = (newFiles) => {
-    setError('');
     setAttachments(newFiles || []);   // 첨부파일이 존재하면 첨부파일 반환, 없으면 빈 값
   }
 
@@ -30,18 +28,13 @@ export default function AttachmentDropzone({attachments, setAttachments, height}
                 files={attachments}
                 onFilesChange={handleFilesChange}
                 height={height}
+                multiple={multiple}
+                accept={accept}
+                maxSize={maxSize}
               />
             </Stack>
-            {error && (
-              <FormHelperText error id='file-error-text'>
-                {error}
-              </FormHelperText>
-            )}
           </Grid>
         </Grid>
-        {/* <Button type="submit" variant="contained" color="primary">
-          업로드
-        </Button> */}
       </Grid>
     </Grid>
   );
