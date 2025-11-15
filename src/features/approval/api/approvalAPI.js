@@ -55,3 +55,45 @@ export const createApproval = async (formData) => {
     throw error;
   }
 };
+
+/**
+ * 결재 양식 템플릿 목록 조회 API
+ * GET /api/approvals/templates
+ */
+
+export const getApprovalTemplates = async () => {
+  try {
+    const response = await axiosServices.get('/api/approvals/templates');
+    return response.data.data;
+  } catch (error) {
+    console.error('Failed to fetch approval templates', error);
+    throw error;
+  }
+};
+
+/**
+ * 휴가 종류 목록 조회 API
+ * GET /api/commoncodes/vacation-types
+ */
+export const getVacationTypes = async () => {
+  const response = await axiosServices.get('/api/commoncodes/vacation-types');
+  return response.data.data; // 실제 CommonCode 목록
+};
+
+/**
+ *  결재 문서 상세 조회 API
+ *  GET /api/approvals/${docId}
+ */
+export const getApprovalDetail = async (docId) => {
+  const response = await axiosServices.get(`/api/approvals/${docId}`);
+  return response.data.data;
+};
+
+/**
+ *  결재 처리(승인 , 반려)
+ *  /api/approvals/decide
+ */
+export const decideApproval = async (payload) => {
+  const response = await axiosServices.patch('/api/approvals/decide', payload);
+  return response.data.data;
+};

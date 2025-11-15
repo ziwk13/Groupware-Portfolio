@@ -6,7 +6,5 @@ import { useParams } from 'react-router';
 
 export default function ApprovalListPage() {
   const { status } = useParams();
-  return (
-    <ApprovalList status={status}/>
-  );
+  return <ApprovalList status={status} />;
 }

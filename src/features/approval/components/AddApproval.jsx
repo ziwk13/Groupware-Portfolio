@@ -1,14 +1,18 @@
 // material-ui
 import Grid from '@mui/material/Grid';
 import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent, TimelineDot } from '@mui/lab';
+import { Box } from '@mui/material';
 
 // project imports
+import TemplateRenderer from 'features/approval/components/approvalTemplate/TemplateRenderer';
 import { gridSpacing } from 'store/constant';
 import SubCard from 'ui-component/cards/SubCard';
+
 import Chip from '@mui/material/Chip';
 import Avatar from '@mui/material/Avatar';
 import ApprovalForm from './ApprovalForm';
 import { useState } from 'react';
+import useAuth from 'hooks/useAuth';
 
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
 import { getImageUrl } from 'api/getImageUrl';
@@ -39,6 +43,9 @@ const formatToLocalDateTimeString = (date) => {
 
 export default function AddApproval() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [templateValues, setTemplateValues] = useState({});
 
   // 알림 상태
   const [alertInfo, setAlertInfo] = useState({
@@ -71,7 +78,28 @@ export default function AddApproval() {
   const [open, setOpen] = useState(false);
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
-    const { title, content } = values;
+    if (!approvers || approvers.length === 0) {
+      setAlertInfo({
+        open: true,
+        message: '결재자를 최소 1명 이상 선택해주세요.',
+        severity: 'warning'
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    let title = (values.title || '').trim();
+    let content = (values.content || '').trim();
+
+    const templateLabel = selectedForm.value1;
+
+    if (!title) {
+      title = `${user?.name || '사용자'} (${user?.position}) - ${templateLabel}`;
+    }
+
+    if (!content) {
+      content = `${templateLabel} 신청합니다.`;
+    }
 
     const formData = new FormData();
 
@@ -79,7 +107,7 @@ export default function AddApproval() {
     formData.append('content', content);
 
     if (selectedForm) {
-      formData.append('templateCode', selectedForm.id);
+      formData.append('templateCode', selectedForm.code);
     } else {
       setAlertInfo({
         open: true,
@@ -143,6 +171,7 @@ export default function AddApproval() {
   return (
     <>
       <Grid container spacing={gridSpacing} sx={{ alignItems: 'flex-start' }}>
+        {/* 좌측: 작성 폼 */}
         <Grid size={{ xs: 12, md: 6, lg: 9 }}>
           <ApprovalForm
             selectedForm={selectedForm}
@@ -159,8 +188,23 @@ export default function AddApproval() {
             onFormSubmit={handleFormSubmit}
             alertInfo={alertInfo}
             setAlertInfo={setAlertInfo}
+            TemplateRendererSlot={
+              selectedForm ? (
+                <TemplateRenderer
+                  template={selectedForm}
+                  approvalLines={approvers}
+                  approvalReferences={references}
+                  templateValues={templateValues}
+                  setTemplateValues={setTemplateValues}
+                  readOnly={false}
+                  docNo={null}
+                />
+              ) : null
+            }
           />
         </Grid>
+
+        {/* 우측: 결재자 / 참조자 타임라인 */}
         <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Grid container spacing={gridSpacing}>
             <Grid size={12}>
@@ -175,7 +219,9 @@ export default function AddApproval() {
                       <TimelineContent sx={{ pb: index < approvers.length - 1 ? 2 : 0, pt: '6px' }}>
                         <Chip
                           label={`${approver.name} ${approver.position}`}
-                          avatar={<Avatar alt={approver.name} src={approver.profileImg ? getImageUrl(approver.profileImg) : DefaultAvatar} />}
+                          avatar={
+                            <Avatar alt={approver.name} src={approver.profileImg ? getImageUrl(approver.profileImg) : DefaultAvatar} />
+                          }
                           onClick={handleClick}
                           variant="outlined"
                         />
@@ -190,7 +236,14 @@ export default function AddApproval() {
               <SubCard
                 title="참조자"
                 darkTitle={true}
-                contentSX={{ display: 'flex', justifyContent: 'left', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, '&:last-child': { pb: 2.5 } }}
+                contentSX={{
+                  display: 'flex',
+                  justifyContent: 'left',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 0.5,
+                  '&:last-child': { pb: 2.5 }
+                }}
               >
                 {references.map((ref, index) => (
                   <Chip
@@ -206,6 +259,7 @@ export default function AddApproval() {
           </Grid>
         </Grid>
       </Grid>
+
       {/* 조직도 모달 */}
       <OrganizationModal open={open} onClose={() => setOpen(false)} list={list} setList={setList} />
     </>

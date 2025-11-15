@@ -12,13 +12,12 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
-import {getImageUrl} from 'api/getImageUrl';
+import { getImageUrl } from 'api/getImageUrl';
 
 // project imports
 import Avatar from 'ui-component/extended/Avatar';
 
 // ==============================|| UTILS ||============================== //
-
 
 const getStatusChip = (statusValue) => {
   switch (statusValue) {
@@ -84,7 +83,6 @@ export default function ApprovalContents({ status, data, loading, error, page, s
       </Stack>
     );
   };
-
 
   return (
     <TableContainer>

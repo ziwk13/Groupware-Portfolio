@@ -8,7 +8,6 @@ import AuthGuard from 'utils/route-guard/AuthGuard';
 import MailListPage from '../features/mail/pages/MailListPage';
 import MailWritePage from '../features/mail/pages/MailWritePage';
 import MailDetailPage from '../features/mail/pages/MailDetailPage';
-
 // sample page routing
 const AddApprovalPage = Loadable(lazy(() => import('features/approval/pages/AddApprovalPage')));
 const ApprovalListPage = Loadable(lazy(() => import('features/approval/pages/ApprovalListPage')));
