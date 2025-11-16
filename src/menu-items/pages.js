@@ -11,7 +11,8 @@ import {
   IconShieldLock,
   IconFileCheck,
   IconClipboardCheck,
-  IconCalendar
+  IconCalendar,
+  IconCode
 } from '@tabler/icons-react';
 
 import IconBadge from '@mui/icons-material/Badge';
@@ -31,7 +32,8 @@ const icons = {
   IconFileCheck,
   IconClipboardCheck,
   IconCalendar,
-  IconBadge
+  IconBadge,
+  IconCode
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
@@ -42,6 +44,14 @@ const pages = {
   icon: icons.IconKey,
   type: 'group',
   children: [
+    {
+      id: 'code',
+      title: '코드관리',
+      type: 'item',
+      icon: icons.IconCode,
+      url: '/code',
+      admin: true
+    },
     {
       id: 'attendance',
 

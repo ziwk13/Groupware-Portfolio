@@ -10,6 +10,7 @@ import { organizationAPI } from '../api/organizationApi';
 import useAuth from 'hooks/useAuth';
 import Alert from '@mui/material/Alert';
 import EmployeeHistoryModal from 'features/employee/components/EmployeeHistoryModal';
+import SyncHRModal from 'features/employee/components/SyncHRModal';
 
 // 신규 직원 생성을 위한 기본 템플릿
 const defaultNewEmployee = {
@@ -40,7 +41,8 @@ export default function OrganizationPage() {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [formData, setFormData] = useState(null);
   const [refreshList, setRefreshList] = useState(0);
-  const [open, setOpen] = useState(false);
+  const [openHistory, setOpenHistory] = useState(false);
+  const [openSyncHR, setOpenSyncHR] = useState(false);
 
 
   // Autocomplete(드롭다운)용 공통 코드
@@ -203,7 +205,19 @@ export default function OrganizationPage() {
   return (
     <>
       <MainCard
-        title="조직도"
+        title={
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Button variant="outlined" color="secondary" onClick={handleNew}>
+              신규
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleSave}>
+              저장
+            </Button>
+            <Button variant="outlined" color="primary" onClick={() => setOpenSyncHR(true)}>
+              업로드
+            </Button>
+          </Stack>
+        }
         secondary={
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             {alertInfo.open && (
@@ -211,12 +225,6 @@ export default function OrganizationPage() {
                 {alertInfo.message}
               </Alert>
             )}
-            <Button variant="outlined" color="secondary" onClick={handleNew}>
-              신규
-            </Button>
-            <Button variant="contained" color="primary" onClick={handleSave}>
-              저장
-            </Button>
           </Stack>
         }
         content={false}
@@ -319,14 +327,15 @@ export default function OrganizationPage() {
                   commonCodes={commonCodes}
                   selectedDeptInfo={selectedDept}
                   resetPasswordHandler={resetPasswordHandler}
-                  onOpenModal={() => setOpen(true)}
+                  onOpenModal={() => setOpenHistory(true)}
                 />
               </Box>
             </Grid>
           </Grid>
         </Box>
       </MainCard>
-      <EmployeeHistoryModal open={open} onClose={() => setOpen(false)} employee={selectedEmployee} />
+      <EmployeeHistoryModal open={openHistory} onClose={() => setOpenHistory(false)} employee={selectedEmployee} />
+      <SyncHRModal open={openSyncHR} onClose={() => setOpenSyncHR(false)}/>
     </>
   );
 }

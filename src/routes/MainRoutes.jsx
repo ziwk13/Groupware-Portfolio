@@ -18,6 +18,7 @@ const MyPage = Loadable(lazy(() => import('features/mypage/pages/MyInfoPage')));
 const SchedulePage = Loadable(lazy(() => import('features/schedule/pages/SchedulePage')));
 const AttendancePage = Loadable(lazy(() => import('features/attendance/pages/AttendancePage')));
 const OrganizationPage = Loadable(lazy(() => import('features/organization/pages/OrganizationPage')));
+const CodePage = Loadable(lazy(() => import('features/code/pages/CodePage')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -45,6 +46,10 @@ const MainRoutes = {
           // element: <ApprovalDetail />
         }
       ]
+    },
+     {
+      path: '/code',
+      element: <CodePage />
     },
      {
       path: '/organization',
