@@ -32,21 +32,28 @@ function ErrorDisplay({ message }) {
   );
 }
 
-export default function CommonDataGrid({ rows, columns, loading, error, ...props }) {
+export default function CommonDataGrid({
+  rows,
+  columns,
+  loading,
+  error,
+  scrollEnabled = false,
+  ...props
+}) {
   if (error) {
     return <ErrorDisplay message={error} />;
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    // scrollEnabled가 true일 때 Box의 높이를 100%로 설정하여 부모 컨테이너의 높이를 따름
+    <Box sx={{ width: '100%', height: scrollEnabled ? '100%' : 'auto' }}>
       <DataGrid
         rows={rows}
         columns={columns}
         loading={loading}
         getRowHeight={() => 'auto'}
-        autoHeight
+        autoHeight={!scrollEnabled} // [CHANGED] scrollEnabled 값에 따라 autoHeight 토글
         hideFooterPagination={true}
-        disableRowSelectionOnClick
         disableColumnMenu
         slots={{
           noRowsOverlay: CustomNoRowsOverlay
