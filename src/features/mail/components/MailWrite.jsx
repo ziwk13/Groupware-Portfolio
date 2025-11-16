@@ -174,15 +174,15 @@ export default function MailWrite() {
 							<Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
 							<Button variant="contained" onClick={handleSendMail} sx={{padding:'0 16px', height:'35px', lineHeight:'35px'}}>발송</Button>
 							<Button
-											variant="outlined"
-											color="primary"
-											type="button"
-											sx={{ height: '35px', lineHeight:'35px', padding:'0 16px', margin:'0 auto 0 10px' }}
-											endIcon={<PersonAddAlt1OutlinedIcon />}
-											onClick={openOrganModal}
-										>
-											결재선 수정
-										</Button>
+								variant="outlined"
+								color="primary"
+								type="button"
+								sx={{ height: '35px', lineHeight:'35px', padding:'0 16px', margin:'0 auto 0 10px' }}
+								endIcon={<PersonAddAlt1OutlinedIcon />}
+								onClick={openOrganModal}
+							>
+								받는 사람
+							</Button>
 
 							<Link
 								component={RouterLink}
