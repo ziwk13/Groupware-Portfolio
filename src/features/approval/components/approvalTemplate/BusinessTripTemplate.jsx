@@ -1,11 +1,18 @@
-// BusinessTripTemplate.jsx
 import './ApprovalStyles.css';
 import ApprovalFormHeader from './ApprovalFormHeader';
-import useAuth from 'hooks/useAuth';
 
-export default function BusinessTripTemplate({ approvalLines, approvalReferences, templateValues, setTemplateValues, readOnly, docNo }) {
-  const { user } = useAuth();
-
+export default function BusinessTripTemplate({
+  approvalLines,
+  approvalReferences,
+  templateValues,
+  setTemplateValues,
+  readOnly,
+  docNo,
+  draftUser,
+  draftDept,
+  draftPosition,
+  draftDate
+}) {
   const handleChange = (key, value) => {
     if (readOnly) return;
     setTemplateValues((prev) => ({ ...prev, [key]: value }));
@@ -17,11 +24,11 @@ export default function BusinessTripTemplate({ approvalLines, approvalReferences
     <div style={{ width: '95%', maxWidth: '1050px', margin: '0 auto' }}>
       <ApprovalFormHeader
         title="출장신청서"
-        draftUser={user?.name}
-        draftDept={user?.department}
-        draftDate={new Date()}
+        draftUser={draftUser}
+        draftDept={draftDept}
+        draftPosition={draftPosition}
+        draftDate={draftDate}
         docNo={docNo}
-        draftPosition={user?.position}
         approvalLines={approvalLines}
         approvalReferences={approvalReferences}
       />

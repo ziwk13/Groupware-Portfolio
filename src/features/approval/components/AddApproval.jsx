@@ -2,7 +2,7 @@
 import Grid from '@mui/material/Grid';
 import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent, TimelineDot } from '@mui/lab';
 import { Box } from '@mui/material';
-
+import { useEffect } from 'react';
 // project imports
 import TemplateRenderer from 'features/approval/components/approvalTemplate/TemplateRenderer';
 import { gridSpacing } from 'store/constant';
@@ -41,7 +41,7 @@ const formatToLocalDateTimeString = (date) => {
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 };
 
-export default function AddApproval() {
+export default function AddApproval({ readOnly = false, initialData = null }) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -77,7 +77,42 @@ export default function AddApproval() {
   // 모달 제어용 state
   const [open, setOpen] = useState(false);
 
+  //  상세조회(initialData)일 때 상태 초기화
+  useEffect(() => {
+    if (!initialData) return;
+
+    // 결재 양식 (CommonCode DTO)
+    if (initialData.approvalTemplate) {
+      setSelectedForm(initialData.approvalTemplate);
+    }
+
+    // 시작/종료일
+    if (initialData.startDate) {
+      setStartTime(new Date(initialData.startDate));
+    }
+    if (initialData.endDate) {
+      setEndTime(new Date(initialData.endDate));
+    }
+
+    // 결재자 / 참조자 리스트
+    const approverEmps = initialData.approvalLines?.map((line) => line.approver) ?? [];
+    const refEmps = initialData.approvalReferences?.map((ref) => ref.referrer) ?? [];
+
+    setList([
+      { name: '결재자', empList: approverEmps },
+      { name: '참조자', empList: refEmps }
+    ]);
+
+    // 첨부파일은
+  }, [initialData]);
+
   const handleFormSubmit = async (values, { setSubmitting }) => {
+    // 읽기 전용 모드에서는 제출 로직 수행 X
+    if (readOnly) {
+      setSubmitting(false);
+      return;
+    }
+
     if (!approvers || approvers.length === 0) {
       setAlertInfo({
         open: true,
@@ -184,7 +219,9 @@ export default function AddApproval() {
             setAttachments={setAttachments}
             approvers={approvers}
             references={references}
-            onOpenModal={() => setOpen(true)}
+            onOpenModal={() => {
+              if (!readOnly) setOpen(true);
+            }}
             onFormSubmit={handleFormSubmit}
             alertInfo={alertInfo}
             setAlertInfo={setAlertInfo}
@@ -196,8 +233,12 @@ export default function AddApproval() {
                   approvalReferences={references}
                   templateValues={templateValues}
                   setTemplateValues={setTemplateValues}
-                  readOnly={false}
-                  docNo={null}
+                  readOnly={readOnly}
+                  docNo={initialData?.docNo}
+                  draftUser={initialData?.creator?.name}
+                  draftDept={initialData?.creator?.department}
+                  draftPosition={initialData?.creator?.position}
+                  draftDate={initialData?.createdAt}
                 />
               ) : null
             }
@@ -261,7 +302,7 @@ export default function AddApproval() {
       </Grid>
 
       {/* 조직도 모달 */}
-      <OrganizationModal open={open} onClose={() => setOpen(false)} list={list} setList={setList} />
+      <OrganizationModal open={open && !readOnly} onClose={() => setOpen(false)} list={list} setList={setList} />
     </>
   );
 }

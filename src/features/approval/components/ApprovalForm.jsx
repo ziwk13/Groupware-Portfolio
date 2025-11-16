@@ -33,7 +33,8 @@ export default function ApprovalForm({
   onFormSubmit,
   alertInfo,
   setAlertInfo,
-  TemplateRendererSlot
+  TemplateRendererSlot,
+  readOnly = false
 }) {
   // 40px 높이를 위한 공통 스타일
   const customInputStyle = {
@@ -76,24 +77,33 @@ export default function ApprovalForm({
             <MainCard
               title={
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: { xs: 1, lg: 2 } }}>
-                  <Button variant="outlined" color="primary" sx={{ height: '35px' }} onClick={() => setFormModalOpen(true)}>
-                    양식 선택
-                  </Button>
+                  {!readOnly && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        sx={{ height: '35px' }}
+                        onClick={() => !readOnly && setFormModalOpen(true)}
+                      >
+                        양식 선택
+                      </Button>
 
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    type="button"
-                    sx={{ height: '35px' }}
-                    endIcon={<PersonAddAlt1OutlinedIcon />}
-                    onClick={onOpenModal}
-                  >
-                    결재선 수정
-                  </Button>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        type="button"
+                        sx={{ height: '35px' }}
+                        endIcon={<PersonAddAlt1OutlinedIcon />}
+                        onClick={() => !readOnly && onOpenModal()}
+                      >
+                        결재선 수정
+                      </Button>
 
-                  <Button variant="contained" color="primary" type="submit" sx={{ height: '35px' }} disabled={isSubmitting}>
-                    상신
-                  </Button>
+                      <Button variant="contained" color="primary" type="submit" sx={{ height: '35px' }} disabled={isSubmitting}>
+                        상신
+                      </Button>
+                    </>
+                  )}
 
                   <Box sx={{ flexGrow: 1 }} />
 
@@ -123,7 +133,7 @@ export default function ApprovalForm({
                   </Grid>
                 )}
                 <Grid item xs={12}>
-                  <AttachmentDropzone attachments={attachments} setAttachments={setAttachments} height={100} />
+                  <AttachmentDropzone attachments={attachments} setAttachments={setAttachments} height={100} readOnly={readOnly} />
                 </Grid>
               </Grid>
             </MainCard>
