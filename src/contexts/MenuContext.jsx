@@ -7,6 +7,7 @@ import { componentMapper } from 'utils/mappers/componentMapper';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
+import useAuth from 'hooks/useAuth';
 
 const MenuContext = createContext(null);
 
@@ -18,7 +19,6 @@ const buildTree = (list, parentCode = null, isRoute = false) => {
     if (item.parentCode === parentCode) {
       let config;
       try {
-        // value1이 null이거나 비어있으면 파싱 시도 하지 않음
         if (!item.value1) {
           continue;
         }
@@ -29,12 +29,12 @@ const buildTree = (list, parentCode = null, isRoute = false) => {
           `[MenuContext] 코드(${item.code})에 대한 JSON 파싱에 실패했습니다. 값: "${item.value1}". 이 항목을 건너뜁니다.`,
           e.message
         );
-        continue; // 파싱 실패 시 건너뜀
+        continue;
       }
 
       const node = {
         ...config,
-        id: config.id || item.code // id가 없으면 code로 대체
+        id: config.id || item.code
       };
 
       // 라우트(Route) 트리 빌드
@@ -56,7 +56,6 @@ const buildTree = (list, parentCode = null, isRoute = false) => {
           //유효한 '레이아웃/그룹' 라우트 (자식만 있는 경우)
           children.push(node);
         }
-        // '단순 링크' (componentPath도, children도 없는 경우)는 무시
       }
       // 메뉴 트리 빌드
       else {
@@ -72,12 +71,11 @@ const buildTree = (list, parentCode = null, isRoute = false) => {
   return children;
 };
 
-// 데이터 처리 헬퍼 함수
-const processMenuData = (menuData, routeData) => {
+const processMenuData = (menuData, routeData, userRole) => {
   // API 응답 원본 가공
   const parseItem = (dto) => ({
     ...dto,
-    parentCode: dto.value2, // 계층 구조를 위한 부모 코드
+    parentCode: dto.value2,
     sortOrder: dto.sortOrder || 0
   });
 
@@ -89,8 +87,11 @@ const processMenuData = (menuData, routeData) => {
   routeData.map(parseItem).forEach((item) => allItemsMap.set(item.code, item));
   const allRoutes = Array.from(allItemsMap.values()).sort((a, b) => a.sortOrder - b.sortOrder);
 
-  // 메뉴 아이템 생성 (Breadcrumbs, MenuList용)
-  const rootMenuDto = allMenus.find((item) => item.code === 'MN1');
+  // 검색을 위해 모든 라우트 아이템을 Map으로 만듭니다.
+  const itemMap = new Map(allRoutes.map((item) => [item.code, item]));
+
+  // 메뉴 아이템 생성 (Breadcrumbs, MenuList용) - value2(부모)가 없는 경우 최상위 부모
+  const rootMenuDto = allMenus.find((item) => !item.value2);
 
   let menuItems;
   if (rootMenuDto) {
@@ -98,7 +99,7 @@ const processMenuData = (menuData, routeData) => {
     try {
       rootMenuNode = JSON.parse(rootMenuDto.value1);
     } catch (e) {
-      console.error(`[MenuContext] 루트 메뉴('MN1') 파싱에 실패했습니다.`, e);
+      console.error(`[MenuContext] 루트 메뉴 파싱에 실패했습니다.`, e);
       rootMenuNode = {};
     }
 
@@ -106,7 +107,7 @@ const processMenuData = (menuData, routeData) => {
     rootMenuNode.icon = getIcon(rootMenuNode.icon);
     menuItems = { items: [rootMenuNode] };
   } else {
-    console.error(`[MenuContext] 루트 메뉴('MN1')를 찾을 수 없습니다.`);
+    console.error(`[MenuContext] 루트 메뉴를 찾을 수 없습니다.`);
     menuItems = { items: [] };
   }
 
@@ -123,13 +124,80 @@ const processMenuData = (menuData, routeData) => {
     children: allTopLevelRoutes
   };
 
-  return { menuItems, dynamicMainRoutes };
+  const searchableItems = [];
+  for (const item of allRoutes) {
+    let config;
+    try {
+      if (!item.value1) continue;
+      config = JSON.parse(item.value1);
+      if (!config) continue;
+    } catch (e) {
+      continue;
+    }
+
+    if (config.url && config.title) {
+      if (config.admin === true && userRole !== 'ROLE_ADMIN') {
+        continue;
+      }
+
+      let path = config.url;
+      const title = config.title;
+
+      if (path.includes(':')) {
+        // 필수 파라미터가 있는지 확인
+        if (/\/:[^?]+\//.test(path) || /\/:[^?]+$/.test(path)) {
+          continue;
+        }
+
+        // 선택적 파라미터가 있는 경우, 해당 부분을 제거
+        path = path.split('/:')[0];
+      }
+
+      // Breadcrumbs 생성
+      const breadcrumbs = [];
+      let current = item;
+      while (current && current.parentCode) {
+        const parent = itemMap.get(current.parentCode);
+        if (parent) {
+          try {
+            const parentConfig = JSON.parse(parent.value1);
+            if (parentConfig && parentConfig.title) {
+              breadcrumbs.unshift(parentConfig.title);
+            }
+          } catch (e) {
+            // 부모 파싱 오류는 무시
+          }
+          current = parent;
+        } else {
+          current = null;
+        }
+      }
+
+      searchableItems.push({
+        title,
+        path,
+        breadcrumbs: breadcrumbs.join(' > ')
+      });
+    }
+  }
+
+  // breadcrumbs 및 title로 정렬
+  searchableItems.sort((a, b) => {
+    const breadcrumbCompare = a.breadcrumbs.localeCompare(b.breadcrumbs);
+    if (breadcrumbCompare !== 0) {
+      return breadcrumbCompare;
+    }
+    return a.title.localeCompare(b.title);
+  });
+
+  return { menuItems, dynamicMainRoutes, searchableItems };
 };
 
-// 3. MenuProvider 컴포넌트
 export const MenuProvider = ({ children }) => {
+  const { user } = useAuth();
   const [menuItems, setMenuItems] = useState(null);
   const [dynamicMainRoutes, setDynamicMainRoutes] = useState(null);
+  const [searchableItems, setSearchableItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -143,10 +211,11 @@ export const MenuProvider = ({ children }) => {
           throw new Error('메뉴 또는 라우트 데이터를 가져오는데 실패했습니다.');
         }
 
-        const { menuItems, dynamicMainRoutes } = processMenuData(menuData, routeData);
+        const { menuItems, dynamicMainRoutes, searchableItems } = processMenuData(menuData, routeData, user?.role);
 
         setMenuItems(menuItems);
         setDynamicMainRoutes(dynamicMainRoutes);
+        setSearchableItems(searchableItems);
       } catch (err) {
         console.error('메뉴 데이터 로드 중 오류 발생:', err);
         setError(err);
@@ -156,23 +225,22 @@ export const MenuProvider = ({ children }) => {
     };
 
     fetchMenuData();
-  }, []);
+  }, [user]);
 
-  // useMemo로 컨텍스트 값 최적화
   const value = useMemo(
     () => ({
       menuItems,
       dynamicMainRoutes,
+      searchableItems,
       loading,
       error
     }),
-    [menuItems, dynamicMainRoutes, loading, error]
+    [menuItems, dynamicMainRoutes, searchableItems, loading, error]
   );
 
   return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>;
 };
 
-// useMenu 커스텀 훅
 export const useMenu = () => {
   const context = useContext(MenuContext);
   if (!context) {
