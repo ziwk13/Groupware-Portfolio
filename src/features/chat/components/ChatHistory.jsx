@@ -67,14 +67,34 @@ export default function ChatHistory({ data, theme, user }) {
               <Grid container spacing={gridSpacing}>
                 <Grid size={{ xs: 0, sm: 5 }} />
                 <Grid size={{ xs: 12, sm: 7 }}>
-                  <Card
+                  <Box
                     sx={{
-                      display: 'inline-block',
-                      float: 'right',
-                      bgcolor: 'primary.light',
-                      ...theme.applyStyles('dark', { bgcolor: 'grey.500' })
+                      display: 'flex',
+                      alignItems: 'flex-end', // 하단 정렬
+                      justifyContent: 'flex-end', // 오른쪽 정렬
+                      gap: 0.5 // 4px 간격
                     }}
                   >
+                    {history.unreadCount > 0 && (
+                      <Typography
+                      variant='caption'
+                      sx={{
+                        color: 'primary.main',
+                        fontWeight: 'bold',
+                        mb: 1
+                      }}
+                      >
+                        {history.unreadCount}
+                      </Typography>
+                    )}
+                    <Card
+                    sx={{
+                      display: 'inline-block',
+                        float: 'right', // (Box가 flex-end를 하므로 이젠 필요 없을 수 있음)
+                        bgcolor: 'primary.light',
+                        ...theme.applyStyles('dark', { bgcolor: 'grey.500' })
+                    }}
+                    >
                     <CardContent sx={{ p: 2, pb: '16px !important', width: 'fit-content', ml: 'auto' }}>
                       <Grid container spacing={1}>
                         <Grid size={12}>
@@ -90,6 +110,7 @@ export default function ChatHistory({ data, theme, user }) {
                       </Grid>
                     </CardContent>
                   </Card>
+                  </Box>
                 </Grid>
               </Grid>
             </Grid>
@@ -98,14 +119,22 @@ export default function ChatHistory({ data, theme, user }) {
             <Grid size={12}>
               <Grid container spacing={gridSpacing}>
                 <Grid size={{ xs: 12, sm: 7 }}>
-                  <Card
+                  <Box
                     sx={{
-                      display: 'inline-block',
-                      float: 'left',
-                      bgcolor: 'secondary.light',
-                      ...theme.applyStyles('dark', { bgcolor: 'dark.900' })
+                      display: 'flex',
+                      alignItems: 'flex-end', // 하단 정렬
+                      justifyContent: 'flex-start', // 왼쪽 정렬
+                      gap: 0.
                     }}
                   >
+                    <Card
+                      sx={{
+                        display: 'inline-block',
+                        float: 'left',
+                        bgcolor: 'secondary.light',
+                        ...theme.applyStyles('dark', { bgcolor: 'dark.900' })
+                      }}
+                    >
                     <CardContent sx={{ p: 2, pb: '16px !important' }}>
                       <Grid container spacing={1}>
                         <Grid size={12}>
@@ -124,6 +153,19 @@ export default function ChatHistory({ data, theme, user }) {
                       </Grid>
                     </CardContent>
                   </Card>
+                  {history.unreadCount > 0 && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'primary.main',
+                          fontWeight: 'bold',
+                          mb: 1 // Card의 paddingBottom과 맞춤
+                        }}
+                      >
+                        {history.unreadCount}
+                      </Typography>
+                    )}
+                    </Box>
                 </Grid>
               </Grid>
             </Grid>
