@@ -119,8 +119,8 @@ export default function ChatHeader({
                 horizontal: 'right'
               }}
             >
-              <MenuItem onClick={handleLeaveRoomClick}>채팅방 나가기</MenuItem>
               <MenuItem onClick={handleInviteMenuClick}>초대하기</MenuItem>
+              <MenuItem onClick={handleLeaveRoomClick}>채팅방 나가기</MenuItem>
             </Menu>
           </Grid>
         )}
