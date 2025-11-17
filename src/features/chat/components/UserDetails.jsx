@@ -10,7 +10,6 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import AvatarStatus from './AvatarStatus';
 import SubCard from 'ui-component/cards/SubCard';
 import { gridSpacing } from 'store/constant';
 import { getImageUrl, ImagePath } from 'utils/getImageUrl';
@@ -53,10 +52,6 @@ export default function UserDetails({ user }) {
                     bgcolor: 'transparent'
                   }}
                 />
-              </Grid>
-              <Grid size={12}>
-                <AvatarStatus status={user.online_status} />
-                <Typography variant="caption">{user?.online_status?.replaceAll('_', ' ')}</Typography>
               </Grid>
               <Grid size={12}>
                 <Typography variant="h5">{user.name}</Typography>

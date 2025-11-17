@@ -38,7 +38,6 @@ const mapDtoToUser = (room) => ({
   avatar: room.profile,
   lastMessage: room.lastMessage,
   unReadChatCount: room.unreadCount,
-  online_status: 'available',
   lastMessageTimestamp: room.lastMessageCreatedAt
 });
 
@@ -288,7 +287,6 @@ export default function ChatDrawer({
                 <Grid container spacing={2} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
                   <Grid>
                     <UserAvatar user={{
-                      online_status: 'available',
                       avatar: user?.avatar || null,
                       name: user?.name || 'User',
                       position: user?.position

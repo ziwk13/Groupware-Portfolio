@@ -13,7 +13,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import AvatarStatus from './AvatarStatus';
 import { getImageUrl, ImagePath } from 'api/getImageUrl';
 
 // assets
@@ -55,13 +54,13 @@ export default function ChatHeader({
 
   return (
     <Grid size={12}>
-      <Grid container spacing={0.1} sx={{ alignItems: 'center' }}>
-        <Grid>
+      <Grid container spacing={0.1} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
+        <Grid sx={{flexShrink:0}}>
           <IconButton onClick={onClose} size="small" aria-label="chat menu collapse">
             <IconArrowLeft />
           </IconButton>
         </Grid>
-        <Grid>
+        <Grid sx={{flex:1}}>
           <Grid container spacing={1} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
             <Grid>
               <Avatar alt={user.name} src={user.avatar && getImageUrl(`${user.avatar}`, ImagePath.USERS)} />
@@ -74,11 +73,10 @@ export default function ChatHeader({
                       sx={{
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        wgiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap'
                       }}
                     >{user.name}
                     </Typography>
-                    {!user.isTeam && user.online_status && <AvatarStatus status={user.online_status} />}
                   </Stack>
                 </Grid>
                 <Grid size={12}>
@@ -97,10 +95,9 @@ export default function ChatHeader({
             </Grid>
           </Grid>
         </Grid>
-        <Grid size={{ sm: 'grow' }} />
 
         {!isUserDetailsOpen && (
-          <Grid>
+          <Grid sx={{flexShrink:0}}>
             <IconButton onClick={handleClickSort} size="large" aria-label="chat user details change">
               <MoreHorizTwoToneIcon />
             </IconButton>
