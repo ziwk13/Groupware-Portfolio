@@ -16,6 +16,7 @@ import { createRoom } from '../api/Chat';
 import useAuth from 'hooks/useAuth';
 import { appDrawerWidth as drawerWidth } from 'store/constant';
 import OrganizationModal from 'features/organization/components/OrganizationModal';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 // assets
 
@@ -56,6 +57,10 @@ export default function ChatMainPage() {
   const [openOrgModal, setOpenOrgModal] = useState(false); // (Modal B) 사원 선택용
   const [initialUsersForCreateModal, setInitialUsersForCreateModal] = useState([]); // Modal A에 전달할 사용자
   const { openChatWithUser } = useChat();
+
+  // 에러 출력용 모달
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const user = chatCtx?.selectedUser;
   const selectedUrl = chatCtx?.selectedUrl;
@@ -121,7 +126,8 @@ export default function ChatMainPage() {
           };
           openChatWithUser(mappedNewRoom)  // 생성된 채팅방으로 바로 이동
         } catch (error) {
-          console.error("1:1 채팅방 생성 실패", error);
+          setErrorMessage("사용자 본인은 초대할 수 없습니다.");
+          setIsErrorModalOpen(true);
         }
       }
     } else {
@@ -199,6 +205,26 @@ export default function ChatMainPage() {
         list={[{ name: '초대자', empList: initialUsersForCreateModal }]}
         setList={handleOrgModalApply}
       />
+      <Dialog
+        open={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)} // 모달 바깥쪽을 클릭해도 닫히게 설정
+        aria-labelledby="error-alert-dialog-title"
+        aria-describedby="error-alert-dialog-description"
+      >
+        <DialogTitle id="error-alert-dialog-title">
+          {"알림"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="error-alert-dialog-description">
+            {errorMessage} {/* state에 저장된 에러 메시지 표시 */}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsErrorModalOpen(false)} autoFocus>
+            확인
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
