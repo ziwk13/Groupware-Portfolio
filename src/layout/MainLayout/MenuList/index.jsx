@@ -9,12 +9,14 @@ import Box from '@mui/material/Box';
 import NavItem from './NavItem';
 import NavGroup from './NavGroup';
 import { MenuOrientation } from 'config';
-import menuItems from 'menu-items';
 import useConfig from 'hooks/useConfig';
 
-// import { Menu } from 'menu-items/widget';
 import { HORIZONTAL_MAX_ITEM } from 'config';
+
 import { useGetMenuMaster } from 'api/menu';
+
+// Context import
+import { useMenu } from 'contexts/MenuContext';
 
 // ==============================|| SIDEBAR MENU LIST ||============================== //
 
@@ -24,34 +26,20 @@ function MenuList() {
   const {
     state: { menuOrientation }
   } = useConfig();
-  // const { menuLoading } = useGetMenu();
+
+  // === MenuContext 사용 ===
+  const { menuItems, loading: menuLoading } = useMenu();
+
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
 
   const [selectedID, setSelectedID] = useState('');
-  // const [menuItems, setMenuItems] = useState<{ items: NavItemType[] }>({ items: [] });
 
-  // let widgetMenu = Menu();
-
-  // useLayoutEffect(() => {
-  //   const isFound = menuItem.items.some((element) => {
-  //     if (element.id === 'group-widget') {
-  //       return true;
-  //     }
-  //     return false;
-  //   });
-  //   if (menuLoading) {
-  //     menuItem.items.splice(1, 0, widgetMenu);
-  //     setMenuItems({ items: [...menuItem.items] });
-  //   } else if (!menuLoading && widgetMenu?.id !== undefined && !isFound) {
-  //     menuItem.items.splice(1, 1, widgetMenu);
-  //     setMenuItems({ items: [...menuItem.items] });
-  //   } else {
-  //     setMenuItems({ items: [...menuItem.items] });
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [menuLoading]);
+  // 메뉴 로딩 중이거나, 메뉴 아이템이 없으면 렌더링하지 않음
+  if (menuLoading || !menuItems || !menuItems.items) {
+    return null;
+  }
 
   // last menu-item to show in horizontal menu bar
   const lastItem = isHorizontal ? HORIZONTAL_MAX_ITEM : null;

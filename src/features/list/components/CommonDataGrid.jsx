@@ -32,21 +32,28 @@ function ErrorDisplay({ message }) {
   );
 }
 
-export default function CommonDataGrid({ rows, columns, loading, error, ...props }) {
+export default function CommonDataGrid({
+  rows,
+  columns,
+  loading,
+  error,
+  scrollEnabled = false,
+  ...props
+}) {
   if (error) {
     return <ErrorDisplay message={error} />;
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    // scrollEnabled가 true일 때 Box의 높이를 100%로 설정하여 부모 컨테이너의 높이를 따름
+    <Box sx={{ width: '100%', height: scrollEnabled ? '100%' : 'auto' }}>
       <DataGrid
         rows={rows}
         columns={columns}
         loading={loading}
         getRowHeight={() => 'auto'}
-        autoHeight
+        autoHeight={!scrollEnabled} // [CHANGED] scrollEnabled 값에 따라 autoHeight 토글
         hideFooterPagination={true}
-        disableRowSelectionOnClick
         disableColumnMenu
         slots={{
           noRowsOverlay: CustomNoRowsOverlay
@@ -54,11 +61,11 @@ export default function CommonDataGrid({ rows, columns, loading, error, ...props
         sx={{
           // 개별 헤더 셀
           '& .MuiDataGrid-columnHeader': {
-            borderRight: '1px solid rgba(224, 224, 224, 1)'
+            borderRight: '1px solid rgba(227, 232, 239, 0.15)'
           },
           // 모든 데이터 셀 공통
           '& .MuiDataGrid-cell': {
-            borderRight: '1px solid rgba(224, 224, 224, 1)',
+            borderRight: '1px solid rgba(227, 232, 239, 0.15)',
             py: 1,
             px: 1.5,
             display: 'flex',
@@ -66,7 +73,7 @@ export default function CommonDataGrid({ rows, columns, loading, error, ...props
           },
           // 헤더 행 컨테이너
           '& .MuiDataGrid-columnHeaders': {
-            borderBottom: '1px solid rgba(224, 224, 224, 1)'
+            borderBottom: 'none'
           },
           // 마지막 열 테두리 제거
           '& .MuiDataGrid-columnHeader:last-of-type, & .MuiDataGrid-cell:last-of-type': {
