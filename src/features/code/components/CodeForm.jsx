@@ -94,6 +94,8 @@ function CodeForm({ selectedPrefix, selectedData, onFormChange }) {
             onChange={onFormChange}
             fullWidth
             InputLabelProps={{ shrink: !!selectedData.value1 }}
+            multiline // 내용이 길어지면 세로로 늘어나도록 수정
+            minRows={1} // 최소 1줄 높이 유지
           />
           <TextField
             name="value2"
@@ -102,6 +104,8 @@ function CodeForm({ selectedPrefix, selectedData, onFormChange }) {
             onChange={onFormChange}
             fullWidth
             InputLabelProps={{ shrink: !!selectedData.value2 }}
+            multiline // 내용이 길어지면 세로로 늘어나도록 수정
+            minRows={1} // 최소 1줄 높이 유지
           />
           <TextField
             name="value3"
@@ -110,6 +114,8 @@ function CodeForm({ selectedPrefix, selectedData, onFormChange }) {
             onChange={onFormChange}
             fullWidth
             InputLabelProps={{ shrink: !!selectedData.value3 }}
+            multiline // 내용이 길어지면 세로로 늘어나도록 수정
+            minRows={1} // 최소 1줄 높이 유지
           />
           <TextField
             name="sortOrder"

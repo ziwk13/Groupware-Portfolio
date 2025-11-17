@@ -1,7 +1,7 @@
 // EmployeeList.jsx
 import { Box, List, ListItemButton, Paper, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { organizationAPI } from '../api/organizationApi';
+import { getEmployeesByDeptCode } from 'features/employee/api/employeeAPI';
 import Avatar from 'ui-component/extended/Avatar';
 import Stack from '@mui/material/Stack';
 import MainCard from 'ui-component/cards/MainCard';
@@ -21,8 +21,7 @@ export default function EmployeeList({
   useEffect(() => {
     if (!selectedDept) return;
 
-    organizationAPI
-      .getEmployeesByDeptCode(selectedDept)
+    getEmployeesByDeptCode(selectedDept)
       .then((data) => setEmployees(Array.isArray(data) ? data : []))
       .catch((err) => console.error('직원 목록 가져오기 실패', err));
   }, [selectedDept, refreshList]);

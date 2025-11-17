@@ -16,8 +16,8 @@ import { FormattedMessage } from 'react-intl';
 
 // project imports
 import { ThemeDirection } from 'config';
-import navigation from 'menu-items';
 import useConfig from 'hooks/useConfig';
+import { useMenu } from 'contexts/MenuContext';
 
 // assets
 import { IconChevronRight, IconTallymark1 } from '@tabler/icons-react';
@@ -59,6 +59,10 @@ export default function Breadcrumbs({
     state: { themeDirection }
   } = useConfig();
 
+  // === MenuContext 사용 ===
+  const { menuItems } = useMenu();
+  const navigation = menuItems;
+
   const [main, setMain] = useState();
   const [item, setItem] = useState();
 
@@ -80,6 +84,10 @@ export default function Breadcrumbs({
   let customLocation = location.pathname;
 
   useEffect(() => {
+    if (!navigation || !navigation.items) {
+      return;
+    }
+
     const getCollapse = (menu) => {
       if (!custom && menu.children) {
         menu.children.filter((collapse) => {
@@ -114,8 +122,8 @@ export default function Breadcrumbs({
       }
       return false;
     });
-    // customLocation (경로) 또는 custom prop이 변경될 때만 useEffect 실행
-  }, [customLocation, custom]);
+    // customLocation (경로), custom prop, 또는 navigation 객체 자체가 변경될 때만 useEffect 실행
+  }, [customLocation, custom, navigation]);
 
   // item separator
   const SeparatorIcon = separator;

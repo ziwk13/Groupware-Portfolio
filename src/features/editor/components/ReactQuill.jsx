@@ -7,6 +7,11 @@ import Box from '@mui/material/Box';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
+import Quill from 'quill';
+import ImageResize from 'quill-image-resize-module-react';
+
+Quill.register('modules/imageResize', ImageResize);
+
 // project imports
 import { ThemeDirection } from 'config';
 import useConfig from 'hooks/useConfig';
@@ -14,7 +19,7 @@ import { withAlpha } from 'utils/colorUtils';
 
 // ==============================|| QUILL EDITOR ||============================== //
 
-export default function ReactQuillDemo({ value, editorMinHeight = 125, onChange }) {
+export default function ReactQuillDemo({ value, editorMinHeight = 125, onChange, modules }) {
   const {
     state: { fontFamily }
   } = useConfig();
@@ -54,9 +59,9 @@ export default function ReactQuillDemo({ value, editorMinHeight = 125, onChange 
         })
       }}
     >
-      <ReactQuill {...(value && { value })} {...(onChange && { onChange })} />
+      <ReactQuill {...(value && { value })} {...(onChange && { onChange })} {...(modules && {modules})} />
     </Box>
   );
 }
 
-ReactQuillDemo.propTypes = { value: PropTypes.string, editorMinHeight: PropTypes.number, onChange: PropTypes.func };
+ReactQuillDemo.propTypes = { value: PropTypes.string, editorMinHeight: PropTypes.number, onChange: PropTypes.func, modules: PropTypes.any };

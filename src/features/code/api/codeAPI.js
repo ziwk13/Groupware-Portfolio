@@ -35,58 +35,17 @@ export const codeAPI = {
     }
   },
 
-  /**
-   * 전체 부서 목록 조회
-   */
-  getDepartments: async () => {
-    try {
-      const res = await axiosServices.get(`${COMMON_CODE_URL}/department`);
-      const data = res.data?.data;
-      return Array.isArray(data) ? data : [];
-    } catch (err) {
-      console.error('부서 목록 조회 실패:', err);
-      return [];
-    }
-  },
 
   /**
-   * 전체 재직 상태 목록 조회
+   * 전체 메뉴 목록 조회
    */
-  getEmployeeStatus: async () => {
+  getAllCodeWithoutRoot: async (prefix) => {
     try {
-      const res = await axiosServices.get(`${COMMON_CODE_URL}/status`);
+      const res = await axiosServices.get(`${COMMON_CODE_URL}/${prefix}`);
       const data = res.data?.data;
       return Array.isArray(data) ? data : [];
     } catch (err) {
-      console.error('재직 상태 목록 조회 실패:', err);
-      return [];
-    }
-  },
-
-  /**
-   * 전체 직급 목록 조회
-   */
-  getPositions: async () => {
-    try {
-      const res = await axiosServices.get(`${COMMON_CODE_URL}/position`);
-      const data = res.data?.data;
-      return Array.isArray(data) ? data : [];
-    } catch (err) {
-      console.error('직급 목록 조회 실패:', err);
-      return [];
-    }
-  },
-
-  /**
-   * 전체 권한 목록 조회
-   */
-  getRoles: async () => {
-    try {
-      const res = await axiosServices.get(`${COMMON_CODE_URL}/role`);
-      const data = res.data?.data;
-      return Array.isArray(data) ? data : [];
-    } catch (err) {
-      console.error('권한 목록 조회 실패:', err);
+      console.error('코드 목록 조회 실패:', err);
       return [];
     }
   },

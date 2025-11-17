@@ -6,7 +6,7 @@ import MainCard from 'ui-component/cards/MainCard';
 import OrganizationTree from 'features/organization/components/OrganizationTree';
 import EmployeeList from 'features/organization/components/EmployeeList';
 import EmployeeForm from '../components/EmployeeForm';
-import { organizationAPI } from '../api/organizationApi';
+import { codeAPI } from 'features/code/api/codeAPI';
 import useAuth from 'hooks/useAuth';
 import Alert from '@mui/material/Alert';
 import EmployeeHistoryModal from 'features/employee/components/EmployeeHistoryModal';
@@ -87,9 +87,9 @@ export default function OrganizationPage() {
     const loadCommonCodes = async () => {
       try {
         const [statusRes, positionsRes, rolesRes] = await Promise.all([
-          organizationAPI.getEmployeeStatus(),
-          organizationAPI.getPositions(),
-          organizationAPI.getRoles()
+          codeAPI.getAllCodeWithoutRoot('ES'),
+          codeAPI.getAllCodeWithoutRoot('PS'),
+          codeAPI.getAllCodeWithoutRoot('AU'),
         ]);
         setCommonCodes({
           status: statusRes,

@@ -61,11 +61,11 @@ export default function CommonDataGrid({
         sx={{
           // 개별 헤더 셀
           '& .MuiDataGrid-columnHeader': {
-            borderRight: '1px solid rgba(224, 224, 224, 1)'
+            borderRight: '1px solid rgba(227, 232, 239, 0.15)'
           },
           // 모든 데이터 셀 공통
           '& .MuiDataGrid-cell': {
-            borderRight: '1px solid rgba(224, 224, 224, 1)',
+            borderRight: '1px solid rgba(227, 232, 239, 0.15)',
             py: 1,
             px: 1.5,
             display: 'flex',
@@ -73,7 +73,7 @@ export default function CommonDataGrid({
           },
           // 헤더 행 컨테이너
           '& .MuiDataGrid-columnHeaders': {
-            borderBottom: '1px solid rgba(224, 224, 224, 1)'
+            borderBottom: 'none'
           },
           // 마지막 열 테두리 제거
           '& .MuiDataGrid-columnHeader:last-of-type, & .MuiDataGrid-cell:last-of-type': {

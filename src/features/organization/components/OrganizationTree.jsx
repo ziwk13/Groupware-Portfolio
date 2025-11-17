@@ -5,7 +5,7 @@
 // - 선택된 부서 코드를 부모 컴포넌트로 전달 (setSelectedDept)
 
 import { useEffect, useState } from "react"; // useState - 부서목록 저장용 state
-import { organizationAPI } from "../api/organizationApi";
+import { codeAPI } from "features/code/api/codeAPI";
 
 // MUI TreeView
 import Collapse from '@mui/material/Collapse';
@@ -64,8 +64,8 @@ export default function OrganizationTree({ setSelectedDept }) {
 
   // 1. 부서 데이터 로드
   useEffect(() => {
-    organizationAPI
-      .getDepartments()
+    codeAPI
+      .getAllCodeWithoutRoot('DP')
       .then((data) => setDepartments(data || []))
       .catch((err) => console.error("부서 가져오기 실패", err));
   }, []);

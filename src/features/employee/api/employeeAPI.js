@@ -64,3 +64,20 @@ export const syncHR = (data) => {
     }
   });
 };
+
+/**
+ * (GET) 특정 부서의 직원 목록 조회 API
+ * @param {string} deptCode - 부서 코드
+ */
+export const getEmployeesByDeptCode = async (deptCode) => {
+  try {
+    const res = await axiosServices.get(`/api/employees/department/${deptCode}`, {
+      withCredentials: true
+    });
+    const data = res.data?.data || res.data;
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error(`직원 목록 조회 실패 (${deptCode}):`, err);
+    return [];
+  }
+};
