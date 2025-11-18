@@ -18,17 +18,15 @@ import Alert from '@mui/material/Alert';
 import { gridSpacing } from 'store/constant';
 import useAuth from 'hooks/useAuth';
 import AnimateButton from 'ui-component/extended/AnimateButton';
+import AttachmentProfile from 'features/attachment/components/AttachmentProfile';
 
-// assets
-
-// 아이콘 imports
+// 아이콘
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import MailTwoToneIcon from '@mui/icons-material/MailTwoTone';
 import CalendarTodayTwoToneIcon from '@mui/icons-material/CalendarTodayTwoTone';
 import BusinessTwoToneIcon from '@mui/icons-material/BusinessTwoTone';
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
-import AttachmentProfile from 'features/attachment/components/AttachmentProfile';
 
 export default function UserProfile() {
   const { user, updateProfile } = useAuth();
@@ -40,24 +38,49 @@ export default function UserProfile() {
 
   useEffect(() => {
     if (user?.phoneNumber) {
-      setPhoneNumber(user.phoneNumber);
+      // 컴포넌트 마운트 시 또는 user 정보 변경 시 기존 번호 포맷팅.
+      const cleaned = (user.phoneNumber || '').replace(/[^\d]/g, '').slice(0, 11);
+      const length = cleaned.length;
+      let formattedValue = cleaned;
+      if (length > 3 && length <= 7) {
+        formattedValue = `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+      } else if (length > 7) {
+        formattedValue = `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7)}`;
+      }
+      setPhoneNumber(formattedValue);
     }
   }, [user]);
 
+  /**
+   * 전화번호 입력 시 자동으로 하이픈(-)을 추가하는 핸들러 (010-0000-0000 형식)
+   */
   const handlePhoneNumberChange = (event) => {
-    setPhoneNumber(event.target.value);
+    const rawValue = event.target.value;
+    // 숫자만 추출하고 최대 11자리로 제한
+    const cleaned = rawValue.replace(/[^\d]/g, '').slice(0, 11);
+    const length = cleaned.length;
+
+    let formattedValue = cleaned;
+    if (length > 3 && length <= 7) {
+      formattedValue = `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+    } else if (length > 7) {
+      formattedValue = `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7)}`;
+    }
+
+    setPhoneNumber(formattedValue);
   };
 
   const handleSave = async () => {
     setSuccessMessage(null);
     setErrorMessage(null);
 
-    // FormData 객체 생성
     const formData = new FormData();
 
+    // 참고: 현재는 하이픈이 포함된 값(예: '010-1234-5678')이 전송됩니다.
+    // 만약 서버에서 숫자만(예: '01012345678') 받기를 원한다면,
+    // phoneNumber.replace(/[^\d]/g, '') 값을 append 해야 합니다.
     formData.append('phoneNumber', phoneNumber);
 
-    // 파일이 있을 경우, DTO의 필드명('multipartFile')에 맞게 파일 추가
     if (file) {
       formData.append('multipartFile', file);
     }
@@ -89,7 +112,6 @@ export default function UserProfile() {
         </Grid>
       )}
 
-      {/* 기존 프로필 이미지 영역 */}
       <Grid size={4}>
         <AttachmentProfile file={file} setFile={setFile} />
       </Grid>
@@ -155,6 +177,7 @@ export default function UserProfile() {
               variant="standard"
               value={phoneNumber}
               onChange={handlePhoneNumberChange}
+              placeholder="010-0000-0000"
               sx={{
                 marginLeft: 'auto',
                 '& .MuiInputBase-input': {
