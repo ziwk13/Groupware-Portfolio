@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 
 // project imports
 import { gridSpacing } from 'store/constant';
+import AttachmentListView from 'features/attachment/components/AttachmentListView';
 
 export default function ChatHistory({ data, theme, user }) {
   
@@ -98,9 +99,16 @@ export default function ChatHistory({ data, theme, user }) {
                     <CardContent sx={{ p: 2, pb: '16px !important', width: 'fit-content', ml: 'auto' }}>
                       <Grid container spacing={1}>
                         <Grid size={12}>
+                          {history.content && (
                           <Typography variant="body2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }) }}>
                             {history.content}
                           </Typography>
+                          )}
+                          {history.attachments && history.attachments.length > 0 && (
+                            <Box sx={{ mt: history.content ? 1 : 0, maxWidth: 350 }}>
+                              <AttachmentListView attachments={history.attachments} height="auto" />
+                            </Box>
+                          )}
                         </Grid>
                         <Grid size={12}>
                           <Typography align="right" variant="subtitle2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }) }}>
@@ -141,9 +149,16 @@ export default function ChatHistory({ data, theme, user }) {
                           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
                             {history.senderName || '상대방'}
                           </Typography>
+                          {history.content && (
                           <Typography variant="body2" sx={{ mt: 0.5 }}>
                             {history.content}
                           </Typography>
+                          )}
+                          {history.attachments && history.attachments.length > 0 && (
+                            <Box sx={{ mt: history.content ? 1 : 0, maxWidth: 350 }}>
+                              <AttachmentListView attachments={history.attachments} height="auto" />
+                            </Box>
+                          )}
                         </Grid>
                         <Grid size={12}>
                           <Typography align="right" variant="subtitle2">
