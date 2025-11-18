@@ -1,13 +1,14 @@
 import { Box, Paper } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ChatHistory from './ChatHistory';
-import { getMessages, markRoomAsRead } from '../api/Chat';
+import { getMessages, markRoomAsRead, sendMessageWithFiles } from '../api/Chat';
 import MessageInput from './MessageInput';
-import { useStomp } from '../../../contexts/StompProvider';
+import { useStomp } from 'contexts/StompProvider';
 
 export default function ChatRoom({ roomId, user, theme }) {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const scrollContainerRef = useRef(null);
 
@@ -128,42 +129,76 @@ export default function ChatRoom({ roomId, user, theme }) {
   }, [messages]);
 
   // 메시지 전송 핸들러
-  const handleSendMessage = (message) => {
-    // 전송 시에도 isConnected와 client 체크
-    if (message.trim() && client && isConnected) {
-      const destination = `/app/chat/rooms/${roomId}/send`;
-      const body = message.trim();
-      // client.publish()를 직접 사용
-      client.publish({
-        destination: destination,
-        body: body
-      });
-    } else if (!client || !isConnected) {
-      console.warn('STOMP: 연결되지 않아 메시지를 보낼 수 없습니다.');
+  const handleSendMessage = async (data) => {
+
+    const { text, files } = data;  // files는 MessageInput의 attachments state
+
+    // 보낼 내용이 없으면 return
+    if (!text.trim() && (!files || files.length === 0)) {
+      return;
+    }
+
+    // 파일이 없고 텍스트만 있는 경우 STOMP로 즉시 전송
+    if (!files || files.length === 0) {
+      if (text.trim() && client && isConnected) {
+        const destination = `/app/chat/rooms/${roomId}/send`;
+        const payload = {
+          content: text.trim(),
+          attachments: null
+        };
+        client.publish({
+          destination: destination,
+          body: JSON.stringify(payload)
+        });
+      } else if (!client || !isConnected) {
+        setError('연결이 끊어졌습니다. 메시지를 보낼 수 없습니다');
+      }
+      return;
+    }
+
+    // 파일이 있는 경우: HTTP API로 전송
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    formData.append('content', text.trim());
+
+    try {
+      await sendMessageWithFiles(roomId, formData);
+    } catch (error) {
+      console.log("Error Object:", error);
+      console.log("Error Response:", error.response); 
+      console.log("Error Status:", error.response?.status);
+      setError(error.response?.data?.message || '파일 업로드에 실패 했습니다');
+    } finally {
+      setLoading(false);
     }
   };
-
-  return (
-    <Paper sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {error && (
-        <Box sx={{ p: 2, m: 'auto', color: 'red' }}>
-          {error.response?.data?.message || '잠시 후 다시 시도해 주세요'}
-        </Box>
-      )}
-      {!error && (
-        <>
-          {/* 채팅 내역 */}
-          <Box
-            ref={scrollContainerRef}
-            sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-            <ChatHistory data={messages} theme={theme} user={user} />
+    return (
+      <Paper sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {error && (
+          <Box sx={{ p: 2, m: 'auto', color: 'red' }}>
+            {error}
           </Box>
+        )}
+        {!error && (
+          <>
+            {/* 채팅 내역 */}
+            <Box
+              ref={scrollContainerRef}
+              sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+              <ChatHistory data={messages} theme={theme} user={user} />
+            </Box>
 
-          <Box sx={{ p: 2, pt: 0, borderTop: '1px solid #eee' }}>
-            <MessageInput onSend={handleSendMessage} />
-          </Box>
-        </>
-      )}
-    </Paper>
-  );
-}
+            <Box sx={{ p: 2, pt: 0, borderTop: '1px solid #eee' }}>
+              <MessageInput onSend={handleSendMessage} disabled={loading} />
+            </Box>
+          </>
+        )}
+      </Paper>
+    );
+  }
