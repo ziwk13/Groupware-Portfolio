@@ -82,6 +82,9 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   // ===== 출근 =====
   const handleClockIn = async () => {
+    if (today?.workStatus === 'VACATION') {
+      return setStatusMessage('오늘은 승인된 휴가일입니다. 출근할 수 없습니다.');
+    }
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
     if (today?.startTime) return setStatusMessage('이미 출근이 완료되었습니다.');
     await dispatch(clockIn(employeeId));
