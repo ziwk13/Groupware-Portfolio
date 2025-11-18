@@ -88,7 +88,7 @@ export default function ApprovalList({ status }) {
   });
   const [processedRows, setProcessedRows] = useState([]);
   const navigate = useNavigate();
-  const [page, setPage] = useState(1); // MUI Pagination은 1-based
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // status(목록 종류)가 변경될 때 page를 1로 리셋

@@ -5,9 +5,9 @@ function safeParseDate(date) {
   return new Date(trimmed);
 }
 
-// 날짜
 function formatKoreanDate(date) {
   const d = safeParseDate(date);
+  if (!d) return '';
   const day = d.getDay();
   const week = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -18,8 +18,8 @@ function formatKoreanDate(date) {
   return `${year}-${month}-${dayNum}(${week[day]})`;
 }
 
-// 날짜2
 function formatDate(date) {
+  if (!date) return '';
   const d = safeParseDate(date);
 
   const year = d.getFullYear();
@@ -33,28 +33,29 @@ export default function ApprovalFormHeader({ title, draftUser, draftDept, draftD
   const displayDate = formatKoreanDate(draftDate);
   const displayDate2 = formatDate(draftDate);
 
-  let approver = null;
-
-  approver = [...approvalLines]
+  const approver = [...approvalLines]
     .reverse()
     .find((line) => ['APPROVED', 'REJECTED', 'IN_PROGRESS', 'AWAITING', 'PENDING'].includes(line.approvalStatus?.value1));
 
+  const dynamicGap = approvalLines.length !== 0 ? '20px' : 0;
+
   return (
     <>
-      {/* 제목 */}
       <h1 className="approval-title">{title}</h1>
 
-      {/* 헤더 전체 레이아웃 */}
+      {/* 전체 헤더 레이아웃 */}
+
       <div
         style={{
           display: 'flex',
-          gap: approver ? '240px' : '350px',
-          justifyContent: 'center',
+          alignItems: 'stretch',
+          justifyContent: 'space-between',
+          width: '100%',
           marginBottom: '20px'
         }}
       >
         {/* 왼쪽 기안자 정보 */}
-        <table className="info-table" style={{ width: '400px' }}>
+        <table className="info-table" style={{ width: '290px' }}>
           <tbody>
             <tr>
               <td className="th">기안자</td>
@@ -75,47 +76,31 @@ export default function ApprovalFormHeader({ title, draftUser, draftDept, draftD
           </tbody>
         </table>
 
-        {/* 오른쪽 결재선 */}
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <table className="sign-table-split">
-            <tbody>
-              <tr>
-                <td className="sign-th-vertical" rowSpan={3}>
-                  신청
-                </td>
-                <td className="sign-rank-horizontal">{draftPosition}</td>
-              </tr>
-              <tr>
-                <td className="sign-name-horizontal">{draftUser}</td>
-              </tr>
-              <tr>
-                <td className="sign-blank-horizontal" style={{ fontSize: '14px' }}>
-                  {approver ? displayDate2 : ''}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        {/* 오른쪽 결재선 (완전 유동적 구조) */}
+        <div style={{ display: 'flex', gap: dynamicGap }}>
+          {/* 신청 박스 */}
+          <div className="sign-column">
+            <div className="sign-title-vertical">신청</div>
+            <div className="sign-box">{draftPosition}</div>
+            <div className="sign-box">{draftUser}</div>
+            <div className="sign-box" style={{ fontSize: '14px' }}>
+              {displayDate2}
+            </div>
+          </div>
 
-          {approver && (
-            <table className="sign-table-split">
-              <tbody>
-                <tr>
-                  <td className="sign-th-vertical" rowSpan={3}>
-                    승인
-                  </td>
-                  <td className="sign-rank-horizontal">{approver.approver.position}</td>
-                </tr>
-                <tr>
-                  <td className="sign-name-horizontal">{approver.approver.name}</td>
-                </tr>
-                <tr>
-                  <td className="sign-blank-horizontal" style={{ fontSize: '14px' }}>
-                    {approver.approvalDate ? formatDate(approver.approvalDate) : ''}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          )}
+          {/* 승인 박스 (N명 대응 구조) */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {approvalLines.map((line, idx) => (
+              <div key={idx} className="sign-column">
+                <div className="sign-title-vertical">승인</div>
+                <div className="sign-box">{line.approver.position}</div>
+                <div className="sign-box">{line.approver.name}</div>
+                <div className="sign-box" style={{ fontSize: '14px' }}>
+                  {line.approvalDate ? formatDate(line.approvalDate) : ''}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>

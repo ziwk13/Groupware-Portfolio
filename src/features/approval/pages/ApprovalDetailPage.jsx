@@ -2,29 +2,84 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddApproval from '../components/AddApproval';
 import { getApprovalDetail } from '../api/approvalAPI';
-import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export default function ApprovalDetailPage() {
   const { docId } = useParams();
   const [detailData, setDetailData] = useState(null);
 
-  const breadcrumbItems = [{ label: '홈', link: '/' }, { label: '전자결재', link: '/approval' }, { label: '결재 상세' }];
-
   useEffect(() => {
     async function fetchDetail() {
       const result = await getApprovalDetail(docId);
-
       setDetailData(result);
     }
     fetchDetail();
   }, [docId]);
 
+  const exportPDF = () => {
+    const target = document.getElementById('approval-document-area');
+    if (!target) return;
+
+    // ⬇⬇ PDF 모드 ON (UI는 그대로)
+    target.classList.add('pdf-mode');
+
+    const originalStyle = target.style.cssText;
+    target.style.cssText += `
+    position: static !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    z-index: auto !important;
+  `;
+
+    html2canvas(target, {
+      scale: window.devicePixelRatio || 2,
+      useCORS: true,
+      scrollX: 0,
+      scrollY: 0,
+      width: target.scrollWidth,
+      height: target.scrollHeight
+    })
+      .then((canvas) => {
+        target.style.cssText = originalStyle;
+
+        // ⬇⬇ PDF 모드 OFF
+        target.classList.remove('pdf-mode');
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 10;
+
+        const imgWidthPx = canvas.width;
+        const imgHeightPx = canvas.height;
+
+        const ratioX = (pageWidth - margin * 2) / imgWidthPx;
+        const ratioY = (pageHeight - margin * 2) / imgHeightPx;
+        const ratio = Math.min(ratioX, ratioY);
+
+        const renderWidth = imgWidthPx * ratio;
+        const renderHeight = imgHeightPx * ratio;
+
+        const x = (pageWidth - renderWidth) / 2;
+
+        // ⬇⬇ 가운데 정렬 제거 → 페이지 상단에서 시작
+        const y = margin;
+
+        pdf.addImage(imgData, 'PNG', x, y, renderWidth, renderHeight);
+        pdf.save(`approval_${docId}.pdf`);
+      })
+      .catch((err) => {
+        console.error('PDF 실패', err);
+        target.classList.remove('pdf-mode');
+        target.style.cssText = originalStyle;
+      });
+  };
+
   if (!detailData) return <div style={{ padding: 20 }}>Loading...</div>;
 
-  return (
-    <>
-      <Breadcrumbs title="결재 상세" breadcrumbItems={breadcrumbItems} />
-      <AddApproval readOnly={true} initialData={detailData} />
-    </>
-  );
+  return <AddApproval readOnly={true} initialData={detailData} onExportPDF={exportPDF} />;
 }

@@ -2,10 +2,11 @@
 import LeaveTemplate from 'features/approval/components/approvalTemplate/LeaveTemplate';
 import BusinessTripTemplate from 'features/approval/components/approvalTemplate/BusinessTripTemplate';
 import useAuth from 'hooks/useAuth';
+import 'features/approval/components/approvalTemplate/ApprovalStyles.css';
 
 const templateMap = {
-  AT1: LeaveTemplate,
-  AT2: BusinessTripTemplate
+  LeaveTemplate,
+  BusinessTripTemplate
 };
 
 export default function TemplateRenderer({
@@ -19,11 +20,12 @@ export default function TemplateRenderer({
   draftUser,
   draftDept,
   draftPosition,
-  draftDate
+  draftDate,
+  initialData
 }) {
   if (!template) return null;
 
-  const Component = templateMap[template.code];
+  const Component = templateMap[template.value3];
   if (!Component) return <div>지원되지 않는 템플릿입니다.</div>;
 
   const { user } = useAuth();
@@ -31,7 +33,7 @@ export default function TemplateRenderer({
   const finalDraftUser = draftUser || user?.name;
   const finalDraftDept = draftDept || user?.department;
   const finalDraftPosition = draftPosition || user?.position;
-  const finalDraftDate = draftDate || new Date();
+  const finalDraftDate = draftDate || '';
 
   return (
     <Component
@@ -45,6 +47,7 @@ export default function TemplateRenderer({
       draftDept={finalDraftDept}
       draftPosition={finalDraftPosition}
       draftDate={finalDraftDate}
+      initialData={initialData}
     />
   );
 }

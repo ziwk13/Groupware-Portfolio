@@ -44,7 +44,7 @@ function toFormData(obj, form = new FormData(), prefix = '') {
   return form;
 }
 
-export default function AddApproval({ readOnly = false, initialData = null }) {
+export default function AddApproval({ readOnly = false, initialData = null, onExportPDF }) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -181,6 +181,11 @@ export default function AddApproval({ readOnly = false, initialData = null }) {
     // API 호출
     try {
       setSubmitting(true);
+
+      for (const pair of formData.entries()) {
+        console.log('FORMDATA:', pair[0], pair[1]);
+      }
+
       // templateValues to formdata
       const response = await createApproval(formData);
       setAlertInfo({
@@ -232,24 +237,27 @@ export default function AddApproval({ readOnly = false, initialData = null }) {
             setAlertInfo={setAlertInfo}
             TemplateRendererSlot={
               selectedForm ? (
-                <TemplateRenderer
-                  template={selectedForm}
-                  approvalLines={headerApprovalLines}
-                  approvalReferences={references}
-                  templateValues={templateValues}
-                  setTemplateValues={setTemplateValues}
-                  readOnly={readOnly}
-                  docNo={initialData?.docId}
-                  draftUser={initialData?.creator?.name}
-                  draftDept={initialData?.creator?.department}
-                  draftPosition={initialData?.creator?.position}
-                  draftDate={initialData?.createdAt}
-                  approvalDate={finalDecisionLine?.approvalDate}
-                  initialData={initialData}
-                />
+                <div id="approval-document-area">
+                  <TemplateRenderer
+                    template={selectedForm}
+                    approvalLines={headerApprovalLines}
+                    approvalReferences={references}
+                    templateValues={templateValues}
+                    setTemplateValues={setTemplateValues}
+                    readOnly={readOnly}
+                    docNo={initialData?.docId}
+                    draftUser={initialData?.creator?.name}
+                    draftDept={initialData?.creator?.department}
+                    draftPosition={initialData?.creator?.position}
+                    draftDate={initialData?.createdAt}
+                    approvalDate={finalDecisionLine?.approvalDate}
+                    initialData={initialData}
+                  />
+                </div>
               ) : null
             }
             readOnly={readOnly}
+            onExportPDF={onExportPDF}
           />
         </Grid>
 

@@ -1,5 +1,5 @@
 // material-ui
-import { Button, Grid, Autocomplete, Stack, TextField, Box, Alert } from '@mui/material';
+import { Button, Grid, Stack, Box, Alert } from '@mui/material';
 import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
 
 // third party
@@ -7,13 +7,12 @@ import { Formik } from 'formik';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
-import StartAndEndDateTime from 'features/date/components/StartAndEndDateTime';
 import AttachmentDropzone from 'features/attachment/components/AttachmentDropzone';
 import ApprovalFormModal from 'features/approval/components/ApprovalFormModal';
-
+import RejectCommentModal from 'features/approval/components/approvalTemplate/RejectCommentModal';
+import AttachmentListView from 'features/attachment/components/AttachmentListView';
 // react
 import { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, List, ListItemButton, ListItemText } from '@mui/material';
 import useAuth from 'hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 // api
@@ -36,7 +35,8 @@ export default function ApprovalForm({
   readOnly = false,
   approvers,
   initialData,
-  approvalLines
+  approvalLines,
+  onExportPDF
 }) {
   // 40px 높이를 위한 공통 스타일
   const customInputStyle = {
@@ -56,6 +56,7 @@ export default function ApprovalForm({
 
   const [templateList, setTemplateList] = useState([]);
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -143,37 +144,16 @@ export default function ApprovalForm({
                       >
                         승인
                       </Button>
-                      {/*  반려 */}
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        sx={{ height: '35px' }}
-                        onClick={async () => {
-                          try {
-                            await decideApproval({
-                              lineId: myPendingLine.lineId,
-                              statusCodeId: 10
-                            });
-                            setAlertInfo({
-                              open: true,
-                              message: '반려되었습니다.',
-                              severity: 'warning'
-                            });
-                            setTimeout(() => navigate('/approval/list/pending'), 800);
-                          } catch (err) {
-                            setAlertInfo({
-                              open: true,
-                              message: err.response?.data?.message || '반려 실패',
-                              severity: 'error'
-                            });
-                          }
-                        }}
-                      >
+                      <Button variant="outlined" color="error" sx={{ height: '35px' }} onClick={() => setRejectModalOpen(true)}>
                         반려
                       </Button>
                     </Stack>
                   )}
-                  <Box sx={{ flexGrow: 1 }} />
+                  {readOnly && (
+                    <Button variant="contained" color="primary" sx={{ height: '35px' }} onClick={onExportPDF}>
+                      PDF 다운로드
+                    </Button>
+                  )}
 
                   {alertInfo.open && (
                     <Alert
@@ -200,8 +180,10 @@ export default function ApprovalForm({
                     <Box mt={2}>{TemplateRendererSlot}</Box>
                   </Grid>
                 )}
+              </Grid>
+              <Grid item xs={12}>
                 {!readOnly && (
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sx={{ mt: 1 }}>
                     <AttachmentDropzone attachments={attachments} setAttachments={setAttachments} height={100} readOnly={readOnly} />
                   </Grid>
                 )}
@@ -215,6 +197,45 @@ export default function ApprovalForm({
             onSelect={(item) => {
               setSelectedForm(item);
               setFormModalOpen(false);
+            }}
+          />
+          {readOnly && initialData?.attachmentFiles?.length > 0 && (
+            <Grid item xs={12}>
+              <Box mt={2}>
+                <h3 style={{ marginBottom: '10px' }}>첨부파일</h3>
+                <AttachmentListView attachments={initialData.attachmentFiles} />
+              </Box>
+            </Grid>
+          )}
+          <RejectCommentModal
+            open={rejectModalOpen}
+            onClose={() => setRejectModalOpen(false)}
+            onSubmit={async (comment) => {
+              try {
+                await decideApproval({
+                  lineId: myPendingLine.lineId,
+                  statusCodeId: 10,
+                  comment: comment
+                });
+
+                setAlertInfo({
+                  open: true,
+                  message: '반려되었습니다.',
+                  severity: 'warning'
+                });
+
+                setRejectModalOpen(false);
+
+                setTimeout(() => {
+                  navigate('/approval/list/pending');
+                }, 1000);
+              } catch (err) {
+                setAlertInfo({
+                  open: true,
+                  message: err.response?.data?.message || '반려 실패',
+                  severity: 'error'
+                });
+              }
             }}
           />
         </>
