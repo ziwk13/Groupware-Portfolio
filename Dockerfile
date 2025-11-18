@@ -8,6 +8,9 @@ RUN npm ci
 
 # frontend 전체 소스를 도커 내부로 복사한 뒤 빌드
 COPY . .
+# Node.js 힙 메모리 제한을 4GB(4096MB)로 확장
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 RUN npm run build
 
 # 2. 배포 스테이지
