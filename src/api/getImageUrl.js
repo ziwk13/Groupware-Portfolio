@@ -8,9 +8,11 @@ export let ImagePath;
   ImagePath['BLOG'] = 'blog';
 })(ImagePath || (ImagePath = {}));
 
+import { BASE_URL } from 'api/axios';
+
 // ==============================|| NEW URL - GET IMAGE URL ||============================== //
 
 export function getImageUrl(path) {
-  const serverBaseUrl = import.meta.env.VITE_APP_API_URL;
-  return `${serverBaseUrl}uploads/${path}`;
+  const serverBaseUrl = BASE_URL;
+  return `${serverBaseUrl}/uploads/${path}`;
 }
