@@ -15,11 +15,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-          # 2. .env 파일 생성
+      # 2. .env 파일 생성
       - name: Create .env file
         run: |
           # 루트 .env (docker-compose.yml에서 사용)
           echo "VITE_APP_API_URL=${{ secrets.ALLOWED_ORIGIN }}" >> .env
+
+      # 2-1. SSL 인증서 생성
+      - name: Create SSL Certificates
+        run: |
+          echo "${{ secrets.SSL_CERT }}" > fullchain.pem
+          echo "${{ secrets.SSL_KEY }}" > key.pem
+          chmod 600 key.pem
 
       # 3. EC2로 파일 전송 (플러그인-https://github.com/appleboy/ssh-action)
       - name: Copy file to EC2
