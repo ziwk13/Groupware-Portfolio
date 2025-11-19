@@ -77,6 +77,11 @@ export default function ChatHeader({
                       }}
                     >{user.name}
                     </Typography>
+                    {user.memberCount && (
+                      <Typography variant="h5" color="textSecondary" sx={{ ml: 0.5 }}>
+                        {user.memberCount}
+                      </Typography>
+                    )}
                   </Stack>
                 </Grid>
                 <Grid size={12}>
@@ -133,7 +138,8 @@ ChatHeader.propTypes = {
     avatar: PropTypes.string,
     online_status: PropTypes.string,
     position: PropTypes.string,
-    isTeam: PropTypes.bool.isRequired // isTeam을 필수로 받도록 설정
+    isTeam: PropTypes.bool.isRequired, // isTeam을 필수로 받도록 설정
+    memberCount: PropTypes.number
   }),
   onClose: PropTypes.func,
   onLeaveRoom: PropTypes.func,
