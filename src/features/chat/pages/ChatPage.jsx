@@ -122,7 +122,8 @@ export default function ChatMainPage() {
             avatar: newRoom.profile,
             lastMessage: '',
             unReadChatCount: 0,
-            online_status: 'available'
+            online_status: 'available',
+            memberCount: newRoom.memeberCount
           };
           openChatWithUser(mappedNewRoom)  // 생성된 채팅방으로 바로 이동
         } catch (error) {
