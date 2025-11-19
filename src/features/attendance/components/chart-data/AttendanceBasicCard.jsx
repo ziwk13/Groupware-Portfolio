@@ -35,7 +35,7 @@ export default function AttendanceBasicCard({ isLoading }) {
   const { colorScheme } = useColorScheme();
   const { user, isLoggedIn } = useAuth();
 
-  // 🔥 반차 값 추가
+  // 근무 상태
   const workStatusMap = {
     NORMAL: '정상근무',
     LATE: '지각',
@@ -52,7 +52,7 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   const employeeId = user?.employeeId;
 
-  // 🔥 휴가/반차일 공통 비활성 목록
+  //  휴가 비활성 목록
   const DISABLED_DAY = ['VACATION'];
 
   // 알림 메시지
@@ -96,23 +96,26 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   // ===== 출근 처리 =====
   const handleClockIn = async () => {
-    // 🔥 반차일/휴가일 출근 금지
     if (DISABLED_DAY.includes(today?.workStatus)) {
       return setStatusMessage('오늘은 휴가/반차일입니다. 출근할 수 없습니다.');
     }
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
     if (today?.startTime) return setStatusMessage('이미 출근이 완료되었습니다.');
 
-    await dispatch(clockIn(employeeId));
-    dispatch(fetchTodayAttendance(employeeId));
-    dispatch(fetchThisWeekAttendance(employeeId));
+    try {
+      await dispatch(clockIn(employeeId)).unwrap();
+      dispatch(fetchTodayAttendance(employeeId));
+      dispatch(fetchThisWeekAttendance(employeeId));
+    } catch (error) {
+      setStatusMessage(error?.message || '출근 처리 중 오류가 발생했습니다.');
+    }
   };
 
   // ===== 퇴근 처리 =====
   const handleClockOut = async () => {
-    // 🔥 반차일/휴가일 퇴근 금지
+    //  휴가일 퇴근 금지
     if (DISABLED_DAY.includes(today?.workStatus)) {
-      return setStatusMessage('오늘은 휴가/반차일입니다. 퇴근할 수 없습니다.');
+      return setStatusMessage('오늘은 휴가일입니다. 퇴근할 수 없습니다.');
     }
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
     if (!today?.startTime) return setStatusMessage('출근 기록이 있어야 퇴근이 가능합니다.');
@@ -127,9 +130,9 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   // ===== 근무상태 변경 메뉴 열기 =====
   const handleWorkStatusClick = (event) => {
-    // 🔥 반차일/휴가일 근무상태 변경 금지
+    //  휴가일 근무상태 변경 금지
     if (DISABLED_DAY.includes(today?.workStatus)) {
-      return setStatusMessage('오늘은 휴가/반차일입니다. 근무상태를 변경할 수 없습니다.');
+      return setStatusMessage('오늘은 휴가일입니다. 근무상태를 변경할 수 없습니다.');
     }
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
     if (!today?.startTime) return setStatusMessage('출근 기록이 있어야 근무상태 변경이 가능합니다.');
