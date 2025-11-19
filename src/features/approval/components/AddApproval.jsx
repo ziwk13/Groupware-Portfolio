@@ -226,9 +226,9 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
                     setTemplateValues={setTemplateValues}
                     readOnly={readOnly}
                     docNo={initialData?.docId}
-                    draftUser={initialData?.creator?.name ?? '정보 없음'}
-                    draftDept={initialData?.creator?.department ?? '-'}
-                    draftPosition={initialData?.creator?.position ?? '-'}
+                    draftUser={initialData?.creator?.name ?? user?.name}
+                    draftDept={initialData?.creator?.department ?? user?.departmentName}
+                    draftPosition={initialData?.creator?.position ?? user?.positionName}
                     draftDate={initialData?.createdAt}
                     approvalDate={finalDecisionLine?.approvalDate}
                     initialData={initialData}
