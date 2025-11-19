@@ -49,7 +49,6 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
   const { user } = useAuth();
 
   const [templateValues, setTemplateValues] = useState({});
-
   const [alertInfo, setAlertInfo] = useState({
     open: false,
     message: '',
@@ -57,17 +56,10 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
   });
 
   const [list, setList] = useState([
-    {
-      name: '결재자',
-      empList: []
-    },
-    {
-      name: '참조자',
-      empList: []
-    }
+    { name: '결재자', empList: [] },
+    { name: '참조자', empList: [] }
   ]);
 
-  // approver / referrer 리스트 구분
   const approvers = list.find((item) => item.name === '결재자')?.empList || [];
   const references = list.find((item) => item.name === '참조자')?.empList || [];
 
@@ -97,11 +89,7 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
     if (!initialData) return;
 
     setSelectedForm(initialData.approvalTemplate);
-
-    setTemplateValues((prev) => ({
-      ...prev,
-      ...initialData
-    }));
+    setTemplateValues((prev) => ({ ...prev, ...initialData }));
 
     const approverEmps = initialData.approvalLines ?? [];
     const refEmps = initialData.approvalReferences?.map((ref) => ref.referrer) ?? [];
@@ -112,36 +100,81 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
     ]);
   }, [initialData]);
 
+  // 프론트 검증 로직
+  const validateFront = () => {
+    if (!selectedForm) {
+      return '양식을 선택해주세요.';
+    }
+
+    const templateType = selectedForm.value2; // VACATION / BUSINESS_TRIP
+
+    // 공통
+    if (!approvers || approvers.length === 0) {
+      return '결재자를 최소 1명 이상 선택해주세요.';
+    }
+
+    // 1) 휴가 검증
+    if (templateType === 'VACATION') {
+      if (!templateValues.vacationTypeCode) {
+        return '휴가 종류를 선택해주세요.';
+      }
+      if (!templateValues.startDate || !templateValues.endDate) {
+        return '휴가 시작/종료 날짜를 선택해주세요.';
+      }
+      if (!templateValues.vacationReason || templateValues.vacationReason.trim() === '') {
+        return '휴가 사유를 입력해주세요.';
+      }
+    }
+
+    // 2) 출장 검증
+    if (templateType === 'BUSINESS_TRIP') {
+      if (!templateValues.startDate || !templateValues.endDate) {
+        return '출장 시작/종료 날짜를 선택해주세요.';
+      }
+      if (!templateValues.tripLocation || templateValues.tripLocation.trim() === '') {
+        return '출장지를 입력해주세요.';
+      }
+      if (!templateValues.transportation || templateValues.transportation.trim() === '') {
+        return '교통편을 입력해주세요.';
+      }
+      if (!templateValues.tripPurpose || templateValues.tripPurpose.trim() === '') {
+        return '출장 목적을 입력해주세요.';
+      }
+    }
+
+    return null;
+  };
+
+  //  상신 처리
+
   const handleFormSubmit = async (values, { setSubmitting }) => {
     if (readOnly) {
       setSubmitting(false);
       return;
     }
-    if (!approvers || approvers.length === 0) {
+
+    //  프론트 검증 실행
+    const errorMessage = validateFront();
+    if (errorMessage) {
       setAlertInfo({
         open: true,
-        message: '결재자를 최소 1명 이상 선택해주세요.',
+        message: errorMessage,
         severity: 'warning'
       });
       setSubmitting(false);
       return;
     }
 
+    // 제목/내용 기본 세팅
     let title = (values.title || '').trim();
     let content = (values.content || '').trim();
 
     const templateLabel = selectedForm?.value1 || '기타 양식';
 
-    if (!title) {
-      title = `${user?.name || '사용자'} (${user?.position}) - ${templateLabel}`;
-    }
-
-    if (!content) {
-      content = `${templateLabel} 신청합니다.`;
-    }
+    if (!title) title = `${user?.name || '사용자'} (${user?.position}) - ${templateLabel}`;
+    if (!content) content = `${templateLabel} 신청합니다.`;
 
     let formData = new FormData();
-
     formData.append('title', title);
     formData.append('content', content);
     formData.append('templateCode', selectedForm.code);
@@ -158,30 +191,26 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
     });
 
     if (attachments && attachments.length > 0) {
-      attachments.forEach((file) => {
-        formData.append('multipartFile', file);
-      });
+      attachments.forEach((file) => formData.append('multipartFile', file));
     }
 
     try {
       setSubmitting(true);
 
-      const response = await createApproval(formData);
+      await createApproval(formData);
+
       setAlertInfo({
         open: true,
         message: '결재가 성공적으로 상신되었습니다.',
         severity: 'success'
       });
 
-      setTimeout(() => {
-        navigate('/approval/list/draft');
-      }, 1000);
+      setTimeout(() => navigate('/approval/list/draft'), 1000);
     } catch (error) {
-      console.error('결재 상신 실패:', error);
-      const errorMessage = error.response?.data?.message || error.message;
+      const errorMessage = error.response?.data?.message || '상신 실패';
       setAlertInfo({
         open: true,
-        message: `${errorMessage}`,
+        message: errorMessage,
         severity: 'error'
       });
     } finally {
@@ -209,9 +238,7 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
             approvers={approvers}
             initialData={initialData}
             references={references}
-            onOpenModal={() => {
-              if (!readOnly) setOpen(true);
-            }}
+            onOpenModal={() => !readOnly && setOpen(true)}
             onFormSubmit={handleFormSubmit}
             alertInfo={alertInfo}
             setAlertInfo={setAlertInfo}
@@ -241,7 +268,7 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
           />
         </Grid>
 
-        {/* 우측: 결재자 / 참조자 타임라인 */}
+        {/* 우측: 결재자/참조자 타임라인 */}
         <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Grid container spacing={gridSpacing}>
             {/* 결재자 */}
@@ -306,6 +333,7 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
                           <TimelineDot color="primary" />
                           {index < references.length - 1 && <TimelineConnector sx={{ bgcolor: 'primary.light' }} />}
                         </TimelineSeparator>
+
                         <TimelineContent sx={{ pb: index < references.length - 1 ? 2 : 0, pt: '6px' }}>
                           <Chip
                             label={`${ref?.name ?? '정보 없음'} ${ref?.position ?? ''}`}
