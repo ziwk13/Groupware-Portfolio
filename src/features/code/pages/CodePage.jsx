@@ -1,24 +1,23 @@
 import { useEffect, useState } from 'react';
 
-// material-ui
 import { Box, Button, Grid, Stack, Alert } from '@mui/material';
 
-// project imports
 import { gridSpacing } from 'store/constant';
 import MainCard from 'ui-component/cards/MainCard';
 import CommonDataGrid from 'features/list/components/CommonDataGrid';
 import CodeList from 'features/code/components/CodeList';
 import CodeForm from 'features/code/components/CodeForm';
 
-// api
 import { codeAPI } from 'features/code/api/codeAPI';
+
+import { useMenu } from 'contexts/MenuContext';
 
 const initialState = {
   commonCodeId: null,
   code: null,
   codeDescription: null,
-  value1: null, // 백엔드 요청을 위해 null 유지
-  value2: null, // 백엔드 요청을 위해 null 유지
+  value1: null,
+  value2: null,
   value3: null,
   sortOrder: 0,
   isDisabled: false,
@@ -42,6 +41,8 @@ export default function CodePage() {
     message: '',
     severity: 'info' // 'success', 'error', 'warning', 'info'
   });
+
+  const { refreshMenuData, relevantMenuPrefixes } = useMenu();
 
   // 대분류 API 호출 로직
   const fetchMainCategories = async () => {
@@ -134,6 +135,14 @@ export default function CodePage() {
 
         // 신규 저장 시에도 폼 데이터 유지 (응답 DTO로 채움)
         setSelectedCodeDetail(response.data);
+
+        // 저장된 코드의 접두사(selectedPrefix)가 MenuContext가 관심있는 목록에 포함되어 있다면
+        if (relevantMenuPrefixes && relevantMenuPrefixes.includes(selectedPrefix)) {
+          // MenuContext의 데이터 갱신 함수 호출
+          if (typeof refreshMenuData === 'function') {
+            refreshMenuData();
+          }
+        }
       } else {
         const errorMsg = response.message || '저장에 실패했습니다.';
         setError(errorMsg); // (선택적) DataGrid에도 에러 전파가 필요하다면 유지
@@ -180,7 +189,6 @@ export default function CodePage() {
             </Button>
           </Stack>
         }
-        // OrganizationPage.jsx와 동일한 패턴으로 Alert 컴포넌트 추가
         secondary={
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', width: '100%' }}>
             {alertInfo.open && (

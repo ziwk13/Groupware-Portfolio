@@ -107,13 +107,12 @@ function MobileSearch({ value, setValue, popupState, onChange, onFocus, onKeyDow
 }
 
 export default function SearchSection() {
-  const theme = useTheme(); // 추가: 하이라이트 색상 등 사용
   const [value, setValue] = useState('');
   const [openResults, setOpenResults] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const anchorRef = useRef(null)
   const listRef = useRef(null);
-  const searchInputRef = useRef(null); // 데스크탑 검색창 (Popper 기준점 및 너비 측정용)
+  const searchInputRef = useRef(null);
   const navigate = useNavigate();
   const { searchableItems, loading } = useMenu();
 console.log(searchableItems);
@@ -141,7 +140,6 @@ console.log(searchableItems);
       )
     );
   };
-  // ==============================================================================
 
   // 검색 가능한 메뉴 리스트 필터링
   const filteredResults = useMemo(() => {
@@ -174,7 +172,7 @@ console.log(searchableItems);
     setOpenResults(true);
   };
 
-  // 외부 클릭 시 결과창 닫기
+  // 외부 클릭 시 결과창 닫기 및 검색어 초기화
   const handleCloseResults = (event) => {
     if (
       anchorRef.current &&
@@ -184,6 +182,7 @@ console.log(searchableItems);
       return;
     }
     setOpenResults(false);
+    setValue(''); // 검색어 초기화 추가
   };
 
   // 결과 항목 클릭 (라우트 이동)
@@ -328,7 +327,6 @@ console.log(searchableItems);
             mt: 0.5,
             ml: 0,
             ...(searchInputRef.current === null && {
-              // 모바일일 때 너비 조정
               width: 'calc(100% - 32px)',
               left: 16
             })

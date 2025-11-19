@@ -1,15 +1,17 @@
-import { createContext, useContext, useState, useEffect, useMemo, lazy } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, lazy, useCallback } from 'react';
 import { codeAPI } from 'features/code/api/codeAPI';
 import { getIcon } from 'utils/mappers/iconMapper';
 import { componentMapper } from 'utils/mappers/componentMapper';
 
-// project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
 import useAuth from 'hooks/useAuth';
 
 const MenuContext = createContext(null);
+
+// 이 컨텍스트가 갱신해야 하는 코드 접두사 목록
+const RELEVANT_PREFIXES = ['MN', 'RO'];
 
 // API 응답(플랫 리스트)을 React 컴포넌트에서 사용할 수 있는 중첩 트리 구조로 변환
 const buildTree = (list, parentCode = null, isRoute = false) => {
@@ -201,31 +203,34 @@ export const MenuProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchMenuData = async () => {
-      try {
-        setLoading(true);
-        const [menuData, routeData] = await Promise.all([codeAPI.getAllCodeWithoutRoot('MN'), codeAPI.getAllCodeWithoutRoot('RO')]);
+  // 데이터 페칭 로직을 useCallback으로 추출
+  const fetchMenuData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null); // 새로고침 시 에러 초기화
+      const [menuData, routeData] = await Promise.all([codeAPI.getAllCodeWithoutRoot('MN'), codeAPI.getAllCodeWithoutRoot('RO')]);
 
-        if (!menuData || !routeData) {
-          throw new Error('메뉴 또는 라우트 데이터를 가져오는데 실패했습니다.');
-        }
-
-        const { menuItems, dynamicMainRoutes, searchableItems } = processMenuData(menuData, routeData, user?.role);
-
-        setMenuItems(menuItems);
-        setDynamicMainRoutes(dynamicMainRoutes);
-        setSearchableItems(searchableItems);
-      } catch (err) {
-        console.error('메뉴 데이터 로드 중 오류 발생:', err);
-        setError(err);
-      } finally {
-        setLoading(false);
+      if (!menuData || !routeData) {
+        throw new Error('메뉴 또는 라우트 데이터를 가져오는데 실패했습니다.');
       }
-    };
 
+      const { menuItems, dynamicMainRoutes, searchableItems } = processMenuData(menuData, routeData, user?.role);
+
+      setMenuItems(menuItems);
+      setDynamicMainRoutes(dynamicMainRoutes);
+      setSearchableItems(searchableItems);
+    } catch (err) {
+      console.error('메뉴 데이터 로드 중 오류 발생:', err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]); // user 정보가 바뀔 때 함수가 재생성되어야 함
+
+  // 마운트 시 및 fetchMenuData 함수가 변경될 때 데이터 로드
+  useEffect(() => {
     fetchMenuData();
-  }, [user]);
+  }, [fetchMenuData]); // fetchMenuData는 user에 의존함
 
   const value = useMemo(
     () => ({
@@ -233,9 +238,11 @@ export const MenuProvider = ({ children }) => {
       dynamicMainRoutes,
       searchableItems,
       loading,
-      error
+      error,
+      refreshMenuData: fetchMenuData,
+      relevantMenuPrefixes: RELEVANT_PREFIXES
     }),
-    [menuItems, dynamicMainRoutes, searchableItems, loading, error]
+    [menuItems, dynamicMainRoutes, searchableItems, loading, error, fetchMenuData]
   );
 
   return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>;

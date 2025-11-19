@@ -1,8 +1,7 @@
 import axiosServices from 'api/axios';
 
 // 백엔드 주소
-const API_BASE_URL = 'http://localhost:8080/api';
-const COMMON_CODE_URL = `${API_BASE_URL}/commoncodes`;
+const COMMON_CODE_URL = 'api/commoncodes';
 
 export const codeAPI = {
   /**
