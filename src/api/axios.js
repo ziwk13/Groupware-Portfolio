@@ -6,10 +6,14 @@
 
 import axios from 'axios';
 
+// --- API Base URL ---
+// VITE_APP_API_URL 환경 변수가 있으면 사용하고, 없으면 기본값
+export const BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://boot-container:8080/';
+
 // axios 인스턴스 생성
 // 이 설정이 있어야 브라우저가 자동으로 HttpOnly 쿠키를 요청에 포함시킴
 const axiosServices = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:8080/',
+  baseURL: BASE_URL, // 분리된 변수 사용
   withCredentials: true // 쿠키 전송을 위한 설정
 });
 

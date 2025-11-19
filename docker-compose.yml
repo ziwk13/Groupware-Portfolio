@@ -1,0 +1,19 @@
+services:
+  # 2. frontend 서비스 생성
+  frontend:
+    # 1) 도커 컨테이너 이름
+    container_name: nginx-container
+    # 2) 현재 경로에 있는 Dockerfile로 도커 이미지를 빌드할 것
+    build:
+      context: ./
+    # 3) 포트 포워딩 (외부에서 80 접속 허용)
+    ports:
+      - 80:80
+    # 4) boot-container와 동일한 도커 네트워크 사용
+    networks:
+      - my-network
+
+# 외부 네트워크 사용 (도커 네트워크 my-network는 도커 컴포즈 실행 전에 미리 만들어 두어야 함)
+networks:
+  my-network:
+    external: true

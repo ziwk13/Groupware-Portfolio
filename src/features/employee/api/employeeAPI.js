@@ -81,3 +81,11 @@ export const getEmployeesByDeptCode = async (deptCode) => {
     return [];
   }
 };
+
+/**
+ * (DELETE) (관리자) 사원 삭제 API
+ * @param {string|number} employeeId - 삭제할 직원 ID
+ */
+export const deleteEmployee = (employeeId) => {
+  return axiosServices.delete(`/api/employees/${employeeId}`);
+};
