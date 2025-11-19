@@ -13,13 +13,9 @@ import AttachmentListView from 'features/attachment/components/AttachmentListVie
 
 export default function ChatHistory({ data, theme, user }) {
   
-  /**
-   * DTO의 createdAt (LocalDateTime)을 '오후 5:29:01' 형식으로 포맷팅하는 함수
-   */
   const formatChatTime = (isoString) => {
     if (!isoString) return '';
     try {
-      // ISO 문자열 (예: "2025-11-12T17:29:01")을 Date 객체로 변환
       return new Date(isoString).toLocaleTimeString('ko-KR', {
         hour: 'numeric',
         minute: 'numeric',
@@ -28,7 +24,7 @@ export default function ChatHistory({ data, theme, user }) {
       });
     } catch (error) {
       console.error('Invalid time format:', isoString);
-      return isoString; // 포맷팅 실패 시 원본 반환
+      return isoString;
     }
   };
 
@@ -36,8 +32,8 @@ export default function ChatHistory({ data, theme, user }) {
     <Grid container spacing={gridSpacing}>
       {data.map((history, index) => (
         <React.Fragment key={index}>
-          {/* 1. 시스템 메시지 (DTO: employeeId가 null) */}
-          {!history.employeeId ? (
+          {/* 1. 시스템 메시지 */}
+          {history.messageType === 'SYSTEM' ? ( 
             <Grid size={12}>
               <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
                 <Card
@@ -55,6 +51,11 @@ export default function ChatHistory({ data, theme, user }) {
                     <Typography variant="body2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }) }}>
                       {history.content}
                     </Typography>
+                    {history.attachments && history.attachments.length > 0 && (
+                        <Box sx={{ mt: history.content ? 1 : 0, minWidth: '200px' }}> 
+                            <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
+                        </Box>
+                    )}
                     <Typography variant="caption" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }), opacity: 0.7 }}>
                       {formatChatTime(history.createdAt)}
                     </Typography>
@@ -62,7 +63,7 @@ export default function ChatHistory({ data, theme, user }) {
                 </Card>
               </Box>
             </Grid>
-          ) : /* 2. 내가 보낸 메시지 (DTO: employeeId가 내 user.id와 일치) */
+          ) : /* 2. 내가 보낸 메시지 */
           String(history.employeeId) === String(user.id) ? (
             <Grid size={12}>
               <Grid container spacing={gridSpacing}>
@@ -71,116 +72,116 @@ export default function ChatHistory({ data, theme, user }) {
                   <Box
                     sx={{
                       display: 'flex',
-                      alignItems: 'flex-end', // 하단 정렬
-                      justifyContent: 'flex-end', // 오른쪽 정렬
-                      gap: 0.5 // 4px 간격
+                      alignItems: 'flex-end',
+                      justifyContent: 'flex-end',
+                      gap: 0.5 
                     }}
                   >
                     {history.unreadCount > 0 && (
                       <Typography
-                      variant='caption'
-                      sx={{
-                        color: 'primary.main',
-                        fontWeight: 'bold',
-                        mb: 1
-                      }}
+                        variant='caption'
+                        sx={{
+                          color: 'primary.main',
+                          fontWeight: 'bold',
+                          mb: 1,
+                          whiteSpace: 'nowrap' // 숫자 줄바꿈 방지
+                        }}
                       >
                         {history.unreadCount}
                       </Typography>
                     )}
                     <Card
-                    sx={{
-                      display: 'inline-block',
-                        float: 'right', // (Box가 flex-end를 하므로 이젠 필요 없을 수 있음)
+                      sx={{
+                        display: 'inline-block',
                         bgcolor: 'primary.light',
-                        ...theme.applyStyles('dark', { bgcolor: 'grey.500' })
-                    }}
+                        ...theme.applyStyles('dark', { bgcolor: 'grey.500' }),
+                        maxWidth: '100%' // Card가 Grid 영역을 넘지 않도록 설정
+                      }}
                     >
-                    <CardContent sx={{ p: 2, pb: '16px !important', width: 'fit-content', ml: 'auto' }}>
-                      <Grid container spacing={1}>
-                        <Grid size={12}>
-                          {history.content && (
-                          <Typography variant="body2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }) }}>
+                      {/* Grid 제거 및 Flex 구조로 변경 */}
+                      <CardContent sx={{ p: 2, pb: '16px !important', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        
+                        {history.content && (
+                          <Typography variant="body2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }), wordBreak: 'break-word' }}>
                             {history.content}
                           </Typography>
-                          )}
-                          {history.attachments && history.attachments.length > 0 && (
-                            <Box sx={{ mt: history.content ? 1 : 0, maxWidth: 350 }}>
-                              <AttachmentListView attachments={history.attachments} height="auto" />
-                            </Box>
-                          )}
-                        </Grid>
-                        <Grid size={12}>
-                          <Typography align="right" variant="subtitle2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }) }}>
-                            {formatChatTime(history.createdAt)}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
+                        )}
+
+                        {/* 파일 첨부 영역: minWidth를 주어 찌그러짐 방지 */}
+                        {history.attachments && history.attachments.length > 0 && (
+                          <Box sx={{ mt: history.content ? 1 : 0, width: '100%' }}>
+                            <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
+                          </Box>
+                        )}
+
+                        <Typography align="right" variant="subtitle2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }), mt: 0.5 }}>
+                          {formatChatTime(history.createdAt)}
+                        </Typography>
+                      </CardContent>
+                    </Card>
                   </Box>
                 </Grid>
               </Grid>
             </Grid>
           ) : (
-            /* 상대방이 보낸 메시지 */
+            /* 3. 상대방이 보낸 메시지 */
             <Grid size={12}>
               <Grid container spacing={gridSpacing}>
                 <Grid size={{ xs: 12, sm: 7 }}>
                   <Box
                     sx={{
                       display: 'flex',
-                      alignItems: 'flex-end', // 하단 정렬
-                      justifyContent: 'flex-start', // 왼쪽 정렬
-                      gap: 0.
+                      alignItems: 'flex-end',
+                      justifyContent: 'flex-start',
+                      gap: 0.5
                     }}
                   >
                     <Card
                       sx={{
                         display: 'inline-block',
-                        float: 'left',
                         bgcolor: 'secondary.light',
-                        ...theme.applyStyles('dark', { bgcolor: 'dark.900' })
+                        ...theme.applyStyles('dark', { bgcolor: 'dark.900' }),
+                        maxWidth: '100%'
                       }}
                     >
-                    <CardContent sx={{ p: 2, pb: '16px !important' }}>
-                      <Grid container spacing={1}>
-                        <Grid size={12}>
-                          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
-                            {history.senderName || '상대방'}
-                          </Typography>
-                          {history.content && (
-                          <Typography variant="body2" sx={{ mt: 0.5 }}>
+                      {/* Grid 제거 및 Flex 구조로 변경 */}
+                      <CardContent sx={{ p: 2, pb: '16px !important', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+                          {history.senderName || '상대방'}
+                        </Typography>
+
+                        {history.content && (
+                          <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
                             {history.content}
                           </Typography>
-                          )}
-                          {history.attachments && history.attachments.length > 0 && (
-                            <Box sx={{ mt: history.content ? 1 : 0, maxWidth: 350 }}>
-                              <AttachmentListView attachments={history.attachments} height="auto" />
-                            </Box>
-                          )}
-                        </Grid>
-                        <Grid size={12}>
-                          <Typography align="right" variant="subtitle2">
-                            {formatChatTime(history.createdAt)}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                  {history.unreadCount > 0 && (
+                        )}
+
+                        {/* 파일 첨부 영역: minWidth를 주어 찌그러짐 방지 */}
+                        {history.attachments && history.attachments.length > 0 && (
+                          <Box sx={{ mt: history.content ? 1 : 0, width: '100%' }}>
+                            <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
+                          </Box>
+                        )}
+
+                        <Typography align="right" variant="subtitle2" sx={{ mt: 0.5 }}>
+                          {formatChatTime(history.createdAt)}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                    {history.unreadCount > 0 && (
                       <Typography
                         variant="caption"
                         sx={{
                           color: 'primary.main',
                           fontWeight: 'bold',
-                          mb: 1 // Card의 paddingBottom과 맞춤
+                          mb: 1,
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         {history.unreadCount}
                       </Typography>
                     )}
-                    </Box>
+                  </Box>
                 </Grid>
               </Grid>
             </Grid>
