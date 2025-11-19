@@ -20,8 +20,6 @@ export default function ApprovalDetailPage() {
   const exportPDF = () => {
     const target = document.getElementById('approval-document-area');
     if (!target) return;
-
-    // ⬇⬇ PDF 모드 ON (UI는 그대로)
     target.classList.add('pdf-mode');
 
     const originalStyle = target.style.cssText;
@@ -38,13 +36,11 @@ export default function ApprovalDetailPage() {
       useCORS: true,
       scrollX: 0,
       scrollY: 0,
-      width: target.scrollWidth,
+      width: target.scrollWidth + 10,
       height: target.scrollHeight
     })
       .then((canvas) => {
         target.style.cssText = originalStyle;
-
-        // ⬇⬇ PDF 모드 OFF
         target.classList.remove('pdf-mode');
 
         const imgData = canvas.toDataURL('image/png');
@@ -66,9 +62,7 @@ export default function ApprovalDetailPage() {
 
         const x = (pageWidth - renderWidth) / 2;
 
-        // ⬇⬇ 가운데 정렬 제거 → 페이지 상단에서 시작
         const y = margin;
-
         pdf.addImage(imgData, 'PNG', x, y, renderWidth, renderHeight);
         pdf.save(`approval_${docId}.pdf`);
       })
