@@ -52,22 +52,31 @@ export default function LeaveTemplate({
 
   const formatDate = (v) => (v ? v.split('T')[0] : '');
 
+  // 휴가 종류 변경 감지해서 vacationDays 자동 계산
   useEffect(() => {
+    if (!templateValues.vacationTypeCode) return;
     if (!templateValues.startDate || !templateValues.endDate) return;
 
     const start = new Date(templateValues.startDate);
     const end = new Date(templateValues.endDate);
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return;
+    // 기본: 날짜 차이 계산
+    let diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-    const diffMs = end - start;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+    const selectedType = vacationTypes.find((t) => t.commonCodeId == templateValues.vacationTypeCode);
+
+    if (!selectedType) return;
+
+    // 오전반차 / 오후반차 => 0.5일
+    if (selectedType.value1 === 'MORNING_HALF' || selectedType.value1 === 'AFTERNOON_HALF') {
+      diffDays = 0.5;
+    }
 
     setTemplateValues((prev) => ({
       ...prev,
       vacationDays: diffDays
     }));
-  }, [templateValues.startDate, templateValues.endDate]);
+  }, [templateValues.vacationTypeCode, templateValues.startDate, templateValues.endDate, vacationTypes]);
 
   return (
     <div className="approval-wrapper">
