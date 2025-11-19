@@ -34,7 +34,8 @@ export default function ChatRoom({ roomId, user, theme }) {
             senderName: msg.senderName,
             content: msg.content,
             createdAt: msg.createdAt,
-            unreadCount: msg.unreadCount
+            unreadCount: msg.unreadCount,
+            attachments: msg.attachments
           }))
           .reverse();
         setMessages(formattedHistory);
@@ -61,7 +62,8 @@ export default function ChatRoom({ roomId, user, theme }) {
         senderName: payload.senderName,
         content: payload.content,
         createdAt: payload.createdAt,
-        unreadCount: payload.unreadCount
+        unreadCount: payload.unreadCount,
+        attachments: payload.attachments
       };
       setMessages((prevMessages) => [...prevMessages, formattedMessage]);
 
