@@ -24,7 +24,7 @@ jobs:
       # 2-1. SSL 인증서 생성
       - name: Create SSL Certificates
         run: |
-          echo "${{ secrets.SSL_CERT }}" > cert.pem
+          echo "${{ secrets.SSL_CERT }}" > fullchain.pem
           echo "${{ secrets.SSL_KEY }}" > key.pem
           chmod 600 key.pem
 

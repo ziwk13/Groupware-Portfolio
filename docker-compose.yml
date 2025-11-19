@@ -14,7 +14,7 @@ services:
     networks:
       - my-network
     volumes:
-      - ./cert.pem:/etc/nginx/certs/cert.pem:ro
+      - ./fullchain.pem:/etc/nginx/certs/fullchain.pem:ro
       - ./key.pem:/etc/nginx/certs/key.pem:ro
 
 # 외부 네트워크 사용 (도커 네트워크 my-network는 도커 컴포즈 실행 전에 미리 만들어 두어야 함)
