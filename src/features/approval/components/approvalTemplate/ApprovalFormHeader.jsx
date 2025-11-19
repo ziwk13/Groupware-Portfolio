@@ -44,7 +44,6 @@ export default function ApprovalFormHeader({ title, draftUser, draftDept, draftD
       <h1 className="approval-title">{title}</h1>
 
       {/* 전체 헤더 레이아웃 */}
-
       <div
         style={{
           display: 'flex',
@@ -59,11 +58,11 @@ export default function ApprovalFormHeader({ title, draftUser, draftDept, draftD
           <tbody>
             <tr>
               <td className="th">기안자</td>
-              <td className="td">{draftUser}</td>
+              <td className="td">{draftUser ?? '정보 없음'}</td>
             </tr>
             <tr>
               <td className="th">소속</td>
-              <td className="td">{draftDept}</td>
+              <td className="td">{draftDept ?? '-'}</td>
             </tr>
             <tr>
               <td className="th">기안일</td>
@@ -76,13 +75,18 @@ export default function ApprovalFormHeader({ title, draftUser, draftDept, draftD
           </tbody>
         </table>
 
-        {/* 오른쪽 결재선 (완전 유동적 구조) */}
+        {/* 오른쪽 결재선 */}
         <div style={{ display: 'flex', gap: dynamicGap }}>
           {/* 신청 박스 */}
           <div className="sign-column">
             <div className="sign-title-vertical">신청</div>
-            <div className="sign-box">{draftPosition}</div>
-            <div className="sign-box">{draftUser}</div>
+
+            {/* position null-safe */}
+            <div className="sign-box">{draftPosition ?? '-'}</div>
+
+            {/* user null-safe */}
+            <div className="sign-box">{draftUser ?? '정보 없음'}</div>
+
             <div className="sign-box" style={{ fontSize: '14px' }}>
               {displayDate2}
             </div>
@@ -93,8 +97,13 @@ export default function ApprovalFormHeader({ title, draftUser, draftDept, draftD
             {approvalLines.map((line, idx) => (
               <div key={idx} className="sign-column">
                 <div className="sign-title-vertical">승인</div>
-                <div className="sign-box">{line.approver.position}</div>
-                <div className="sign-box">{line.approver.name}</div>
+
+                {/* approver.position null-safe */}
+                <div className="sign-box">{line.approver?.position ?? '-'}</div>
+
+                {/* approver.name null-safe */}
+                <div className="sign-box">{line.approver?.name ?? '정보 없음'}</div>
+
                 <div className="sign-box" style={{ fontSize: '14px' }}>
                   {line.approvalDate ? formatDate(line.approvalDate) : ''}
                 </div>

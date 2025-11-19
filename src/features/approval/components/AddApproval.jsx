@@ -53,7 +53,7 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
   const [alertInfo, setAlertInfo] = useState({
     open: false,
     message: '',
-    severity: 'info' // 'success', 'error', 'warning', 'info'
+    severity: 'info'
   });
 
   const [list, setList] = useState([
@@ -67,14 +67,12 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
     }
   ]);
 
-  // list state에서 approvers와 references 추출
+  // approver / referrer 리스트 구분
   const approvers = list.find((item) => item.name === '결재자')?.empList || [];
   const references = list.find((item) => item.name === '참조자')?.empList || [];
 
-  const [selectedForm, setSelectedForm] = useState(null); // 선택한 결재 양식
-  const [attachments, setAttachments] = useState([]); // 첨부파일
-
-  // 모달 제어용 state
+  const [selectedForm, setSelectedForm] = useState(null);
+  const [attachments, setAttachments] = useState([]);
   const [open, setOpen] = useState(false);
 
   const getStatusChip = (statusValue) => {
@@ -85,30 +83,26 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
         return <Chip label="최종 반려" size="small" color="error" />;
       case 'LINE_APPROVED':
         return <Chip label="승인" size="small" color="success" />;
-      case 'AWAITING': // 결재 대기 (내 차례)
+      case 'AWAITING':
         return <Chip label="대기" size="small" color="warning" />;
-      case 'PENDING': // 미결 (내 차례 아님)
+      case 'PENDING':
         return <Chip label="미결" size="small" color="primary" />;
-
       default:
         return null;
     }
   };
 
-  //  상세조회(initialData)일 때 상태 초기화
+  // 상세 조회 시 초기 데이터 세팅
   useEffect(() => {
     if (!initialData) return;
 
-    // 템플릿 정보 그대로 세팅
     setSelectedForm(initialData.approvalTemplate);
 
-    // 템플릿 관련 값 전체를 templateValues로 전달
     setTemplateValues((prev) => ({
       ...prev,
       ...initialData
     }));
 
-    // 결재선 / 참조자 초기화
     const approverEmps = initialData.approvalLines ?? [];
     const refEmps = initialData.approvalReferences?.map((ref) => ref.referrer) ?? [];
 
@@ -119,7 +113,6 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
   }, [initialData]);
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
-    // 읽기 전용 모드에서는 제출 로직 수행 X
     if (readOnly) {
       setSubmitting(false);
       return;
@@ -137,7 +130,6 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
     let title = (values.title || '').trim();
     let content = (values.content || '').trim();
 
-    // selectedForm이 null일 수 있으므로 null 체크 추가
     const templateLabel = selectedForm?.value1 || '기타 양식';
 
     if (!title) {
@@ -153,40 +145,27 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
     formData.append('title', title);
     formData.append('content', content);
     formData.append('templateCode', selectedForm.code);
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
 
     toFormData(templateValues, formData);
-    const templateData = templateValues || {};
 
-    // 결재선(ApprovalLines) 추가
     approvers.forEach((approver, index) => {
       formData.append(`approvalLines[${index}].approverId`, approver.employeeId);
-      formData.append(`approvalLines[${index}].approvalOrder`, index + 1); // 순서는 1부터 시작
+      formData.append(`approvalLines[${index}].approvalOrder`, index + 1);
     });
 
-    // 참조자(ApprovalReferences) 추가
     references.forEach((referrer, index) => {
       formData.append(`approvalReferences[${index}].referrerId`, referrer.employeeId);
     });
 
-    // 첨부파일(multipartFile) 추가
     if (attachments && attachments.length > 0) {
       attachments.forEach((file) => {
         formData.append('multipartFile', file);
       });
     }
 
-    // API 호출
     try {
       setSubmitting(true);
 
-      for (const pair of formData.entries()) {
-        console.log('FORMDATA:', pair[0], pair[1]);
-      }
-
-      // templateValues to formdata
       const response = await createApproval(formData);
       setAlertInfo({
         open: true,
@@ -194,7 +173,6 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
         severity: 'success'
       });
 
-      // 1초 후 기안 문서함으로 이동
       setTimeout(() => {
         navigate('/approval/list/draft');
       }, 1000);
@@ -210,10 +188,12 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
       setSubmitting(false);
     }
   };
+
   const headerApprovalLines = initialData?.approvalLines || [];
   const finalDecisionLine = headerApprovalLines
     ?.filter((line) => ['APPROVED', 'REJECTED'].includes(line.approvalStatus?.value1))
     ?.sort((a, b) => new Date(b.approvalDate) - new Date(a.approvalDate))[0];
+
   return (
     <>
       <div style={{ marginTop: '20px' }}></div>
@@ -246,9 +226,9 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
                     setTemplateValues={setTemplateValues}
                     readOnly={readOnly}
                     docNo={initialData?.docId}
-                    draftUser={initialData?.creator?.name}
-                    draftDept={initialData?.creator?.department}
-                    draftPosition={initialData?.creator?.position}
+                    draftUser={initialData?.creator?.name ?? '정보 없음'}
+                    draftDept={initialData?.creator?.department ?? '-'}
+                    draftPosition={initialData?.creator?.position ?? '-'}
                     draftDate={initialData?.createdAt}
                     approvalDate={finalDecisionLine?.approvalDate}
                     initialData={initialData}
@@ -264,89 +244,79 @@ export default function AddApproval({ readOnly = false, initialData = null, onEx
         {/* 우측: 결재자 / 참조자 타임라인 */}
         <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Grid container spacing={gridSpacing}>
+            {/* 결재자 */}
             <Grid size={12}>
               <SubCard title="결재자" darkTitle={true}>
                 <Timeline sx={{ m: 0, p: 0, '& .MuiTimelineItem-root': { minHeight: 0 } }}>
-                  {approvers.map((approver, index) => (
-                    <TimelineItem key={index} sx={{ '&::before': { content: 'none' } }}>
-                      <TimelineSeparator>
-                        <TimelineDot color="primary" />
-                        {index < approvers.length - 1 && <TimelineConnector sx={{ bgcolor: 'primary.light' }} />}
-                      </TimelineSeparator>
+                  {approvers.map((approver, index) => {
+                    const emp = initialData ? approver.approver : approver;
+                    const profileImg = emp?.profileImg ?? null;
 
-                      <TimelineContent
-                        sx={{
-                          pb: index < approvers.length - 1 ? 2 : 0,
-                          pt: '6px'
-                        }}
-                      >
-                        {/* 아바타 */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Chip
-                            label={
-                              initialData
-                                ? `${approver.approver.name} ${approver.approver.position}`
-                                : `${approver.name} ${approver.position}`
-                            }
-                            avatar={
-                              <Avatar
-                                alt={initialData ? approver.approver.name : approver.name}
-                                src={
-                                  (initialData ? approver.approver.profileImg : approver.profileImg)
-                                    ? getImageUrl(initialData ? approver.approver.profileImg : approver.profileImg)
-                                    : DefaultAvatar
-                                }
-                                sx={{ width: 36, height: 36 }}
-                              />
-                            }
-                            onClick={handleClick}
-                            variant="outlined"
-                          />
+                    return (
+                      <TimelineItem key={index} sx={{ '&::before': { content: 'none' } }}>
+                        <TimelineSeparator>
+                          <TimelineDot color="primary" />
+                          {index < approvers.length - 1 && <TimelineConnector sx={{ bgcolor: 'primary.light' }} />}
+                        </TimelineSeparator>
 
-                          {/* 상태 칩  */}
+                        <TimelineContent sx={{ pb: index < approvers.length - 1 ? 2 : 0, pt: '6px' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Chip
+                              label={`${emp?.name ?? '정보 없음'} ${emp?.position ?? ''}`}
+                              avatar={
+                                <Avatar
+                                  alt={emp?.name ?? '정보 없음'}
+                                  src={profileImg ? getImageUrl(profileImg) : DefaultAvatar}
+                                  sx={{ width: 36, height: 36 }}
+                                />
+                              }
+                              onClick={handleClick}
+                              variant="outlined"
+                            />
 
-                          {readOnly &&
-                            getStatusChip(
-                              approver.approvalStatus?.value1 === 'APPROVED'
-                                ? 'LINE_APPROVED'
-                                : approver.approvalStatus?.value1 === 'REJECTED'
-                                  ? 'DOC_REJECTED'
-                                  : approver.approvalStatus?.value1 === 'AWAITING'
-                                    ? 'AWAITING'
-                                    : 'PENDING'
-                            )}
-                        </Box>
-                      </TimelineContent>
-                    </TimelineItem>
-                  ))}
+                            {readOnly &&
+                              getStatusChip(
+                                approver.approvalStatus?.value1 === 'APPROVED'
+                                  ? 'LINE_APPROVED'
+                                  : approver.approvalStatus?.value1 === 'REJECTED'
+                                    ? 'DOC_REJECTED'
+                                    : approver.approvalStatus?.value1 === 'AWAITING'
+                                      ? 'AWAITING'
+                                      : 'PENDING'
+                              )}
+                          </Box>
+                        </TimelineContent>
+                      </TimelineItem>
+                    );
+                  })}
                 </Timeline>
               </SubCard>
             </Grid>
 
+            {/* 참조자 */}
             <Grid size={12}>
               <SubCard title="참조자" darkTitle={true}>
                 <Timeline sx={{ m: 0, p: 0, '& .MuiTimelineItem-root': { minHeight: 0 } }}>
-                  {references.map((ref, index) => (
-                    <TimelineItem key={index} sx={{ '&::before': { content: 'none' } }}>
-                      <TimelineSeparator>
-                        <TimelineDot color="primary" />
-                        {index < references.length - 1 && <TimelineConnector sx={{ bgcolor: 'primary.light' }} />}
-                      </TimelineSeparator>
-                      <TimelineContent
-                        sx={{
-                          pb: index < references.length - 1 ? 2 : 0,
-                          pt: '6px'
-                        }}
-                      >
-                        <Chip
-                          label={`${ref.name} ${ref.position}`}
-                          avatar={<Avatar alt={ref.name} src={ref.profileImg ? getImageUrl(ref.profileImg) : DefaultAvatar} />}
-                          onClick={handleClick}
-                          variant="outlined"
-                        />
-                      </TimelineContent>
-                    </TimelineItem>
-                  ))}
+                  {references.map((ref, index) => {
+                    const profileImg = ref?.profileImg ?? null;
+
+                    return (
+                      <TimelineItem key={index} sx={{ '&::before': { content: 'none' } }}>
+                        <TimelineSeparator>
+                          <TimelineDot color="primary" />
+                          {index < references.length - 1 && <TimelineConnector sx={{ bgcolor: 'primary.light' }} />}
+                        </TimelineSeparator>
+                        <TimelineContent sx={{ pb: index < references.length - 1 ? 2 : 0, pt: '6px' }}>
+                          <Chip
+                            label={`${ref?.name ?? '정보 없음'} ${ref?.position ?? ''}`}
+                            avatar={<Avatar alt={ref?.name} src={profileImg ? getImageUrl(profileImg) : DefaultAvatar} />}
+                            onClick={handleClick}
+                            variant="outlined"
+                          />
+                        </TimelineContent>
+                      </TimelineItem>
+                    );
+                  })}
                 </Timeline>
               </SubCard>
             </Grid>
