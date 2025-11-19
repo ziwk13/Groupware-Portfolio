@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Stack } from '@mui/material';
+import { Box, Button, Grid, Stack, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { gridSpacing } from 'store/constant';
 import MainCard from 'ui-component/cards/MainCard';
@@ -11,6 +11,7 @@ import useAuth from 'hooks/useAuth';
 import Alert from '@mui/material/Alert';
 import EmployeeHistoryModal from 'features/employee/components/EmployeeHistoryModal';
 import SyncHRModal from 'features/employee/components/SyncHRModal';
+import { deleteEmployee } from 'features/employee/api/employeeAPI';
 
 // 신규 직원 생성을 위한 기본 템플릿
 const defaultNewEmployee = {
@@ -43,6 +44,8 @@ export default function OrganizationPage() {
   const [refreshList, setRefreshList] = useState(0);
   const [openHistory, setOpenHistory] = useState(false);
   const [openSyncHR, setOpenSyncHR] = useState(false);
+
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, onConfirm: null });
 
 
   // Autocomplete(드롭다운)용 공통 코드
@@ -80,6 +83,8 @@ export default function OrganizationPage() {
       });
     }
   };
+
+  const handleCloseConfirm = () => setConfirmDialog({ open: false, onConfirm: null });
 
   // 2. 데이터 로딩 (공통 코드)
   useEffect(() => {
@@ -200,6 +205,26 @@ export default function OrganizationPage() {
       const errorMessage = error.response?.data?.message || error.message;
       setAlertInfo({ open: true, message: `저장 중 오류가 발생했습니다: ${errorMessage}`, severity: 'error' });
     }
+  };
+
+  const handleDelete = () => {
+    if (!formData?.employeeId) return;
+
+    setConfirmDialog({
+      open: true,
+      onConfirm: async () => {
+        try {
+          await deleteEmployee(formData.employeeId);
+          setAlertInfo({ open: true, message: '사원이 삭제되었습니다.', severity: 'success' });
+          handleNew();
+          setRefreshList((prev) => prev + 1);
+        } catch (error) {
+          console.error('삭제 실패:', error);
+          const errorMessage = error.response?.data?.message || error.message;
+          setAlertInfo({ open: true, message: `삭제 중 오류가 발생했습니다: ${errorMessage}`, severity: 'error' });
+        }
+      }
+    });
   };
 
   return (
@@ -328,6 +353,7 @@ export default function OrganizationPage() {
                   selectedDeptInfo={selectedDept}
                   resetPasswordHandler={resetPasswordHandler}
                   onOpenModal={() => setOpenHistory(true)}
+                  onDelete={handleDelete}
                 />
               </Box>
             </Grid>
@@ -336,6 +362,26 @@ export default function OrganizationPage() {
       </MainCard>
       <EmployeeHistoryModal open={openHistory} onClose={() => setOpenHistory(false)} employee={selectedEmployee} />
       <SyncHRModal open={openSyncHR} onClose={() => setOpenSyncHR(false)}/>
+
+      <Dialog open={confirmDialog.open} onClose={handleCloseConfirm}>
+        <DialogTitle>사원 삭제 확인</DialogTitle>
+        <DialogContent>
+          <DialogContentText>정말로 이 사원을 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm}>취소</Button>
+          <Button
+            onClick={() => {
+              confirmDialog.onConfirm?.();
+              handleCloseConfirm();
+            }}
+            color="error"
+            variant="contained"
+          >
+            삭제
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

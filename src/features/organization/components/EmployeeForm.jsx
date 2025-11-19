@@ -18,7 +18,7 @@ import {getImageUrl} from 'api/getImageUrl';
 import DefaultAvatar from 'assets/images/profile/default_profile.png';
 
 
-function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler, onOpenModal }) {
+function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, resetPasswordHandler, onOpenModal, onDelete }) {
   // 1. 폼 데이터가 없을 때 (초기 상태)
   if (!formData) {
     return (
@@ -144,21 +144,16 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, re
               </ListItem>
               <Divider />
 
-              {/* 이름 */}
+              {/* 이름 (수정불가)*/}
               <ListItem sx={{ px: 0 }}>
                 {' '}
                 <ListItemIcon>
-                  <AccountCircleTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                  <BusinessTwoToneIcon sx={{ fontSize: '1.3rem' }} />
                 </ListItemIcon>
                 <ListItemText primary={<Typography sx={{ fontSize: 14 }}>이름</Typography>} />
-                <TextField
-                  variant="standard"
-                  name="name"
-                  value={formData.name || ''}
-                  onChange={handleChange}
-                  sx={{ marginLeft: 'auto' }}
-                  inputProps={{ style: { textAlign: 'right' } }}
-                />
+                <Typography sx={{ fontSize: 14 }} align="right">
+                  {formData.name || ''}
+                </Typography>
               </ListItem>
               <Divider />
 
@@ -326,6 +321,17 @@ function EmployeeForm({ formData, setFormData, commonCodes, selectedDeptInfo, re
                   size="small"
                 />
               </ListItem>
+
+              {!isNew && (
+                <>
+                  <Divider />
+                  <Box sx={{ p: 2 }}>
+                    <Button fullWidth variant="contained" color="error" onClick={onDelete}>
+                      사원 삭제
+                    </Button>
+                  </Box>
+                </>
+              )}
             </List>
           </Grid>
         </Grid>
