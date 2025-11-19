@@ -14,5 +14,5 @@ import { BASE_URL } from 'api/axios';
 
 export function getImageUrl(path) {
   const serverBaseUrl = BASE_URL;
-  return `${serverBaseUrl}uploads/${path}`;
+  return `${serverBaseUrl}/uploads/${path}`;
 }
