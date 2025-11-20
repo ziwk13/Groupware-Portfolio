@@ -21,11 +21,7 @@ import { APP_AUTH } from 'config';
 
 // A mapping of auth types to dynamic imports
 const authRegisterImports = {
-  firebase: () => import('./firebase/AuthRegister'),
-  jwt: () => import('./jwt/AuthRegister'),
-  aws: () => import('./aws/AuthRegister'),
-  auth0: () => import('./auth0/AuthRegister'),
-  supabase: () => import('./supabase/AuthRegister')
+  jwt: () => import('./jwt/AuthRegister')
 };
 
 export default function Register() {

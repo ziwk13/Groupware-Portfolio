@@ -13,22 +13,7 @@ export default function ViewOnlyAlert() {
   const [searchParams] = useSearchParams();
   const authParam = searchParams.get('auth') || '';
 
-  let documentationLink = 'https://codedthemes.gitbook.io/berry/authentication';
-
-  switch (authParam) {
-    case 'auth0':
-      documentationLink = 'https://codedthemes.gitbook.io/berry/authentication/auth0';
-      break;
-    case 'firebase':
-      documentationLink = 'https://codedthemes.gitbook.io/berry/authentication/firebase';
-      break;
-    case 'aws':
-      documentationLink = 'https://codedthemes.gitbook.io/berry/authentication/aws-cognito';
-      break;
-    case 'supabase':
-      documentationLink = 'https://codedthemes.gitbook.io/berry/authentication/supabase';
-      break;
-  }
+  const documentationLink = 'https://codedthemes.gitbook.io/berry/authentication';
 
   return (
     <>
