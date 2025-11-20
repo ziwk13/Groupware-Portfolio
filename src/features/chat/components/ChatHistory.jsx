@@ -6,12 +6,13 @@ import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar'; // [추가] Avatar import
 
 // project imports
 import { gridSpacing } from 'store/constant';
 import AttachmentListView from 'features/attachment/components/AttachmentListView';
 
-export default function ChatHistory({ data, theme, user }) {
+export default function ChatHistory({ data, theme, user, roomInfo }) { // [수정] roomInfo prop 추가
   
   const formatChatTime = (isoString) => {
     if (!isoString) return '';
@@ -45,7 +46,6 @@ export default function ChatHistory({ data, theme, user }) {
                   px: 2
                 }}
               >
-                {/* 카드(Card) 형태를 제거하고 텍스트만 표시하여 배경과 일체화 */}
                 <Typography 
                   variant="body2" 
                   sx={{ 
@@ -65,7 +65,6 @@ export default function ChatHistory({ data, theme, user }) {
                     </Box>
                 )}
                 
-                {/* 시간 표시 - 텍스트 아래에 작게 표시 */}
                 <Typography 
                   variant="caption" 
                   sx={{ 
@@ -81,8 +80,8 @@ export default function ChatHistory({ data, theme, user }) {
           String(history.employeeId) === String(user.id) ? (
             <Grid size={12}>
               <Grid container spacing={gridSpacing}>
-                <Grid size={{ xs: 0, sm: 5 }} />
-                <Grid size={{ xs: 12, sm: 7 }}>
+                <Grid size={{ xs: 0, sm: 4 }} /> {/* 여백 조정 */}
+                <Grid size={{ xs: 12, sm: 8 }}>
                   <Box
                     sx={{
                       display: 'flex',
@@ -98,7 +97,7 @@ export default function ChatHistory({ data, theme, user }) {
                           color: 'primary.main',
                           fontWeight: 'bold',
                           mb: 1,
-                          whiteSpace: 'nowrap' // 숫자 줄바꿈 방지
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         {history.unreadCount}
@@ -109,10 +108,9 @@ export default function ChatHistory({ data, theme, user }) {
                         display: 'inline-block',
                         bgcolor: 'primary.light',
                         ...theme.applyStyles('dark', { bgcolor: 'grey.500' }),
-                        maxWidth: '100%' // Card가 Grid 영역을 넘지 않도록 설정
+                        maxWidth: '100%'
                       }}
                     >
-                      {/* Grid 제거 및 Flex 구조로 변경 */}
                       <CardContent sx={{ p: 2, pb: '16px !important', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                         
                         {history.content && (
@@ -121,7 +119,6 @@ export default function ChatHistory({ data, theme, user }) {
                           </Typography>
                         )}
 
-                        {/* 파일 첨부 영역: minWidth를 주어 찌그러짐 방지 */}
                         {history.attachments && history.attachments.length > 0 && (
                           <Box sx={{ mt: history.content ? 1 : 0, width: '100%' }}>
                             <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
@@ -138,63 +135,73 @@ export default function ChatHistory({ data, theme, user }) {
               </Grid>
             </Grid>
           ) : (
-            /* 3. 상대방이 보낸 메시지 */
+            /* 3. 상대방이 보낸 메시지 (프로필 렌더링 추가) */
             <Grid size={12}>
               <Grid container spacing={gridSpacing}>
-                <Grid size={{ xs: 12, sm: 7 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      justifyContent: 'flex-start',
-                      gap: 0.5
-                    }}
-                  >
-                    <Card
+                <Grid size={{ xs: 12, sm: 8 }}>
+                  {/* 프로필 이미지 + 메시지 박스 레이아웃 */}
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    
+                    {/* 프로필 아바타 */}
+                    <Avatar 
+                      alt={history.senderName || '상대방'} 
+                      // 메시지 자체에 프로필이 있으면 사용, 없으면 방 정보(1:1의 경우) 사용
+                      src={history.senderProfile || roomInfo?.avatar} 
+                      sx={{ width: 34, height: 34, mt: 0.5 }}
+                    />
+
+                    <Box
                       sx={{
-                        display: 'inline-block',
-                        bgcolor: 'secondary.light',
-                        ...theme.applyStyles('dark', { bgcolor: 'dark.900' }),
-                        maxWidth: '100%'
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        justifyContent: 'flex-start',
+                        gap: 0.5
                       }}
                     >
-                      {/* Grid 제거 및 Flex 구조로 변경 */}
-                      <CardContent sx={{ p: 2, pb: '16px !important', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
-                          {history.senderName || '상대방'}
-                        </Typography>
-
-                        {history.content && (
-                          <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-                            {history.content}
-                          </Typography>
-                        )}
-
-                        {/* 파일 첨부 영역: minWidth를 주어 찌그러짐 방지 */}
-                        {history.attachments && history.attachments.length > 0 && (
-                          <Box sx={{ mt: history.content ? 1 : 0, width: '100%' }}>
-                            <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
-                          </Box>
-                        )}
-
-                        <Typography align="right" variant="subtitle2" sx={{ mt: 0.5 }}>
-                          {formatChatTime(history.createdAt)}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                    {history.unreadCount > 0 && (
-                      <Typography
-                        variant="caption"
+                      <Card
                         sx={{
-                          color: 'primary.main',
-                          fontWeight: 'bold',
-                          mb: 1,
-                          whiteSpace: 'nowrap'
+                          display: 'inline-block',
+                          bgcolor: 'secondary.light',
+                          ...theme.applyStyles('dark', { bgcolor: 'dark.900' }),
+                          maxWidth: '100%'
                         }}
                       >
-                        {history.unreadCount}
-                      </Typography>
-                    )}
+                        <CardContent sx={{ p: 2, pb: '16px !important', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
+                            {history.senderName || '상대방'}
+                          </Typography>
+
+                          {history.content && (
+                            <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                              {history.content}
+                            </Typography>
+                          )}
+
+                          {history.attachments && history.attachments.length > 0 && (
+                            <Box sx={{ mt: history.content ? 1 : 0, width: '100%' }}>
+                              <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
+                            </Box>
+                          )}
+
+                          <Typography align="right" variant="subtitle2" sx={{ mt: 0.5 }}>
+                            {formatChatTime(history.createdAt)}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                      {history.unreadCount > 0 && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: 'primary.main',
+                            fontWeight: 'bold',
+                            mb: 1,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {history.unreadCount}
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
                 </Grid>
               </Grid>
@@ -212,5 +219,6 @@ ChatHistory.propTypes = {
   user: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     name: PropTypes.string 
-  })
+  }),
+  roomInfo: PropTypes.object // [추가] Prop Type 정의
 };
