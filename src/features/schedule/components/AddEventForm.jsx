@@ -22,6 +22,7 @@ import {
   Alert
 } from '@mui/material';
 import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers';
+import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -52,14 +53,16 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
   const { user } = useAuth();
   const loggedInId = user?.employeeId;
   const isHost = event && event.employeeId === loggedInId;
+
   const navigate = useNavigate();
   const [participantStatus, setParticipantStatus] = useState(null);
+
+  //  휴가 일정인지 판별
+  const isVacationEvent = event?.categoryName === '휴가';
 
   // 조직도 모달 상태
   const [orgOpen, setOrgOpen] = useState(false);
   const [orgList, setOrgList] = useState([{ name: '참석자', empList: [] }]);
-
-  // MUI 알림 관련 상태
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, onConfirm: null });
 
@@ -92,7 +95,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
     fetchParticipants();
   }, [event]);
 
-  // 카테고리 목록 (공통코드 기반)
+  // 카테고리 목록
   const categoryOptions = [
     { code: 'SC01', value1: 'MEETING', value2: '회의' },
     { code: 'SC02', value1: 'BUSINESS_TRIP', value2: '출장' },
@@ -100,6 +103,8 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
     { code: 'SC04', value1: 'PROJECT', value2: '프로젝트' },
     { code: 'SC05', value1: 'ETC', value2: '기타 일정' }
   ];
+
+  const filteredCategoryOptions = isCreating ? categoryOptions.filter((opt) => opt.value1 !== 'VACATION') : categoryOptions;
 
   const initialValues = useMemo(() => {
     const baseNow = openNowRef.current;
@@ -123,7 +128,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
 
     const merged = [...values.selectedParticipants, ...selected];
     const unique = merged.filter((emp, idx, arr) => idx === arr.findIndex((e) => e.employeeId === emp.employeeId));
-    if (isCreating || isHost) setFieldValue('selectedParticipants', unique);
+    if ((isCreating || isHost) && !isVacationEvent) setFieldValue('selectedParticipants', unique); // ⭐ 휴가일 경우 추가 금지
   }, [orgList]);
 
   // 참여 상태 불러오기
@@ -147,6 +152,13 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
     validationSchema: EventSchema,
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
+        //  휴가 일정 수정 방지
+        if (isVacationEvent) {
+          setSnackbar({ open: true, message: '휴가 일정은 수정할 수 없습니다.', severity: 'warning' });
+          setSubmitting(false);
+          return;
+        }
+
         const data = {
           title: values.title,
           content: values.content,
@@ -181,7 +193,6 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
           await dispatch(inviteParticipants(scheduleId, ids));
         }
       } catch (error) {
-        // 필요 시 에러 표시
       } finally {
         setSubmitting(false);
       }
@@ -212,6 +223,12 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
   // 삭제 다이얼로그
   const handleDeleteClick = () => {
     if (!event) return;
+
+    if (isVacationEvent) {
+      setSnackbar({ open: true, message: '휴가 일정은 삭제할 수 없습니다.', severity: 'warning' });
+      return;
+    }
+
     if (!isHost) {
       setSnackbar({ open: true, message: '이 일정은 작성자만 삭제할 수 있습니다.', severity: 'warning' });
       setStatusMessage?.('이 일정은 작성자만 삭제할 수 있습니다.');
@@ -242,7 +259,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                   fullWidth
                   label="제목"
                   {...getFieldProps('title')}
-                  InputProps={{ readOnly: event && !isHost }}
+                  InputProps={{ readOnly: (event && !isHost) || isVacationEvent }}
                   error={Boolean(touched.title && errors.title)}
                   helperText={touched.title && errors.title}
                 />
@@ -256,13 +273,13 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                   rows={3}
                   label="일정 내용"
                   {...getFieldProps('content')}
-                  InputProps={{ readOnly: event && !isHost }}
+                  InputProps={{ readOnly: (event && !isHost) || isVacationEvent }}
                   error={Boolean(touched.content && errors.content)}
                   helperText={touched.content && errors.content}
                 />
               </Grid>
 
-              {/* 참석자 선택 (조직도 모달) */}
+              {/* 참석자 선택 */}
               <Grid size={12}>
                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
                   참석자
@@ -275,12 +292,14 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                         key={emp.employeeId}
                         label={emp.name}
                         variant="outlined"
-                        onDelete={() =>
-                          (isCreating || isHost) &&
-                          setFieldValue(
-                            'selectedParticipants',
-                            values.selectedParticipants.filter((p) => Number(p.employeeId) !== Number(emp.employeeId))
-                          )
+                        onDelete={
+                          !isVacationEvent && (isCreating || isHost)
+                            ? () =>
+                                setFieldValue(
+                                  'selectedParticipants',
+                                  values.selectedParticipants.filter((p) => Number(p.employeeId) !== Number(emp.employeeId))
+                                )
+                            : undefined
                         }
                       />
                     ))
@@ -291,8 +310,14 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                   )}
                 </Stack>
 
-                <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setOrgOpen(true)} disabled={!(isCreating || isHost)}>
-                  조직도 열기
+                <Button
+                  variant="outlined"
+                  sx={{ mt: 1 }}
+                  onClick={() => setOrgOpen(true)}
+                  disabled={isVacationEvent || !(isCreating || isHost)}
+                  endIcon={<PersonAddAlt1OutlinedIcon />}
+                >
+                  일정 초대
                 </Button>
 
                 <OrganizationModal open={orgOpen} onClose={() => setOrgOpen(false)} list={orgList} setList={setOrgList} />
@@ -302,21 +327,22 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
               <Grid size={12}>
                 <StartAndEndDateTime
                   startTime={values.startTime}
-                  setStartTime={(d) => (isCreating || isHost) && setFieldValue('startTime', d)}
+                  setStartTime={(d) => !isVacationEvent && (isCreating || isHost) && setFieldValue('startTime', d)}
                   endTime={values.endTime}
-                  setEndTime={(d) => (isCreating || isHost) && setFieldValue('endTime', d)}
+                  setEndTime={(d) => !isVacationEvent && (isCreating || isHost) && setFieldValue('endTime', d)}
+                  disabled={isVacationEvent}
                 />
               </Grid>
 
               {/* 카테고리 선택 */}
               <Grid size={12}>
                 <Autocomplete
-                  options={categoryOptions}
+                  options={filteredCategoryOptions}
                   getOptionLabel={(option) => option.value2}
                   value={categoryOptions.find((opt) => opt.value1 === values.categoryCode) || null}
                   onChange={(e, val) => setFieldValue('categoryCode', val?.value1 || '')}
                   isOptionEqualToValue={(option, value) => option.value1 === value.value1}
-                  disabled={!isCreating && !isHost}
+                  disabled={isVacationEvent || (!isCreating && !isHost)}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -329,11 +355,12 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                 />
               </Grid>
 
-              {/* 참여자 목록 */}
-              {!isCreating && participants.length > 0 && (
+              {/* 참여자 목록 - 휴가일정이면 숨기기 */}
+              {!isCreating && participants.length > 0 && !isVacationEvent && (
                 <Grid size={12} sx={{ mt: 2 }}>
                   {!isHost && (
                     <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                      {/* 참석 버튼 */}
                       <Button
                         size="small"
                         variant={participantStatus === 'ATTEND' ? 'contained' : 'outlined'}
@@ -363,6 +390,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                         참석
                       </Button>
 
+                      {/* 거절 버튼 */}
                       <Button
                         size="small"
                         variant={participantStatus === 'REJECT' ? 'contained' : 'outlined'}
@@ -397,6 +425,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                   <Typography variant="h6" gutterBottom>
                     참여자 목록
                   </Typography>
+
                   <List dense>
                     {participants.map((p) => (
                       <ListItem key={p.participantId}>
@@ -415,7 +444,7 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
           <DialogActions sx={{ p: 3 }}>
             <Grid container sx={{ justifyContent: 'space-between', alignItems: 'center', width: 1 }}>
               <Grid>
-                {isHost && !isCreating && (
+                {isHost && !isCreating && !isVacationEvent && (
                   <Tooltip title="Delete Event">
                     <IconButton onClick={handleDeleteClick} size="large" disabled={isSubmitting}>
                       <DeleteIcon color="error" />
@@ -423,12 +452,14 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                   </Tooltip>
                 )}
               </Grid>
+
               <Grid>
                 <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
                   <Button type="button" variant="outlined" onClick={onCancel}>
                     취소
                   </Button>
-                  {(!event || isHost) && (
+
+                  {(!event || isHost) && !isVacationEvent && (
                     <Button type="submit" variant="contained" disabled={isSubmitting}>
                       {event ? '수정' : '추가'}
                     </Button>

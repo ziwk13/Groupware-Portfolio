@@ -1,0 +1,181 @@
+/* flex 확장 방지 → 양쪽 레이아웃이 절대 늘어나지 않음 */
+.info-wrapper,
+.sign-wrapper {
+  flex: 0 0 auto;
+}
+
+/* 제목 */
+.approval-title {
+  text-align: center;
+  font-size: 42px;
+  margin-bottom: 50px;
+  font-weight: 700;
+}
+
+/* 왼쪽 정보 테이블 */
+.info-table {
+  border-collapse: collapse;
+  font-size: 16px;
+  height: 50px;
+  height: 100px;
+  width: 330px;
+  min-width: 330px;
+}
+
+.info-table .th {
+  width: 100px;
+  border: 1px solid #333;
+  padding: 12px;
+  font-weight: 700;
+  text-align: center;
+  background-color: #f5f5f5;
+}
+
+.info-table .td {
+  border: 1px solid #333;
+  padding: 11px;
+}
+
+/* 오른쪽 결재선 */
+.sign-table-split {
+  border-collapse: collapse;
+  font-size: 16px;
+  text-align: center;
+  width: 120px;
+  height: 120px;
+}
+
+.sign-th-vertical {
+  width: 30px;
+  border: 1px solid #333;
+  padding: 10px 5px;
+  font-weight: 700;
+  background-color: #f5f5f5;
+  vertical-align: middle;
+}
+
+.sign-rank-horizontal,
+.sign-name-horizontal,
+.sign-blank-horizontal {
+  width: 90px;
+  border: 1px solid #333;
+  padding: 5px;
+  height: 58px;
+  vertical-align: middle;
+}
+
+/* 휴가 입력 테이블 */
+.form-table {
+  border-collapse: collapse;
+  font-size: 16px;
+  margin-top: 25px;
+}
+
+.form-th {
+  width: 150px;
+  border: 1px solid #333;
+  padding: 12px;
+  font-weight: 700;
+  background: #f5f5f5;
+  text-align: center;
+}
+
+.form-td {
+  border: 1px solid #333;
+  padding: 12px;
+}
+
+.input-select {
+  height: 32px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-date {
+  height: 32px;
+  width: 160px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-days {
+  height: 32px;
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.textarea-reason {
+  width: 100%;
+  height: 150px;
+  resize: none;
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* 결재선 유동 구조 (N명 대응) */
+.sign-column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100px;
+  flex: 1;
+  border: 1px solid #333;
+}
+
+.sign-title-vertical {
+  background: #f5f5f5;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #333;
+}
+
+.sign-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #333;
+}
+
+.sign-box:last-child {
+  border-bottom: none;
+}
+
+.approval-wrapper {
+  width: 800px; /* 원하는 폭으로 설정 */
+  margin: 0 auto;
+}
+
+.approval-body {
+  width: 100%;
+}
+
+/* PDF 캡처용 A4 페이지 래퍼 */
+.pdf-page-wrapper {
+  /* A4 비율에 맞춰 여백 있는 종이처럼 보이게 */
+  padding: 40px 30px; /* 위·아래 40, 좌우 30 정도 여백 */
+  background-color: #ffffff;
+}
+
+/* 실제 문서 박스는 margin 대신 내부 여백을 사용하는 편이 안전함 */
+.approval-wrapper {
+  margin: 0 auto; /* 좌우 중앙 정렬만 유지 */
+}
+
+#approval-document-area.pdf-mode {
+  padding: 20px 20px; /* PDF에서만 위→좌우 여백 적용됨 */
+  background: #fff !important;
+}
+
+#approval-document-area.pdf-mode .approval-wrapper {
+  margin-top: 0 !important; /* 화면에서는 margin 있지만 PDF에서만 제거 */
+}

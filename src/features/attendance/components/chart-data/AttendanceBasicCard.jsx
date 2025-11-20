@@ -11,7 +11,6 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-// 절대경로로 수정된 부분
 import {
   fetchTodayAttendance,
   clockIn,
@@ -36,14 +35,29 @@ export default function AttendanceBasicCard({ isLoading }) {
   const { colorScheme } = useColorScheme();
   const { user, isLoggedIn } = useAuth();
 
+  // 근무 상태
+  const workStatusMap = {
+    NORMAL: '정상근무',
+    LATE: '지각',
+    EARLY_LEAVE: '조퇴',
+    ABSENT: '결근',
+    VACATION: '휴가',
+    OUT_ON_BUSINESS: '외근',
+    OFF: '퇴근',
+    MORNING_HALF: '오전 반차',
+    AFTERNOON_HALF: '오후 반차'
+  };
+
   const { today, loading, thisWeek } = useSelector((state) => state.attendance);
 
   const employeeId = user?.employeeId;
 
+  //  휴가 비활성 목록
+  const DISABLED_DAY = ['VACATION'];
+
   // 알림 메시지
   const [statusMessage, setStatusMessage] = useState('');
 
-  // 알림 자동 사라짐
   useEffect(() => {
     if (!statusMessage) return;
     const timer = setTimeout(() => setStatusMessage(''), 2000);
@@ -80,19 +94,32 @@ export default function AttendanceBasicCard({ isLoading }) {
     return () => clearInterval(interval);
   }, [dispatch, user]);
 
-  // ===== 출근 =====
+  // ===== 출근 처리 =====
   const handleClockIn = async () => {
-    if (today?.startTime) return setStatusMessage('이미 출근이 완료되었습니다.');
+    if (DISABLED_DAY.includes(today?.workStatus)) {
+      return setStatusMessage('오늘은 휴가/반차일입니다. 출근할 수 없습니다.');
+    }
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
-    await dispatch(clockIn(employeeId));
-    dispatch(fetchTodayAttendance(employeeId));
-    dispatch(fetchThisWeekAttendance(employeeId));
+    if (today?.startTime) return setStatusMessage('이미 출근이 완료되었습니다.');
+
+    try {
+      await dispatch(clockIn(employeeId)).unwrap();
+      dispatch(fetchTodayAttendance(employeeId));
+      dispatch(fetchThisWeekAttendance(employeeId));
+    } catch (error) {
+      setStatusMessage(error?.message || '오늘은 반차일입니다. 출근할 수 없습니다.');
+    }
   };
 
-  // ===== 퇴근 =====
+  // ===== 퇴근 처리 =====
   const handleClockOut = async () => {
+    //  휴가일 퇴근 금지
+    if (DISABLED_DAY.includes(today?.workStatus)) {
+      return setStatusMessage('오늘은 휴가일입니다. 퇴근할 수 없습니다.');
+    }
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
     if (!today?.startTime) return setStatusMessage('출근 기록이 있어야 퇴근이 가능합니다.');
+
     await dispatch(clockOut(employeeId));
     dispatch(fetchTodayAttendance(employeeId));
     dispatch(fetchThisWeekAttendance(employeeId));
@@ -101,30 +128,38 @@ export default function AttendanceBasicCard({ isLoading }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  // ===== 근무상태 변경 =====
+  // ===== 근무상태 변경 메뉴 열기 =====
   const handleWorkStatusClick = (event) => {
+    //  휴가일 근무상태 변경 금지
+    if (DISABLED_DAY.includes(today?.workStatus)) {
+      return setStatusMessage('오늘은 휴가일입니다. 근무상태를 변경할 수 없습니다.');
+    }
     if (today?.endTime) return setStatusMessage('이미 퇴근이 완료되었습니다.');
     if (!today?.startTime) return setStatusMessage('출근 기록이 있어야 근무상태 변경이 가능합니다.');
+
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => setAnchorEl(null);
 
+  const inOfficeStatusKeys = ['NORMAL', 'LATE'];
+
   const handleWorkStatusChange = (statusCode) => {
+    if (statusCode === 'return-to-office') {
+      const isInOffice = inOfficeStatusKeys.includes(today?.workStatus);
+
+      if (isInOffice) {
+        setStatusMessage('이미 사내 근무 중입니다.');
+        handleClose();
+        return;
+      }
+    }
+
     dispatch(updateWorkStatus({ employeeId, statusCode }));
     handleClose();
   };
 
-  const workStatusMap = {
-    NORMAL: '정상근무',
-    LATE: '지각',
-    EARLY_LEAVE: '조퇴',
-    ABSENT: '결근',
-    VACATION: '휴가',
-    OUT_ON_BUSINESS: '외근',
-    OFF: '퇴근'
-  };
-
+  // 테마 및 차트 설정
   const {
     state: { fontFamily }
   } = useConfig();
@@ -150,11 +185,20 @@ export default function AttendanceBasicCard({ isLoading }) {
 
   return (
     <>
-      {/* ===== Alert: 카드 완전 밖에서 겹쳐 띄우기 (절대 크기 영향 없음) ===== */}
       <Box sx={{ position: 'relative' }}>
         {statusMessage && (
           <Alert
-            severity={statusMessage.includes('가능') || statusMessage.includes('완료') ? 'error' : 'success'}
+            severity={
+              statusMessage.includes('없습니다') ||
+              statusMessage.includes('불가능') ||
+              statusMessage.includes('이미') ||
+              statusMessage.includes('오류') ||
+              statusMessage.includes('에러') ||
+              statusMessage.includes('실패') ||
+              statusMessage.includes('있어')
+                ? 'error'
+                : 'success'
+            }
             sx={{
               position: 'absolute',
               top: 10,
@@ -170,17 +214,15 @@ export default function AttendanceBasicCard({ isLoading }) {
           </Alert>
         )}
 
-        {/* ===== Main 카드 (원래 크기 유지됨) ===== */}
         <MainCard>
           <Stack spacing={1}>
-            {/* ===== 시간 라인 ===== */}
+            {/* 날짜 표시 */}
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography variant={isSmall ? 'h5' : 'h3'} color="text.primary">
                 {formattedTime}
               </Typography>
             </Stack>
 
-            {/* 근무시간 바 */}
             <Box sx={{ mt: 1, mb: 1 }}>
               <WorkProgressBar currentMinutes={thisWeek?.totalMinutes || 0} targetMinutes={thisWeek?.targetMinutes || 2400} />
             </Box>
@@ -245,7 +287,7 @@ export default function AttendanceBasicCard({ isLoading }) {
               </Box>
             </Box>
 
-            {/* ===== 버튼 영역 ===== */}
+            {/* 버튼 영역 */}
             <Stack direction="row" spacing={2} justifyContent="flex-end" mt={1}>
               <Button
                 variant="outlined"

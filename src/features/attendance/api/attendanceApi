@@ -78,7 +78,8 @@ const attendanceSlice = createSlice({
     thisWeek: { records: [], totalMinutes: 0, targetMinutes: 2400 },
     selectedWeek: { records: [], totalMinutes: 0, targetMinutes: 2400 },
     loading: false,
-    error: null
+    error: null,
+    lastUpdated: 0
   },
   reducers: {
     resetAttendanceState: (state) => {
@@ -108,9 +109,11 @@ const attendanceSlice = createSlice({
       // 출근 / 퇴근
       .addCase(clockIn.fulfilled, (state, action) => {
         state.today = action.payload;
+        state.lastUpdated = Date.now();
       })
       .addCase(clockOut.fulfilled, (state, action) => {
         state.today = action.payload;
+        state.lastUpdated = Date.now();
       })
 
       // 근무 상태 변경
@@ -121,6 +124,7 @@ const attendanceSlice = createSlice({
         } else {
           state.today = { workStatus: newStatus };
         }
+        state.lastUpdated = Date.now();
       })
 
       // 이번 주 (ProgressBar용)
