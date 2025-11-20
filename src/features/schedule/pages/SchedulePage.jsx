@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -22,6 +22,7 @@ import useAuth from 'hooks/useAuth';
 import { Alert, Grid, Box, Typography } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import koLocale from '@fullcalendar/core/locales/ko';
+import axios from 'api/axios';
 
 const fmtLocal = (d) => (d ? format(new Date(d), "yyyy-MM-dd'T'HH:mm:ss") : null);
 
@@ -44,6 +45,10 @@ export default function Calendar() {
   const modalType = searchParams.get('modal');
   const modalId = searchParams.get('id');
   const isModalOpen = Boolean(modalType);
+
+  // 공휴일 목록
+  const [holidays, setHolidays] = useState([]);
+  const holidaySet = useMemo(() => new Set(holidays.map((h) => String(h.locdate))), [holidays]);
 
   const openAddModal = () => navigate('/schedule?modal=add', { replace: false });
   const openEditModal = (id) => navigate(`/schedule?modal=edit&id=${id}`, { replace: false });
@@ -115,6 +120,7 @@ export default function Calendar() {
     api?.prev();
     setDate(api?.getDate() ?? new Date());
   };
+
   const handleDateNext = () => {
     const api = calendarRef.current?.getApi();
     api?.next();
@@ -177,6 +183,27 @@ export default function Calendar() {
     closeModal();
   };
 
+  // 공휴일 API 호출
+  useEffect(() => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+
+    const fetchHoliday = async () => {
+      try {
+        const res = await axios.get('/api/schedules/holidays', {
+          params: { year, month },
+          withCredentials: true
+        });
+
+        setHolidays(res.data?.data || []);
+      } catch (err) {
+        console.error('공휴일 조회 오류:', err);
+      }
+    };
+
+    fetchHoliday();
+  }, [date]);
+
   if (loading) return <Loader />;
   if (error) return <div style={{ padding: 20, color: 'red' }}>❌ 일정 로드 중 오류: {error.message}</div>;
 
@@ -190,7 +217,12 @@ export default function Calendar() {
               severity={
                 statusMessage.includes('실패') || statusMessage.includes('에러') || statusMessage.includes('오류') ? 'error' : 'success'
               }
-              sx={{ p: 0.5, px: 1.5, fontSize: '0.875rem', whiteSpace: 'nowrap' }}
+              sx={{
+                p: 0.5,
+                px: 1.5,
+                fontSize: '0.875rem',
+                whiteSpace: 'nowrap'
+              }}
             >
               {statusMessage}
             </Alert>
@@ -220,6 +252,56 @@ export default function Calendar() {
             initialDate={date}
             timeZone="local"
             locale={koLocale}
+            selectable
+            editable
+            weekends
+            height={matchSm ? 'auto' : 720}
+            headerToolbar={false}
+            dayCellContent={(info) => {
+              const y = info.date.getFullYear();
+              const m = String(info.date.getMonth() + 1).padStart(2, '0');
+              const d = String(info.date.getDate()).padStart(2, '0');
+              const ymd = `${y}${m}${d}`;
+
+              const isHoliday = holidaySet.has(ymd);
+              const isSunday = info.date.getDay() === 0;
+              const isRed = isHoliday || isSunday;
+
+              const holiday = isHoliday ? holidays.find((h) => String(h.locdate) === ymd) : null;
+
+              // 날짜 숫자
+              let html = `
+                <div style="
+                  font-size: 0.9rem;
+                  margin-bottom: 2px;
+                  ${isRed ? 'color:#D32F2F; font-weight:700;' : ''}
+                ">
+                  ${info.dayNumberText}
+                </div>
+              `;
+
+              // 공휴일 이름 표시
+              if (holiday) {
+                html += `
+                  <div style="
+                    font-size: 0.65rem;
+                    color: #D32F2F;
+                    font-weight: 600;
+                    min-height: 14px;
+                    line-height: 14px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  ">
+                    ${holiday.dateName}
+                  </div>
+                `;
+              } else {
+                html += `<div style="min-height: 14px;"></div>`;
+              }
+
+              return { html };
+            }}
             events={events.map((e) => {
               const categoryColorMap = {
                 회의: '#42A5F5',
@@ -253,13 +335,13 @@ export default function Calendar() {
               info.el.style.setProperty('border-color', color, 'important');
               info.el.style.setProperty('color', '#fff', 'important');
             }}
-            eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
-            selectable
-            editable
-            weekends
-            height={matchSm ? 'auto' : 720}
-            headerToolbar={false}
+            eventTimeFormat={{
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            }}
             select={handleRangeSelect}
+            eventClick={handleEventSelect}
             eventDrop={(info) => {
               const ev = info.event;
               const isVacation = ev.extendedProps?.categoryName === '휴가';
@@ -284,7 +366,6 @@ export default function Calendar() {
               if (isVacation) return false;
               return canEdit(draggedEvent);
             }}
-            eventClick={handleEventSelect}
           />
         </SubCard>
       </CalendarStyled>
