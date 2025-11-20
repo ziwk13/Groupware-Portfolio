@@ -6,7 +6,6 @@ import { getMessages, markRoomAsRead, sendMessageWithFiles } from '../api/Chat';
 import MessageInput from './MessageInput';
 import { useStomp } from 'contexts/StompProvider';
 
-// [수정] roomInfo prop 추가
 export default function ChatRoom({ roomId, user, theme, roomInfo }) {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
