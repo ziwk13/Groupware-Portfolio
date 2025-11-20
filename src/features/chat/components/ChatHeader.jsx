@@ -63,7 +63,7 @@ export default function ChatHeader({
         <Grid sx={{flex:1}}>
           <Grid container spacing={1} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
             <Grid>
-              <Avatar alt={user.name} src={user.avatar && getImageUrl(`${user.avatar}`, ImagePath.USERS)} />
+              <Avatar alt={user.displayName} src={user.profileImg && getImageUrl(`${user.profileImg}`, ImagePath.USERS)} />
             </Grid>
             <Grid size={{ sm: 'grow' }} sx={{ minWidth: 0 }}>
               <Grid container spacing={0} sx={{ alignItems: 'center' }}>
@@ -75,7 +75,7 @@ export default function ChatHeader({
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
                       }}
-                    >{user.name}
+                    >{user.displayName || user.name}
                     </Typography>
                     {user.memberCount && (
                       <Typography variant="h5" color="textSecondary" sx={{ ml: 0.5 }}>
@@ -93,7 +93,7 @@ export default function ChatHeader({
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    {user.isTeam ? '팀 채팅방' : user.position}
+                    {user.isTeam ? '팀 채팅방' : user.positionName}
                   </Typography>
                 </Grid>
               </Grid>
@@ -134,10 +134,10 @@ export default function ChatHeader({
 
 ChatHeader.propTypes = {
   user: PropTypes.shape({
-    name: PropTypes.string,
-    avatar: PropTypes.string,
+    displayName: PropTypes.string,
+    profileImg: PropTypes.string,
     online_status: PropTypes.string,
-    position: PropTypes.string,
+    positionName: PropTypes.string,
     isTeam: PropTypes.bool.isRequired, // isTeam을 필수로 받도록 설정
     memberCount: PropTypes.number
   }),
