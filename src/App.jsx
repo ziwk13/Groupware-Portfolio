@@ -56,7 +56,6 @@ export default function App() {
   return (
     <>
       <ThemeCustomization>
-        {/* <RTLLayout> */}
         <Locales>
           <NavigationScroll>
             <AuthProvider>
@@ -71,7 +70,6 @@ export default function App() {
             </AuthProvider>
           </NavigationScroll>
         </Locales>
-        {/* </RTLLayout> */}
       </ThemeCustomization>
     </>
   );

@@ -14,10 +14,6 @@ import { AuthProvider, APP_AUTH } from 'config';
 
 // assets
 import Jwt from 'assets/images/icons/jwt.svg';
-import Firebase from 'assets/images/icons/firebase.svg';
-import Auth0 from 'assets/images/icons/auth0.svg';
-import Aws from 'assets/images/icons/aws.svg';
-import Supabase from 'assets/images/icons/supabase.svg';
 
 // ==============================|| SOCIAL BUTTON ||============================== //
 
@@ -29,19 +25,11 @@ export default function LoginProvider({ currentLoginWith }) {
   const auth = searchParams.get('auth'); // get auth and set route based on that
 
   const loginHandlers = {
-    Jwt: APP_AUTH === AuthProvider.JWT ? '/login' : '/login?auth=jwt',
-    Firebase: APP_AUTH === AuthProvider.FIREBASE ? '/login' : '/login?auth=firebase',
-    Auth0: APP_AUTH === AuthProvider.AUTH0 ? '/login' : '/login?auth=auth0',
-    Aws: APP_AUTH === AuthProvider.AWS ? '/login' : '/login?auth=aws',
-    Supabase: APP_AUTH === AuthProvider.SUPABASE ? '/login' : '/login?auth=supabase'
+    Jwt: '/login'
   };
 
   const buttonData = [
-    { name: 'jwt', icon: Jwt, url: loginHandlers.Jwt },
-    { name: 'firebase', icon: Firebase, url: loginHandlers.Firebase },
-    { name: 'auth0', icon: Auth0, url: loginHandlers.Auth0 },
-    { name: 'aws', icon: Aws, url: loginHandlers.Aws },
-    { name: 'supabase', icon: Supabase, url: loginHandlers.Supabase }
+    { name: 'jwt', icon: Jwt, url: loginHandlers.Jwt }
   ];
 
   const currentLoginExists = buttonData.some((button) => button.name === currentLoginWith);

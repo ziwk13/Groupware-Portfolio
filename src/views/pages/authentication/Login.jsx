@@ -21,11 +21,7 @@ import { APP_AUTH } from 'config';
 
 // A mapping of auth types to dynamic imports
 const authLoginImports = {
-  firebase: () => import('./firebase/AuthLogin'),
-  jwt: () => import('./jwt/AuthLogin'),
-  aws: () => import('./aws/AuthLogin'),
-  auth0: () => import('./auth0/AuthLogin'),
-  supabase: () => import('./supabase/AuthLogin')
+  jwt: () => import('./jwt/AuthLogin')
 };
 
 // ================================|| AUTH3 - LOGIN ||================================ //
