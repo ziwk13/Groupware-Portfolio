@@ -27,6 +27,7 @@ export default function ChatHistory({ data, theme, user }) {
       return isoString;
     }
   };
+  console.log('history', history);
 
   return (
     <Grid container spacing={gridSpacing}>
@@ -35,32 +36,46 @@ export default function ChatHistory({ data, theme, user }) {
           {/* 1. 시스템 메시지 */}
           {history.messageType === 'SYSTEM' ? ( 
             <Grid size={12}>
-              <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
-                <Card
-                  sx={{
-                    display: 'inline-block',
-                    bgcolor: 'background.default',
-                    ...theme.applyStyles('dark', { bgcolor: 'grey.700' }),
-                    boxShadow: 'none',
-                    borderRadius: '12px',
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  my: 3,
+                  px: 2
+                }}
+              >
+                {/* 카드(Card) 형태를 제거하고 텍스트만 표시하여 배경과 일체화 */}
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    bgcolor: 'rgba(0, 0, 0, 0.05)',
                     textAlign: 'center',
-                    maxWidth: '80%'
+                    fontWeight: 500,
+                    fontSize: '0.875rem'
                   }}
                 >
-                  <CardContent sx={{ p: '8px 12px !important' }}>
-                    <Typography variant="body2" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }) }}>
-                      {history.content}
-                    </Typography>
-                    {history.attachments && history.attachments.length > 0 && (
-                        <Box sx={{ mt: history.content ? 1 : 0, minWidth: '200px' }}> 
-                            <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
-                        </Box>
-                    )}
-                    <Typography variant="caption" sx={{ ...theme.applyStyles('dark', { color: 'dark.900' }), opacity: 0.7 }}>
-                      {formatChatTime(history.createdAt)}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                  {history.content}
+                </Typography>
+
+                {history.attachments && history.attachments.length > 0 && (
+                    <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', width: '100%' }}> 
+                        <AttachmentListView attachments={history.attachments} height="auto" type='chat' />
+                    </Box>
+                )}
+                
+                {/* 시간 표시 - 텍스트 아래에 작게 표시 */}
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'text.disabled', 
+                    mt: 0.5 
+                  }}
+                >
+                  {formatChatTime(history.createdAt)}
+                </Typography>
               </Box>
             </Grid>
           ) : /* 2. 내가 보낸 메시지 */
