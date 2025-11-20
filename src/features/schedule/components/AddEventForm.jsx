@@ -22,6 +22,7 @@ import {
   Alert
 } from '@mui/material';
 import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers';
+import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import * as Yup from 'yup';
 import { useFormik, Form, FormikProvider } from 'formik';
@@ -314,8 +315,9 @@ export default function AddEventForm({ event, range, handleDelete, handleCreate,
                   sx={{ mt: 1 }}
                   onClick={() => setOrgOpen(true)}
                   disabled={isVacationEvent || !(isCreating || isHost)}
+                  endIcon={<PersonAddAlt1OutlinedIcon />}
                 >
-                  조직도 열기
+                  일정 초대
                 </Button>
 
                 <OrganizationModal open={orgOpen} onClose={() => setOrgOpen(false)} list={orgList} setList={setOrgList} />
