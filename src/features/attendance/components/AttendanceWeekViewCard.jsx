@@ -14,7 +14,7 @@ export default function AttendanceWeekViewCard({ employeeId: propEmployeeId }) {
   const dispatch = useDispatch();
   dayjs.extend(weekday);
 
-  const { selectedWeek, absentDays, holidays } = useSelector((state) => state.attendance);
+  const { selectedWeek, absentDays, holidays, today } = useSelector((state) => state.attendance);
   const { isLoggedIn, isRefreshing, isInitialized, user } = useAuth();
 
   const holidayCache = useRef({}); // 월 단위 공휴일 캐싱
@@ -53,7 +53,7 @@ export default function AttendanceWeekViewCard({ employeeId: propEmployeeId }) {
     }
 
     dispatch(fetchAbsentDays({ employeeId, year, month }));
-  }, [dispatch, employeeId, weekStart, isInitialized, isLoggedIn, isRefreshing]);
+  }, [dispatch, employeeId, weekStart, isInitialized, isLoggedIn, isRefreshing, today]);
 
   // ---------------------- 공휴일 매핑(useMemo) ----------------------
   const holidayMap = useMemo(() => {
