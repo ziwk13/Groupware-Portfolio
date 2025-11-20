@@ -1,12 +1,12 @@
 import React from 'react'
 import { useParams } from 'react-router'
-import MailList from '../components/WorkLogList'
+import WorkLogList from '../components/WorkLogList';
 
 
 function WorkLogListPage() {
 	const {type} = useParams();
 	return (
-		<MailList mailboxType={type}/>
+		<WorkLogList workLogListType={type}/>
 	)
 }
 

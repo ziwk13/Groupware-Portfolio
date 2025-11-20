@@ -58,21 +58,22 @@ export default function MainLayout() {
       {menu}
 
       {/* Main Content */}
-      <MainContentStyled {...{ borderRadius, menuOrientation, open: drawerOpen }}>
+      <MainContentStyled {...{ borderRadius, menuOrientation, open: drawerOpen }} sx={{minHeight:'calc(100vh - 88px)'}}>
         <Container
           maxWidth={container ? 'lg' : false}
           sx={{
             ...(!container && { px: { xs: 0 } }),
             flexGrow: 1,
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            minHeight:'100%',
           }}
         >
           <Breadcrumbs />
           <Box sx={{ flexGrow: 1 }}>
             <Outlet />
           </Box>
-          <Footer />
+          {/* <Footer /> */}
         </Container>
       </MainContentStyled>
     </Box>
