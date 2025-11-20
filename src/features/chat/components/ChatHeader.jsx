@@ -1,9 +1,8 @@
 import PropTypes from 'prop-types';
-import React, { useState } from 'react'; // React import 추가
+import React, { useState } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
@@ -13,8 +12,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import { getImageUrl, ImagePath } from 'api/getImageUrl';
-
+import UserAvatar from './UserAvatar';
 // assets
 import MoreHorizTwoToneIcon from '@mui/icons-material/MoreHorizTwoTone';
 import { IconArrowLeft } from '@tabler/icons-react';
@@ -30,24 +28,20 @@ export default function ChatHeader({
 }) {
   const theme = useTheme();
 
-  // 1. ChatPage에 있던 메뉴 관련 state와 핸들러를 이곳으로 가져옵니다.
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClickSort = (event) => {
     setAnchorEl(event?.currentTarget);
   };
 
-  // 메뉴 닫기
   const handleCloseSort = () => {
     setAnchorEl(null);
   };
 
-  // 초대하기 메뉴 클릭 핸들러
   const handleInviteMenuClick = () => {
     handleCloseSort();
     onInviteClick();
   }
 
-  // 채팅방 나가기 클릭 핸들러
   const handleLeaveRoomClick = () => {
     onLeaveRoom();
   };
@@ -63,7 +57,13 @@ export default function ChatHeader({
         <Grid sx={{flex:1}}>
           <Grid container spacing={1} sx={{ alignItems: 'center', flexWrap: 'nowrap' }}>
             <Grid>
-              <Avatar alt={user.displayName} src={user.profileImg && getImageUrl(`${user.profileImg}`, ImagePath.USERS)} />
+              <UserAvatar 
+                user={{
+                  ...user,
+                  avatar: user.profileImg, // profileImg를 avatar로 매핑
+                  isTeam: user.isTeam      // 팀 여부 전달
+                }} 
+              />
             </Grid>
             <Grid size={{ sm: 'grow' }} sx={{ minWidth: 0 }}>
               <Grid container spacing={0} sx={{ alignItems: 'center' }}>
@@ -108,10 +108,10 @@ export default function ChatHeader({
             </IconButton>
             <Menu
               id="simple-menu"
-              anchorEl={anchorEl} // 내부 state 사용
+              anchorEl={anchorEl}
               keepMounted
-              open={Boolean(anchorEl)} // 내부 state 사용
-              onClose={handleCloseSort} // 내부 핸들러 사용
+              open={Boolean(anchorEl)}
+              onClose={handleCloseSort}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'right'
@@ -134,11 +134,12 @@ export default function ChatHeader({
 
 ChatHeader.propTypes = {
   user: PropTypes.shape({
+    name: PropTypes.string,
     displayName: PropTypes.string,
     profileImg: PropTypes.string,
     online_status: PropTypes.string,
     positionName: PropTypes.string,
-    isTeam: PropTypes.bool.isRequired, // isTeam을 필수로 받도록 설정
+    isTeam: PropTypes.bool,
     memberCount: PropTypes.number
   }),
   onClose: PropTypes.func,
