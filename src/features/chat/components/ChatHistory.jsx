@@ -6,13 +6,13 @@ import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar'; // [추가] Avatar import
+import Avatar from '@mui/material/Avatar';
 
 // project imports
 import { gridSpacing } from 'store/constant';
 import AttachmentListView from 'features/attachment/components/AttachmentListView';
 
-export default function ChatHistory({ data, theme, user, roomInfo }) { // [수정] roomInfo prop 추가
+export default function ChatHistory({ data, theme, user, roomInfo }) {
   
   const formatChatTime = (isoString) => {
     if (!isoString) return '';
@@ -33,7 +33,7 @@ export default function ChatHistory({ data, theme, user, roomInfo }) { // [수�
     <Grid container spacing={gridSpacing}>
       {data.map((history, index) => (
         <React.Fragment key={index}>
-          {/* 1. 시스템 메시지 */}
+          {/* 시스템 메시지 */}
           {history.messageType === 'SYSTEM' ? ( 
             <Grid size={12}>
               <Box 
@@ -76,11 +76,11 @@ export default function ChatHistory({ data, theme, user, roomInfo }) { // [수�
                 </Typography>
               </Box>
             </Grid>
-          ) : /* 2. 내가 보낸 메시지 */
+          ) : /* 내가 보낸 메시지 */
           String(history.employeeId) === String(user.id) ? (
             <Grid size={12}>
               <Grid container spacing={gridSpacing}>
-                <Grid size={{ xs: 0, sm: 4 }} /> {/* 여백 조정 */}
+                <Grid size={{ xs: 0, sm: 4 }} />
                 <Grid size={{ xs: 12, sm: 8 }}>
                   <Box
                     sx={{
@@ -135,7 +135,7 @@ export default function ChatHistory({ data, theme, user, roomInfo }) { // [수�
               </Grid>
             </Grid>
           ) : (
-            /* 3. 상대방이 보낸 메시지 (프로필 렌더링 추가) */
+            /* 상대방이 보낸 메시지 (프로필 렌더링 추가) */
             <Grid size={12}>
               <Grid container spacing={gridSpacing}>
                 <Grid size={{ xs: 12, sm: 8 }}>
@@ -220,5 +220,5 @@ ChatHistory.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     name: PropTypes.string 
   }),
-  roomInfo: PropTypes.object // [추가] Prop Type 정의
+  roomInfo: PropTypes.object
 };
