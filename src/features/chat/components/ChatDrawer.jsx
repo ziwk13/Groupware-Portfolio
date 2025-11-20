@@ -145,15 +145,36 @@ export default function ChatDrawer({
     setInviteModalOpen(false);
   };
 
+  // 초대하기 적용 핸들러 (본인 포함 체크 추가)
   const handleInviteApply = async (appliedList) => {
     if (!effectiveRoomId) return;
 
     const inviteeBox = appliedList.find(item => item.name === '초대 대상자');
+    // 선택된 인원이 없는 경우
     if (!inviteeBox || inviteeBox.empList.length === 0) {
+      setErrorMessage("초대할 대상을 선택해주세요.");
+      setIsErrorModalOpen(true);
       handleInviteModalClose();
       return;
     }
-    const inviteeEmployeeIds = inviteeBox.empList.map(emp => emp.employeeId);
+
+    const selectedEmployees = inviteeBox.empList;
+
+    // 1. 본인 포함 여부 검증
+    // 현재 로그인한 사용자(user)가 선택된 목록에 있는지 확인
+    const isSelfIncluded = selectedEmployees.some(
+      (emp) => emp.employeeId === user.employeeId
+    );
+
+    if (isSelfIncluded) {
+      setErrorMessage("사용자 본인은 초대할 수 없습니다.");
+      setIsErrorModalOpen(true);
+      handleInviteModalClose(); // 조직도 모달 닫기 (에러 모달만 남김)
+      return; // API 호출 중단
+    }
+
+    // 2. 검증 통과 시 API 호출
+    const inviteeEmployeeIds = selectedEmployees.map(emp => emp.employeeId);
 
     try {
       await inviteToRoom(effectiveRoomId, inviteeEmployeeIds);
