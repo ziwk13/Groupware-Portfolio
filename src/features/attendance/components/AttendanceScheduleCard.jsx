@@ -31,7 +31,7 @@ export default function AttendanceScheduleCard() {
       const start = dayjs(event.startTime);
       return start.isAfter(startOfWeek.startOf('day')) && start.isBefore(endOfWeek.endOf('day'));
     });
-  }, [events]); // 주차 바뀔 때 갱신하려면 [events, startOfWeek, endOfWeek]
+  }, [events]);
 
   // 카드 고정 높이
   const CARD_HEIGHT = 300;

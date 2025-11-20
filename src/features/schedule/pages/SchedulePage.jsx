@@ -260,9 +260,30 @@ export default function Calendar() {
             height={matchSm ? 'auto' : 720}
             headerToolbar={false}
             select={handleRangeSelect}
-            eventDrop={handleEventUpdate}
-            eventResize={handleEventUpdate}
-            eventAllow={(dropInfo, draggedEvent) => canEdit(draggedEvent)}
+            eventDrop={(info) => {
+              const ev = info.event;
+              const isVacation = ev.extendedProps?.categoryName === '휴가';
+              if (isVacation) {
+                info.revert();
+                return;
+              }
+              handleEventUpdate(info);
+            }}
+            eventResize={(info) => {
+              const ev = info.event;
+              const isVacation = ev.extendedProps?.categoryName === '휴가';
+              if (isVacation) {
+                info.revert();
+                return;
+              }
+
+              handleEventUpdate(info);
+            }}
+            eventAllow={(dropInfo, draggedEvent) => {
+              const isVacation = draggedEvent.extendedProps?.categoryName === '휴가';
+              if (isVacation) return false;
+              return canEdit(draggedEvent);
+            }}
             eventClick={handleEventSelect}
           />
         </SubCard>

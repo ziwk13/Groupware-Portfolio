@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -86,8 +87,8 @@ export default function ApprovalList({ status }) {
     size: 10
   });
   const [processedRows, setProcessedRows] = useState([]);
-
-  const [page, setPage] = useState(1); // MUI Pagination은 1-based
+  const navigate = useNavigate();
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // status(목록 종류)가 변경될 때 page를 1로 리셋
@@ -141,7 +142,7 @@ export default function ApprovalList({ status }) {
             id: row.docId || index, // DataGrid는 'id' 필드를 고유 식별자로 사용
             serialNumber,
             draftDate,
-            formName: '현재 미구현 기능',
+            formName: row.approvalTemplate?.value1,
             title: row.title,
             drafter,
             approver,
@@ -201,9 +202,14 @@ export default function ApprovalList({ status }) {
       {
         field: 'title',
         headerName: '제목',
-        flex: 1,  // 가장 여유가 필요한곳에 flex:1 추가 (반드시 추가해야함)
+        flex: 1,
         minWidth: 150,
-        sortable: false
+        sortable: false,
+        renderCell: (params) => (
+          <Typography sx={{ cursor: 'pointer', color: '#1976d2' }} onClick={() => navigate(`/approval/detail/${params.row.id}`)}>
+            {params.value}
+          </Typography>
+        )
       }
     ];
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Grid, Typography, Box, useTheme } from '@mui/material';
 import axios from 'api/axios';
 import MainCard from 'ui-component/cards/MainCard';
@@ -6,6 +7,7 @@ import useAuth from 'hooks/useAuth';
 
 export default function AttendanceSummaryCard() {
   const { user } = useAuth();
+  const { lastUpdated } = useSelector((state) => state.attendance);
   const [summary, setSummary] = useState({
     totalDays: 0,
     totalMinutes: 0,
@@ -19,12 +21,10 @@ export default function AttendanceSummaryCard() {
       try {
         const response = await axios.get(`/api/attendances/summary/${user.employeeId}`);
         setSummary(response.data.data);
-      } catch (error) {
-        console.error('근태 요약 조회 실패:', error);
-      }
+      } catch (error) {}
     };
     fetchSummary();
-  }, [user?.employeeId]);
+  }, [user?.employeeId, lastUpdated]);
 
   // 총 근무시간 포맷팅
   const hours = Math.floor(summary.totalMinutes / 60);
@@ -52,7 +52,7 @@ export default function AttendanceSummaryCard() {
           </Box>
         </Grid>
 
-        {/* 총 근무시간 (시간 + 분) */}
+        {/* 총 근무시간  */}
         <Grid item xs={12} sm={6} md={3}>
           <Box textAlign="center">
             <Typography variant="body1" color="text.secondary">

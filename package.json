@@ -39,6 +39,8 @@
     "firebase": "12.3.0",
     "formik": "2.4.6",
     "framer-motion": "12.23.22",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
     "jwt-decode": "4.0.0",
     "lodash-es": "4.17.21",
     "mapbox-gl": "3.15.0",
