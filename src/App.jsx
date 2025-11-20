@@ -62,27 +62,25 @@ export default function App() {
   return (
     <>
       <ThemeCustomization>
-        {/* <RTLLayout> */}
-          <Locales>
-            <NavigationScroll>
-              <AuthProvider>
-                <StompProvider>
-                  <ChatProvider>
-                    <MenuProvider>
+        <Locales>
+          <NavigationScroll>
+            <AuthProvider>
+              <StompProvider>
+                <ChatProvider>
+                  <MenuProvider>
                     <>
                       <Notistack>
                         <AppRouter />
                         <Snackbar />
                       </Notistack>
                     </>
-                    </MenuProvider>
-                  </ChatProvider>
-                </StompProvider>
-              </AuthProvider>
-            </NavigationScroll>
-          </Locales>
-        {/* </RTLLayout> */}
-      </ThemeCustomization>
+                  </MenuProvider>
+                </ChatProvider>
+              </StompProvider>
+            </AuthProvider>
+          </NavigationScroll>
+        </Locales>
+      </ThemeCustomization >
     </>
   );
 }
