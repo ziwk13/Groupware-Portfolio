@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'features/editor/components/ReactQuill';
 import { useNavigate } from 'react-router-dom';
+import { getMyInfo } from '../../employee/api/employeeAPI';
 
 // material-ui
-import {Box, Grid, CircularProgress, Button } from '@mui/material';
+import {Box, Grid, CircularProgress, Button, Table, TableBody, TableRow, TableCell } from '@mui/material';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
@@ -18,6 +19,18 @@ export default function MailDetail() {
 	const {mailId} = useParams();
 	const [mail, setMail] = useState(null);	// 메일 상세 데이터
 	const [loading, setLoading] = useState(false);	// 로딩중
+	const [myInfo, setMyInfo] = useState(null);
+
+	// 접속한 유저 정보 가져오기
+	useEffect(() => {
+		getMyInfo().then((res) => {
+			setMyInfo(res.data.data);
+			console.log("유저 정보 : ", res.data.data)
+		})
+	}, []);
+
+	// 상세조회한 메일이 본인의 메일인지 체크
+	const canReply = myInfo && mail ? mail.mailboxType === 'INBOX' && myInfo.email !== mail.senderEmail && mail.senderName !== '정보 없음' : false;
 	
 	// 페이지 이동시 스크롤 맨 위로
 	useEffect(() => {
@@ -40,7 +53,7 @@ export default function MailDetail() {
 			.finally(() => setLoading(false));
   }, [mailId]);
 
-	if(loading) {
+	if(loading || !myInfo) {
 		return (
 			<Box
 				sx={{
@@ -68,34 +81,133 @@ export default function MailDetail() {
 
 	return (
 	<Grid container spacing={gridSpacing}>
-		<Button variant="contained" onClick={() => navigate(`/mail/write/${mailId}?mode=reply`)}>회신</Button>
-		<Button variant="contained" onClick={() => navigate(-1)}>뒤로</Button>
-		
 		<Grid size={12}>
 			<MainCard>
-				{/* 메일 상세 부분 */}
 				<Grid container spacing={gridSpacing}>
-					<Grid size={12}>
-						<Box>제목 : {mail.title}</Box>
-					</Grid>
-					<Grid size={12}>
-						<Box>보낸 사람 : {mail.senderEmail} ({mail.senderName})</Box>
-					</Grid>
-					<Grid size={12}>
-						<Box>수신자 : {mail.to?.join(' , ')}</Box>
-					</Grid>
-					<Grid size={12}>
-						<Box>참조 : {mail.cc?.join(' , ')}</Box>
-					</Grid>
-					<Grid size={12}>
-						<Box>내용 :</Box>
-						<Box dangerouslySetInnerHTML={{ __html: mail.content }}/>
-					</Grid>
-				</Grid>
-				{/* 메일 상세 부분 */}
+					{canReply &&
+						<Grid size={12}>
+							<Button variant="contained" onClick={() => navigate(`/mail/write/${mailId}?mode=reply`)}>회신</Button>
+						</Grid>
+					}
 
-				<Box sx={{height:"30px"}}></Box>
-				<AttachmentListView attachments = {mail.attachments}/>
+					{/* 상단 정보 테이블 */}
+					<Grid size={12}>
+						<Table
+							size="small"
+							sx={{
+								borderTop: '1px solid',
+								borderBottom: '1px solid',
+								borderColor: 'divider',
+								'& td': {
+									borderBottom: '1px solid',
+									borderColor: 'divider',
+									py: 1,
+									fontSize: 14
+								}
+							}}
+						>
+							<TableBody>
+								<TableRow>
+									<TableCell
+										sx={{
+											width: 110,
+											fontWeight: 600,
+											bgcolor: 'background.default'
+										}}
+									>
+										제목
+									</TableCell>
+									<TableCell colSpan={3}>{mail.title}</TableCell>
+								</TableRow>
+
+								<TableRow>
+									<TableCell
+										sx={{
+											width: 110,
+											fontWeight: 600,
+											bgcolor: 'background.default'
+										}}
+									>
+										보낸 사람
+									</TableCell>
+									<TableCell colSpan={3}>
+										{mail.senderEmail} ({mail.senderName})
+									</TableCell>
+								</TableRow>
+
+								<TableRow>
+									<TableCell
+										sx={{
+											width: 110,
+											fontWeight: 600,
+											bgcolor: 'background.default'
+										}}
+									>
+										수신자
+									</TableCell>
+									<TableCell colSpan={3}>
+										{mail.to?.join(' , ')}
+									</TableCell>
+								</TableRow>
+
+								<TableRow>
+									<TableCell
+										sx={{
+											width: 110,
+											fontWeight: 600,
+											bgcolor: 'background.default'
+										}}
+									>
+										참조
+									</TableCell>
+									<TableCell colSpan={3}>
+										{mail.cc?.join(' , ')}
+									</TableCell>
+								</TableRow>
+
+								{!canReply && (
+									<TableRow>
+										<TableCell
+											sx={{
+												width: 110,
+												fontWeight: 600,
+												bgcolor: 'background.default'
+											}}
+										>
+											숨은참조
+										</TableCell>
+										<TableCell colSpan={3}>
+											{mail.bcc?.join(' , ')}
+										</TableCell>
+									</TableRow>
+								)}
+							</TableBody>
+						</Table>
+					</Grid>
+					
+					{/* 첨부파일 영역 */}
+					{mail.attachments?.length > 0 && 
+						<Grid size={12}>
+							<AttachmentListView attachments = {mail.attachments}/>
+					</Grid>
+					}
+						
+					{/* 본문 영역 */}
+					<Grid item xs={12}>
+						<Box 
+						sx={{
+							'& img': {
+								maxWidth: '100%',
+								height: 'auto',
+								display: 'block',
+								margin: '8px 0'
+							}
+						}}
+						dangerouslySetInnerHTML={{ __html: mail.content }} />
+					</Grid>
+
+				</Grid>
+				
 			</MainCard>
 		</Grid>
 	</Grid>

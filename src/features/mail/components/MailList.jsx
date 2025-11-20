@@ -219,6 +219,14 @@ export default function MailList({mailboxType}) {
 		window.scrollTo(0, 0);
 	}, [mailboxType, page, size, reload]);
 
+	// 메일함 이동시 Alert 열려있는거 초기화
+	useEffect(() => {
+		return () => {
+			setShowAlert(false);
+			setAlertMessage('');
+		}
+	}, [mailboxType]);
+
 	// 리스트 테이블 정의
 	useEffect(() => {
 		const cols = [];

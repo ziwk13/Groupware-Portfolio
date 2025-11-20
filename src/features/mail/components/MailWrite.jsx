@@ -7,7 +7,7 @@ import OrganizationModal from 'features/organization/components/OrganizationModa
 
 // material-ui
 import { useColorScheme } from '@mui/material/styles';
-import{Button, Collapse, Grid, Link, TextField, Box, CircularProgress}  from '@mui/material';
+import{Button, Collapse, Grid, Link, TextField, Box, CircularProgress, Alert}  from '@mui/material';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
@@ -18,10 +18,10 @@ import ReactQuill from 'features/editor/components/ReactQuill';
 // 메일 API 함수 호출
 import { sendMail, detailMail  } from '../api/mailAPI';
 
-export default function MailWrite() {
+export default function MailWrite({mailId}) {
 	const navigate = useNavigate();
 	const quillRef = useRef(null);
-	const {mailId} = useParams();
+	// const {mailId} = useParams();
 	const searchParams = new URLSearchParams(location.search);
 	const isReply = searchParams.get("mode") === "reply";
 	const isRewrite = !!mailId && !isReply;		// 재작성
@@ -34,6 +34,10 @@ export default function MailWrite() {
 	const [bcc, setBcc] = useState('');
   const [attachments, setAttachments] = useState([]);
 	const [loading, setLoading] = useState(false);	// 로딩중
+
+	// Alert useState
+	const [showAlert, setShowAlert] = useState(false);
+	const [alertMessage, setAlertMessage] = useState('');
 
   const { colorScheme } = useColorScheme();
 
@@ -75,6 +79,14 @@ export default function MailWrite() {
 
 	// 메일 작성
 	const handleSendMail = async () => {
+		if(loading) return;
+
+		if(!title) {setAlertMessage("제목을 작성해주세요."); setShowAlert(true); return;} 
+		if(!to) {setAlertMessage("수신자를 추가해주세요."); setShowAlert(true); return;} 
+
+		setLoading(true);
+		await new Promise(resolve => setTimeout(resolve, 0));
+
     const formData = new FormData();
 
     formData.append('title', title);
@@ -95,7 +107,9 @@ export default function MailWrite() {
       navigate('/mail/list/INBOX');
     } catch (err) {
       console.error(err);
-      alert('메일 발송 중 오류가 발생했습니다.');
+			setLoading(false);
+			
+			setAlertMessage("메일 발송에 실패했습니다."); setShowAlert(true);
     }
   };
 
@@ -251,6 +265,22 @@ export default function MailWrite() {
 		)
 	}
 
+	if (loading) {
+		return (
+			<Box sx={{
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'center',
+				justifyContent: 'center',
+				height: '60vh',
+				gap: 2,
+			}}>
+				<CircularProgress size={32} />
+				<Box sx={{ fontSize: 14, color: 'text.secondary' }}>메일을 발송중 입니다...</Box>
+			</Box>
+		);
+	}
+
   return (
 		<>
 			<Grid container spacing={gridSpacing}>
@@ -258,18 +288,35 @@ export default function MailWrite() {
 					<MainCard>
 						<Grid container spacing={gridSpacing}>
 							<Grid size={12}>
-								<Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+								<Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center', gap:'5px'}}>
 									<Button variant="contained" onClick={handleSendMail} sx={{padding:'0 16px', height:'35px', lineHeight:'35px'}}>발송</Button>
 									<Button
-										variant="outlined"
+										variant="contained"
 										color="primary"
 										type="button"
-										sx={{ height: '35px', lineHeight:'35px', padding:'0 16px', margin:'0 auto 0 10px' }}
+										sx={{ height: '35px', lineHeight:'35px', padding:'0 16px', marginRight:'auto' }}
 										endIcon={<PersonAddAlt1OutlinedIcon />}
 										onClick={openOrganModal}
 									>
 										받는 사람
 									</Button>
+									<Grid sx={{marginRight:'auto'}}>
+										{showAlert && (
+											<Alert
+												severity={"error"}
+												onClose={() => setShowAlert(false)}
+												sx={{
+													flex: 1,
+													height: '35px',
+													py: 0,
+													display: 'flex',
+													alignItems: 'center',
+												}}
+											>
+												{alertMessage}
+											</Alert>
+											)}
+									</Grid>
 
 									<Link
 										component={RouterLink}
