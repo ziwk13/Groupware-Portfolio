@@ -19,7 +19,7 @@ const connect = (onConnectedCallback) => {
 
   // 새 클라이언트 생성
   stompClient = new Client({
-    webSocketFactory: () => new SockJS('http://localhost:8080/ws'), // 백엔드 엔드포인트
+    webSocketFactory: () => new SockJS('https://goodee.kro.kr/ws'), // 백엔드 엔드포인트
     reconnectDelay: 5000, // 5초마다 재연결 시도
     heartbeatIncoming: 4000,
     heartbeatOutgoing: 4000,
