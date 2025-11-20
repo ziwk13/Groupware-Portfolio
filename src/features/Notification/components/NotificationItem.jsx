@@ -75,15 +75,9 @@ const NotificationItem = ({ notification, onItemRead, onItemDelete, onClose }) =
           // API 파일에서 콘솔 에러 출력
         });
     }
-    if (ownerType === 'TEAMCHATNOTI') {
+if (ownerType === 'TEAMCHATNOTI') {
       if (url) {
-        const roomId = url.split('/').pop();
-        if (myChatRoomIds && myChatRoomIds.includes(roomId)) {
-          openChatWithUrl(url);
-        } else {
-          setError('이미 나가거나 참여하지 않은 채팅방 입니다.');
-          return;
-        }
+        openChatWithUrl(url);
       } else {
         openChatWithUrl(null);
       }
