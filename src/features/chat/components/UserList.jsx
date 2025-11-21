@@ -65,7 +65,7 @@ export default function UserList({ users, setUser, onLeave }) {
           >
             <ListItemButton
               onClick={() => setUser(user)}
-              sx={{ pr: user.unReadChatCount > 0 ? 11 : 7 }}
+              sx={{ pr: user.unReadChatCount > 0 ? 16 : 9 }}
             >
               <ListItemAvatar>
                 <UserAvatar user={user} />
@@ -106,7 +106,7 @@ export default function UserList({ users, setUser, onLeave }) {
                 }
                 secondary={
                   <Grid container spacing={1} component="span" sx={{ alignItems: 'center' }}>
-                    <Grid component="span" size="grow">
+                    <Grid component="span" size="grow" sx={{ minWidth: 0 }}>
                       <Typography
                         variant="caption"
                         component="span"
