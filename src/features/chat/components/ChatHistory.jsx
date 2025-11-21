@@ -35,7 +35,7 @@ export default function ChatHistory({ data, theme, user, roomInfo }) {
       {data.map((history, index) => (
         <React.Fragment key={index}>
           {/* 시스템 메시지 */}
-          {history.messageType === 'SYSTEM' ? ( 
+          {history.messageType === 'CHAT_SYSTEM' ? ( 
             <Grid size={12}>
               <Box 
                 sx={{ 
