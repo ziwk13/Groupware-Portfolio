@@ -84,40 +84,29 @@ const NotificationList = forwardRef(({ refreshKey, onCountChange, onTotalCountCh
 
     // 알림 읽음 처리 함수
     const handleItemRead = (readItemId) => {
-      let wasUnread = false;
       const updateNotifications = notifications.map((item) => {
         if(item.notificationId === readItemId) {
-          if(!item.readAt) wasUnread = true;
           return { ... item, readAt: true }; // 읽음 상태로 변경
         }
         return item;
       });
 
       setNotifications(updateNotifications);
-      if(wasUnread && onCountChange) {
-        onCountChange(prevCount => Math.max(0, prevCount - 1));
-      };
     }
 
     // 개별 알림 삭제 함수
     const handleItemDelete = (deletedItemId) => {
-      let wasUnread = false;
-      const itemToDelete = notifications.find(item => item.notificationId === deletedItemId);
-      if(itemToDelete && !itemToDelete.readAt) {
-        wasUnread = true;
-      }
+      
       const updateNotifications = notifications.filter(
-        (item) => item.notificationId !== deletedItemId
+        (item) => item.notification !== deletedItemId
       );
       setNotifications(updateNotifications);
 
-      if(wasUnread && onCountChange) {
-        onCountChange(prevCount => Math.max(0, prevCount - 1));
-      }
-      if(onTotalCountChange) {
+      if (onTotalCountChange) {
         onTotalCountChange(prevCount => Math.max(0, prevCount - 1));
       }
-      if(hasNextPage) {
+
+      if (hasNextPage) {
         loadMoreItems();
       }
     };
