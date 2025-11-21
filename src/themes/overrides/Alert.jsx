@@ -67,6 +67,21 @@ export default function Alert(theme) {
             { props: { variant: 'filled' }, style: filledVariant }
           ]
         },
+        action: {
+          alignItems: 'center',
+          paddingTop: 0,       // ← X 버튼 위의 여백 제거
+          paddingBottom: 0,    // ← 아래 여백 제거
+          marginTop: 0,
+          marginBottom: 0,
+          '& .MuiIconButton-root': {
+            padding: 0,          
+            margin: 0,
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }
+        },
         outlined: { border: '1px dashed' }
       }
     }

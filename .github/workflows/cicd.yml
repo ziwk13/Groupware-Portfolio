@@ -35,7 +35,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "./*"
           target: "/home/ubuntu/website/frontend"
-          rm: false
+          rm: true  # (전송 전 대상 폴더 비우기)
 
       # 4. EC2에서 Docker Compose 실행 (플러그인-https://github.com/appleboy/ssh-action)
       - name: Deploy with Docker Compose on EC2

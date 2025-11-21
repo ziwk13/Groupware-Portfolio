@@ -30,8 +30,7 @@ import TwitterIcon from '@mui/icons-material/Twitter';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import BookIcon from '@mui/icons-material/Book';
 
-import logo from 'assets/images/logo.svg';
-import logoDark from 'assets/images/logo-dark.svg';
+import logo from 'assets/images/logo.png';
 import companyLightLogo from 'assets/images/maintenance/img-ct-light-logo.png';
 import companyDarkLogo from 'assets/images/maintenance/img-ct-dark-logo.png';
 import imageBackground from 'assets/images/maintenance/img-soon-bg.svg';
@@ -183,7 +182,7 @@ export default function ComingSoon1() {
           />
           <CardMedia
             component="img"
-            src={colorScheme === ThemeMode.DARK ? logoDark : logo}
+            src={logo}
             alt="Berry"
             sx={{
               position: themeDirection === ThemeDirection.RTL ? 'relative' : 'initial',

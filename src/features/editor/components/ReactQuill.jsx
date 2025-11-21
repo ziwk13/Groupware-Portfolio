@@ -10,6 +10,14 @@ import 'react-quill-new/dist/quill.snow.css';
 import Quill from 'quill';
 import ImageResize from 'quill-image-resize-module-react';
 
+const BlockEmbed = Quill.import('blots/block/embed');
+
+class HrBlot extends BlockEmbed {}
+HrBlot.blotName = 'hr';
+HrBlot.tagName = 'hr';
+
+Quill.register(HrBlot);
+
 Quill.register('modules/imageResize', ImageResize);
 
 // project imports
