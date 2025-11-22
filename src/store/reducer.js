@@ -11,7 +11,7 @@ import attendanceReducer from 'features/attendance/api/attendanceApi';
 const reducer = combineReducers({
   snackbar: snackbarReducer,
   schedule: scheduleReducer,
-  attendance: attendanceReducer
+  attendance: attendanceReducer,
 });
 
 export default reducer;

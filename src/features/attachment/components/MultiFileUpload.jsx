@@ -25,7 +25,7 @@ const DropzoneWrapper = styled('div')(({ theme }) => ({
 
 // ==============================|| UPLOAD - MULTIPLE FILE ||============================== //
 
-export default function MultiFileUpload({ showList = false, files, onFilesChange, height="200px", multiple=true, accept=undefined, maxSize=10*1024*1024}) {
+export default function MultiFileUpload({ showList = false, files, onFilesChange, height="200px", multiple=true, accept=undefined, maxSize=10*1024*1024, onOpenFileDialog}) {
   const [showAlert, setShowAlert] = useState(false);
   const hasFiles = files && files.length > 0;
   
@@ -59,6 +59,13 @@ export default function MultiFileUpload({ showList = false, files, onFilesChange
       onFilesChange(updatedFiles);
     }
   });
+
+  useEffect(() => {
+    if(onOpenFileDialog) {
+      onOpenFileDialog(open);
+    }
+  }, [onOpenFileDialog, open]);
+  
   const isRejectState = isDragActive && isDragReject; 
 
 
