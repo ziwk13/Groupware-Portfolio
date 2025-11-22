@@ -18,7 +18,7 @@ export function StompProvider({ children }){
   useEffect(() => {
     // STOMP 클라이언트 인스턴스 생성
     const stompClient = new Client({
-      webSocketFactory: () => new SockJS(`${ BASE_URL }ws`),
+      webSocketFactory: () => new SockJS(`${ BASE_URL }/ws`),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
