@@ -328,9 +328,9 @@ export default function MailWrite({mailId}) {
 
   return (
 		<>
-			<Grid container spacing={gridSpacing}>
+			<Grid container spacing={gridSpacing} sx={{minHeight:'100%'}}>
 				<Grid size={12}>
-					<MainCard>
+					<MainCard sx={{minHeight:'100%'}}>
 						<Grid container spacing={gridSpacing}>
 							<Grid size={12}>
 								<Box sx={{display:'flex', justifyContent:'space-between', alignItems:'center', gap:'5px'}}>
@@ -496,7 +496,7 @@ export default function MailWrite({mailId}) {
 
 							{/* quill editor */}
 							<Grid size={12}>
-								<ReactQuill value={content} onChange = {setContent} ref={quillRef} modules={modules}/>
+								<ReactQuill value={content} onChange = {setContent} ref={quillRef} modules={modules} editorMinHeight="calc(100vh - 670px)"/>
 							</Grid>
 							<Grid size={12}>
 								<AttachmentDropzone attachments={attachments} setAttachments={setAttachments} height={"150px"}/>

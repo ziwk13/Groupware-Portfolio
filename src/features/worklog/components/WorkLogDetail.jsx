@@ -163,7 +163,7 @@ export default function WorkLogDetail({worklogId}) {
 									<TableCell sx={{width: 110, fontWeight: 600, bgcolor: 'background.default'}}>
 										업무분류
 									</TableCell>
-									<TableCell colSpan={2}>{worklog.workOptionName}</TableCell>
+									<TableCell colSpan={2}>{worklog.workTypeName}</TableCell>
 									<TableCell sx={{width: 110, fontWeight: 600, bgcolor: 'background.default'}}>
 										세부업무
 									</TableCell>

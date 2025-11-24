@@ -151,9 +151,9 @@ function WorkLogWrite({worklogId}) {
 
 	return (
 		<>
-			<Grid container spacing={gridSpacing}>
+			<Grid container spacing={gridSpacing} sx={{minHeight:'100%'}}>
 				<Grid size={12}>
-					<MainCard>
+					<MainCard sx={{minHeight:'100%'}}>
 						<Grid container spacing={gridSpacing}>
 							<Grid size={12} sx={{display:'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 								<Box sx={{display:'flex', justifyContent:'space-between', gap:'5px'}}>
@@ -234,7 +234,7 @@ function WorkLogWrite({worklogId}) {
 								<TextField fullWidth label="제목" value={title} onChange = {e => {setTitle(e.target.value)}}/>
 							</Grid>
 							<Grid size={12}>
-								<ReactQuill value={content} onChange = {setContent}/>
+								<ReactQuill value={content} onChange = {setContent} editorMinHeight="calc(100vh - 500px)"/>
 							</Grid>
 						</Grid>
 					</MainCard>
