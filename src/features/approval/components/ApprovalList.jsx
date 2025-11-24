@@ -205,11 +205,7 @@ export default function ApprovalList({ status }) {
         flex: 1,
         minWidth: 150,
         sortable: false,
-        renderCell: (params) => (
-          <Typography sx={{ cursor: 'pointer', color: '#1976d2' }} onClick={() => navigate(`/approval/detail/${params.row.id}`)}>
-            {params.value}
-          </Typography>
-        )
+        renderCell: (params) => <Typography>{params.value}</Typography>
       }
     ];
 
@@ -280,7 +276,15 @@ export default function ApprovalList({ status }) {
       }
       content={false}
     >
-      <CommonDataGrid rows={processedRows} columns={columns} loading={loading} error={error} />
+      <CommonDataGrid
+        rows={processedRows}
+        columns={columns}
+        loading={loading}
+        error={error}
+        onRowClick={(params) => {
+          navigate(`/approval/detail/${params.row.id}`);
+        }}
+      />
 
       <GridPaginationActions
         totalPages={data.totalPages}

@@ -19,6 +19,11 @@ export const getWorkLogList = async (workLogType, page=0, size=10) => {
 	return res.data.data;
 }
 
+// 업무일지 수정
+export const updateWorkLog = (worklogId, worklogData) => {
+  return axiosServices.put(`/api/worklogs/${worklogId}`, worklogData);
+};
+
 // 업무일지 상세조회
 export const detailWorkLog = async (worklogId) => {
 	return axiosServices.get(`/api/worklogs/${worklogId}`);

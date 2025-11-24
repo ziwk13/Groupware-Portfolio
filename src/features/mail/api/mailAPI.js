@@ -33,11 +33,11 @@ export const getMailList = async (mailboxType, page=0, size=10) => {
 };
 
 // 메일 상세 조회
-export const detailMail = async (mailId) => {
-	return axiosServices.get(`/api/mails/${mailId}`, {
-    params: {isRead : true}
+export const detailMail = async (mailId, boxId) => {
+  return axiosServices.get(`/api/mails/${mailId}`, {
+    params: { isRead: true, boxId }
   });
-}
+};
 
 // 메일함 이동
 export const moveMail = async (mailIds, targetType) => {

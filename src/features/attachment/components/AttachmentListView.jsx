@@ -20,7 +20,7 @@ const AttachmentListBox = styled('div')(({ theme }) => ({
   overflowY: 'auto'
 }));
 
-export default function AttachmentListView({ attachments = [], height="200px"}) {
+export default function AttachmentListView({ attachments = [], height="200px", type=""}) {
   const theme = useTheme();
   const hasFile = attachments.length > 0;
 
@@ -48,6 +48,76 @@ export default function AttachmentListView({ attachments = [], height="200px"}) 
       console.error("다운로드 실패: ", err);
     }
   };
+
+
+if (type === "chat") {
+    return (
+      <AttachmentListBox sx={{ width: '100%', padding: 0, background: 'none', border: 'none'}}>
+        <List disablePadding sx={{ width: '100%' }}>
+          {attachments.map((file) => (
+            <ListItem
+              key={file.fileId}
+              sx={{
+                my: 0.5, 
+                px: 1,   
+                py: 1, // 터치 영역 확보를 위해 약간 늘림
+                borderRadius: theme.shape.borderRadius,
+                border: '1px solid',
+                borderColor: theme.palette.grey[400], 
+                ...theme.applyStyles('dark', { borderColor: theme.palette.divider }),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between', // 아이템 간 간격 분배
+                backgroundColor: 'rgba(255, 255, 255, 0.4)', // 가독성을 위해 반투명 배경 추가 (선택 사항)
+                ...theme.applyStyles('dark', { backgroundColor: 'rgba(0, 0, 0, 0.2)' }), 
+              }}
+            >
+              {/* 왼쪽 아이콘과 텍스트를 묶는 Box */}
+              <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'hidden', flex: 1, minWidth: 0, mr: 1 }}>
+                <InsertDriveFileOutlinedIcon
+                  sx={{
+                    color: 'secondary.main',
+                    width: 30,
+                    height: 30,
+                    fontSize: '1.5rem',
+                    mr: 1,
+                    flexShrink: 0 // 아이콘 크기 고정
+                  }}
+                />
+                <ListItemText
+                  sx={{ 
+                    margin: 0,
+                    minWidth: 0 // Flex container 내부에서 text-overflow 작동을 위해 필수
+                  }} 
+                  primary={
+                    <Typography variant="subtitle2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', webkitLineClamp: 2 }}>
+                      {file.originalName}
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography variant="caption" display="block" noWrap>
+                      {formatBytes(file.size)}
+                    </Typography>
+                  }
+                />
+              </Box>
+              
+              {/* 다운로드 버튼 */}
+              <IconButton 
+                edge="end" 
+                size="small" 
+                color="primary" 
+                onClick={() => handleDownload?.(file)}
+                sx={{ flexShrink: 0 }} // 버튼 크기 고정
+              >
+                <DownloadIcon sx={{ fontSize: '1.25rem' }} />
+              </IconButton>
+            </ListItem>
+          ))}
+        </List>
+      </AttachmentListBox>
+    )
+  }
 
   return (
     <AttachmentListBox sx={{height:{height}, minHeight:'150px'}}>

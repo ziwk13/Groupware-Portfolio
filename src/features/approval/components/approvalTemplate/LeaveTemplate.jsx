@@ -52,7 +52,28 @@ export default function LeaveTemplate({
 
   const formatDate = (v) => (v ? v.split('T')[0] : '');
 
+  // ===========================
+  // 반차일 때: startDate → endDate 자동 설정
+  // ===========================
+  useEffect(() => {
+    const selectedType = vacationTypes.find((t) => t.commonCodeId == templateValues.vacationTypeCode);
+
+    if (!selectedType) return;
+    if (!templateValues.startDate) return;
+
+    const isHalf = selectedType.value1 === 'MORNING_HALF' || selectedType.value1 === 'AFTERNOON_HALF';
+
+    if (isHalf) {
+      setTemplateValues((prev) => ({
+        ...prev,
+        endDate: prev.startDate
+      }));
+    }
+  }, [templateValues.startDate, templateValues.vacationTypeCode, vacationTypes, setTemplateValues]);
+
+  // ===========================
   // 휴가 종류 변경 감지해서 vacationDays 자동 계산
+  // ===========================
   useEffect(() => {
     if (!templateValues.vacationTypeCode) return;
     if (!templateValues.startDate || !templateValues.endDate) return;
@@ -67,7 +88,7 @@ export default function LeaveTemplate({
 
     if (!selectedType) return;
 
-    // 오전반차 / 오후반차 => 0.5일
+    // 반차 → 0.5일
     if (selectedType.value1 === 'MORNING_HALF' || selectedType.value1 === 'AFTERNOON_HALF') {
       diffDays = 0.5;
     }
@@ -76,7 +97,12 @@ export default function LeaveTemplate({
       ...prev,
       vacationDays: diffDays
     }));
-  }, [templateValues.vacationTypeCode, templateValues.startDate, templateValues.endDate, vacationTypes]);
+  }, [templateValues.vacationTypeCode, templateValues.startDate, templateValues.endDate, vacationTypes, setTemplateValues]);
+
+  // 렌더링 시 반차 여부 판별
+  const selectedType = vacationTypes.find((t) => t.commonCodeId == templateValues.vacationTypeCode);
+
+  const isHalf = selectedType?.value1 === 'MORNING_HALF' || selectedType?.value1 === 'AFTERNOON_HALF';
 
   return (
     <div className="approval-wrapper">
@@ -132,7 +158,7 @@ export default function LeaveTemplate({
                   min={templateValues.startDate ? formatDate(templateValues.startDate) : today}
                   value={formatDate(templateValues.endDate)}
                   onChange={(e) => handleChange('endDate', e.target.value + 'T00:00:00')}
-                  disabled={readOnly}
+                  disabled={readOnly || isHalf}
                 />
                 <span style={{ marginLeft: '12px' }}>사용일수 : </span>
                 <input type="text" className="input-days" value={templateValues.vacationDays || ''} readOnly />일
@@ -154,6 +180,7 @@ export default function LeaveTemplate({
           </tbody>
         </table>
       </div>
+
       {readOnly && <RejectCommentBlock approvalLines={approvalLines} />}
     </div>
   );

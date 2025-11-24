@@ -1,5 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';
+import DefaultAvatar from 'assets/images/profile/default_profile.png';
+import { getImageUrl } from 'api/getImageUrl';
 
 // material-ui
 import {Box, Grid, Button, Checkbox, CircularProgress, Alert} from '@mui/material';
@@ -74,10 +78,13 @@ export default function WorkLogList({workLogListType}) {
 						...worklog,
 						id: worklog.workLogId,
 						workDateText,
+						employeeName: worklog.employeeName,
+						employeeProfileImg: worklog.employeeProfileImg,
+						employeeDepartment: worklog.employeeDepartment
 					};
 				});
 				
-				// console.log('rows 확인:', list[0]);
+				console.log('rows 확인:', list[0]);
 
 				setRows(list);
 				setTotalPages(res.totalPages);
@@ -156,9 +163,8 @@ export default function WorkLogList({workLogListType}) {
 			setReload(prev => !prev);
 		} catch (err) {
 			console.error(err);
-			setAlertMessage("삭제 실패");
+			setAlertMessage("업무일지 삭제에 실패했습니다.");
 			setShowAlert(true);
-			alert("삭제 실패");
 		}
 	}
 
@@ -239,9 +245,26 @@ export default function WorkLogList({workLogListType}) {
 			{
 				field: 'employeeName',
 				headerName: '작성자',
-				width:150,
+				width:250,
 				align: 'center',
 				sortable:false,
+				renderCell: (params) => (
+					<Chip
+						label={`${params.row.employeeName} (${params.row.employeeDepartment})`}
+						avatar={
+							<Avatar
+								alt={params.row.employeeName}
+								src={
+									params.row.employeeProfileImg
+										? getImageUrl(params.row.employeeProfileImg)
+										: DefaultAvatar
+								}
+								sx={{ width: 32, height: 32 }}
+							/>
+						}
+						variant="outlined"
+					/>
+				)
 			},
 			{
 				field: 'title',

@@ -197,6 +197,7 @@ export default function MailList({mailboxType}) {
 	// 상세페이지 이동 + 읽음 처리
 	const handleRowClick = async (params) => {
 		const mailId = params.row.mailId;
+		const boxId = params.row.boxId;
 
 		setRows((prev) =>
 			prev.map((row) =>
@@ -204,14 +205,13 @@ export default function MailList({mailboxType}) {
 			)
 		);
 
-		// 서버에 읽음처리
 		try {
-			await detailMail(mailId);
+			await detailMail(mailId, boxId); // boxId 같이 전달 (읽음 처리)
 		} catch (e) {
 			console.error(e);
 		}
 
-		navigate(`/mail/detail/${mailId}`);
+		navigate(`/mail/detail/${mailId}?boxId=${boxId}`);
 	};
 
 	useEffect(() => {

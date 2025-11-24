@@ -15,6 +15,12 @@ import Loader from 'ui-component/Loader';
 
 // auth provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
+import { ChatProvider } from 'contexts/ChatContext';
+import { StompProvider } from './contexts/StompProvider';
+// import { FirebaseProvider as AuthProvider } from 'contexts/FirebaseContext';
+// import { Auth0Provider as AuthProvider } from 'contexts/Auth0Context';
+// import { AWSCognitoProvider as AuthProvider } from 'contexts/AWSCognitoContext';
+// import { SupabseProvider as AuthProvider } from 'contexts/SupabaseContext';
 // Menu Provider
 import { MenuProvider, useMenu } from 'contexts/MenuContext';
 
@@ -59,18 +65,22 @@ export default function App() {
         <Locales>
           <NavigationScroll>
             <AuthProvider>
-              <MenuProvider>
-                <>
-                  <Notistack>
-                    <AppRouter />
-                    <Snackbar />
-                  </Notistack>
-                </>
-              </MenuProvider>
+              <StompProvider>
+                <ChatProvider>
+                  <MenuProvider>
+                    <>
+                      <Notistack>
+                        <AppRouter />
+                        <Snackbar />
+                      </Notistack>
+                    </>
+                  </MenuProvider>
+                </ChatProvider>
+              </StompProvider>
             </AuthProvider>
           </NavigationScroll>
         </Locales>
-      </ThemeCustomization>
+      </ThemeCustomization >
     </>
   );
 }

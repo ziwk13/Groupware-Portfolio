@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack';
 import UploadMultiFile from 'features/attachment/components/MultiFileUpload';
 import { gridSpacing } from 'store/constant';
 
-export default function AttachmentDropzone({attachments, setAttachments, height, multiple, accept, maxSize}) {
+export default function AttachmentDropzone({attachments, setAttachments, height, multiple, accept, maxSize, onOpenFileDialog}) {
   const [list, setList] = useState(false);
 
   // 파일 변경 시 부모로 전달
@@ -31,6 +31,7 @@ export default function AttachmentDropzone({attachments, setAttachments, height,
                 multiple={multiple}
                 accept={accept}
                 maxSize={maxSize}
+                onOpenFileDialog={onOpenFileDialog}
               />
             </Stack>
           </Grid>

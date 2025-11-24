@@ -164,7 +164,7 @@ export default function MailWrite({mailId}) {
 					setContent(replyTemplate);
 
 					// 회신이라 발신자가 수신자로 들어감
-					const senderEmail = extractEmail(data.senderEmail || '');
+					const senderEmail = data.senderEmail || '';
 					setTo(senderEmail);
 
 					// 참조, 숨은참조 초기화
@@ -175,7 +175,19 @@ export default function MailWrite({mailId}) {
 					setAttachments([]);
 					
 					setList([
-						{name: '수신자', empList: senderEmail ? [mapToOrgEmp(senderEmail)] : []},
+						{
+				      name: '수신자',
+				      empList: senderEmail
+				        ? [{
+				            email: senderEmail,
+				            name: data.senderName,
+				            position: data.senderPosition,
+				            departmentName: data.senderDepartment,
+				            profileImg: data.senderProfileImg,
+				            employeeId: data.senderId
+				          }]
+				        : []
+				    },
 						{name: '참조', empList: []},
 						{name: '숨은참조', empList: []}
 					]);
@@ -350,7 +362,16 @@ export default function MailWrite({mailId}) {
 											</Alert>
 											)}
 									</Grid>
-
+									<Button variant="contained" onClick={() => navigate('/mail/list/INBOX')} sx={{padding:'0 16px', height:'35px', lineHeight:'35px'}}>목록</Button>
+									
+								</Box>
+							</Grid>
+							<Grid size={12}>
+								<TextField fullWidth label="제목" value={title} onChange = {e => setTitle(e.target.value)}/>
+							</Grid>
+							<Grid size={12}>
+								<Box sx={{ mb: '4px', fontSize: '14px', fontWeight: 600, color: 'text.primary', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+									수신자
 									<Link
 										component={RouterLink}
 										to="#"
@@ -361,12 +382,6 @@ export default function MailWrite({mailId}) {
 										CC & BCC
 									</Link>
 								</Box>
-							</Grid>
-							<Grid size={12}>
-								<TextField fullWidth label="제목" value={title} onChange = {e => setTitle(e.target.value)}/>
-							</Grid>
-							<Grid size={12}>
-								<Box sx={{ mb: '4px', fontSize: '14px', fontWeight: 600, color: 'text.primary' }}>수신자</Box>
 								<Box 
 									sx={{
 										display: 'flex',

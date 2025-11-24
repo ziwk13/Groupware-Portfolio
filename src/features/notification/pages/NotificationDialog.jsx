@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { stompService } from 'api/stompService';
+import { useStomp } from 'contexts/StompProvider';
 
 // material-ui
 import Avatar from '@mui/material/Avatar';
@@ -15,7 +15,9 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Button } from '@mui/material';
-import { IconBell } from '@tabler/icons-react';
+import { IconBell, IconTrash } from '@tabler/icons-react';
+import { IconBellCheck } from '@tabler/icons-react';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 // project imports
 import { deleteAllNotifications, getUnreadCount, markAllAsRead } from '../api/notification';
@@ -24,10 +26,7 @@ import NotificationList from '../components/NotificationList';
 // assets
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-import BellCheckIcon from 'assets/icons/BellCheckIcon';
 import IconBellRingingFilled from 'assets/icons/IconBellRingingFilled';
-import TrashIcon from 'assets/icons/TrashIcon';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 // notification status options
 const status = [
@@ -56,10 +55,10 @@ export default function NotificationSection() {
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { client, isConnected } = useStomp();
 
   const anchorRef = useRef(null);
   const listRef = useRef(null);  // NotificationList의 loadMore 함수를 호출하기 위한 ref
@@ -91,20 +90,40 @@ export default function NotificationSection() {
   // 웹소켓 연결 및 구독
   useEffect(() => {
     // 서비스에 연결 요청
-    stompService.connect(() => {
-      console.log('STOMP: 연결 성공');
+if (client && isConnected) {
+      // 구독할 경로
+      const notificationTopic = '/user/queue/notifications';
 
-      // 알림 구독 요청
-      stompService.subscribeToNotifications((payload) => {
-        console.log('STOMP: 새 알림 개수 수신', payload);
-        setUnreadCount(payload.unreadCount);
-        setRefreshKey(prevKey => prevKey + 1);
+      // client.subscribe()를 직접 호출합니다.
+      const subscription = client.subscribe(notificationTopic, (message) => {
+        try {
+          const payload = JSON.parse(message.body);
+          setUnreadCount(payload.unreadCount);
+        } catch (e) {
+          console.error('STOMP (Context): 알림 메시지 파싱 실패', e);
+        }
       });
-    });
-    return () => {
-      stompService.disconnect();
-    };
-  }, []);
+
+      const newNotiSubscription = client.subscribe('/user/queue/new-notifications', (message) => {
+        try {
+          setRefreshKey(prevKey => prevKey + 1);
+        } catch (error) {
+          console.error('STOMP: 새 알림 객체 파싱 실패', error);
+        }
+      });
+
+      // (연결 해제(disconnect)는 StompProvider가 알아서 한다)
+      return () => {
+        if (subscription) {
+          subscription.unsubscribe();
+        }
+        if(newNotiSubscription) {
+          newNotiSubscription.unsubscribe();
+        }
+      };
+    }
+    // client나 isConnected 상태가 변경될 때마다 이 효과를 재실행합니다.
+  }, [client, isConnected]);
 
   // 전체 알림 읽기
   const handleClick = async () => {
@@ -225,7 +244,7 @@ export default function NotificationSection() {
                         <Stack direction="row" spacing={0.5}>
                           <Tooltip title="전체 알림 읽음">
                             <IconButton onClick={handleClick} color="primary" size="small">
-                              <BellCheckIcon />
+                              <IconBellCheck />
                             </IconButton>
                           </Tooltip>
                           <Dialog
@@ -251,7 +270,7 @@ export default function NotificationSection() {
                           </Dialog>
                           <Tooltip title="전체 알림 삭제">
                             <IconButton onClick={handleDeleteAllClick} color="error" size="small">
-                              <TrashIcon />
+                              <IconTrash />
                             </IconButton>
                           </Tooltip>
                         </Stack>

@@ -10,18 +10,19 @@ import { getMyInfo } from '../../employee/api/employeeAPI';
 // 달력 import
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { detailWorkLog, getWorkLogCodes, submitWorkLog } from '../api/worklogAPI';
+import { detailWorkLog, getWorkLogCodes, submitWorkLog, updateWorkLog } from '../api/worklogAPI';
 
 function WorkLogWrite({worklogId}) {
 	const navigate = useNavigate();
+	const isEdit = !!worklogId;
 	const [loading, setLoading] = useState(false);
 	const [showAlert, setShowAlert] = useState(false);
 	const [alertMessage, setAlertMessage] = useState('');
 
 	const [valueBasic, setValueBasic] = React.useState(new Date());	// 업무일
-	const [writer, setWriter] = useState();	// 작성자
-	const [title, setTitle] = useState();		// 제목
-	const [content, setContent] = useState();	// 업무내용
+	const [writer, setWriter] = useState('');	// 작성자
+	const [title, setTitle] = useState('');		// 제목
+	const [content, setContent] = useState('');	// 업무내용
 
 	// 업무 코드 조회
 	const [workTypes, setWorkTypes] = useState([]);
@@ -88,47 +89,63 @@ function WorkLogWrite({worklogId}) {
 
 	// 업무일지 등록
 	const handleSubmitWorkLog = async () => {
-		if(!workTypeId) {setAlertMessage("업무를 선택해주세요."); setShowAlert(true); return;};
-		if(!workOptionId) {setAlertMessage("세부업무를 선택해주세요."); setShowAlert(true); return;};
-		if(!title || title.trim() === "") {setAlertMessage("제목을 입력해주세요."); setShowAlert(true); return;};
-		const now = new Date();
-		if(valueBasic > now) {setAlertMessage("미래 날짜는 선택할 수 없습니다."); setShowAlert(true); return;}
+    if (!workTypeId) { setAlertMessage("업무를 선택해주세요."); setShowAlert(true); return; }
+    if (!workOptionId) { setAlertMessage("세부업무를 선택해주세요."); setShowAlert(true); return; }
+    if (!title || title.trim() === "") { setAlertMessage("제목을 입력해주세요."); setShowAlert(true); return; }
+    const now = new Date();
+    if (valueBasic > now) { setAlertMessage("미래 날짜는 선택할 수 없습니다."); setShowAlert(true); return; }
 
-		const formData = new FormData();
-		const dateStr = valueBasic.toLocaleString("sv-SE").replace(" ", "T");
+    const dateStr = valueBasic.toLocaleString("sv-SE").replace(" ", "T");
 
-		formData.append('workDate', dateStr);
-		formData.append('workTypeId', workTypeId);
-		formData.append('workOptionId', workOptionId);
-		formData.append('title', title);
-		formData.append('content', content);
+    try {
+      if (isEdit) {
+        const body = {
+          workDate: dateStr,
+          workTypeId,
+          workOptionId,
+          title,
+          content
+        };
+        await updateWorkLog(worklogId, body);
+      } else {
+        // 신규 등록일 때: FormData + POST
+        const formData = new FormData();
+        formData.append('workDate', dateStr);
+        formData.append('workTypeId', workTypeId);
+        formData.append('workOptionId', workOptionId);
+        formData.append('title', title);
+        formData.append('content', content);
 
-		try {
-			await submitWorkLog(formData);
-			navigate('/worklog/list/all')
-		} catch(err) {
-			console.error(err);
-			setAlertMessage("업무일지 등록에 실패했습니다.");
-			setShowAlert(true);
-		}
-	};
+        await submitWorkLog(formData);
+      }
+
+      navigate('/worklog/list/all');
+    } catch (err) {
+      console.error(err);
+      setAlertMessage(isEdit ? "업무일지 수정에 실패했습니다." : "업무일지 등록에 실패했습니다.");
+      setShowAlert(true);
+    }
+  };
 
 
 	// 수정 : 기존 업무일지 정보 가져오기
 	useEffect(() => {
-		if(!worklogId) return;
+    if (!worklogId) return;
 
-		setLoading(true);
-		detailWorkLog(worklogId)
-			.then(res => {
-				const data = res.data.data;
-				console.log(data);
-				setTitle(data.title);
-				setWorkTypeId(data.workTypeId);
-				setWorkOptionId(data.workOptionId);
-				setContent(data.content);
-			})
-	})
+    setLoading(true);
+    detailWorkLog(worklogId)
+      .then((res) => {
+        const data = res.data.data;
+        setTitle(data.title);
+        setWorkTypeId(data.workTypeId);
+        setWorkOptionId(data.workOptionId);
+        setContent(data.content);
+        if (data.workDate) {
+          setValueBasic(new Date(data.workDate));
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [worklogId]);
 
 
 
@@ -140,7 +157,6 @@ function WorkLogWrite({worklogId}) {
 						<Grid container spacing={gridSpacing}>
 							<Grid size={12} sx={{display:'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 								<Box sx={{display:'flex', justifyContent:'space-between', gap:'5px'}}>
-									<Button variant="contained" onClick={() => navigate(-1)} sx={{padding:'0 16px', height:'35px', lineHeight:'35px'}}>뒤로</Button>
 									<Button variant="contained" onClick={handleSubmitWorkLog} sx={{padding:'0 16px', height:'35px', lineHeight:'35px'}}>등록</Button>
 								</Box>
 
@@ -178,7 +194,7 @@ function WorkLogWrite({worklogId}) {
 									</LocalizationProvider>
 								</Box>
 								<Box sx={{flex:1}}>
-									<TextField fullWidth label="작성자" value={writer?.name || ''} InputProps={{readOnly:true}}></TextField> 
+									<TextField fullWidth label="작성자" value={`${writer?.name || ''} (${writer?.department})`} InputProps={{readOnly:true}}></TextField> 
 								</Box>
 							</Grid>
 							<Grid size={12} sx={{display:'flex', gap:'20px'}}>
