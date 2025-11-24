@@ -164,7 +164,7 @@ export default function MailWrite({mailId}) {
 					setContent(replyTemplate);
 
 					// 회신이라 발신자가 수신자로 들어감
-					const senderEmail = extractEmail(data.senderEmail || '');
+					const senderEmail = data.senderEmail || '';
 					setTo(senderEmail);
 
 					// 참조, 숨은참조 초기화
@@ -175,7 +175,19 @@ export default function MailWrite({mailId}) {
 					setAttachments([]);
 					
 					setList([
-						{name: '수신자', empList: senderEmail ? [mapToOrgEmp(senderEmail)] : []},
+						{
+				      name: '수신자',
+				      empList: senderEmail
+				        ? [{
+				            email: senderEmail,
+				            name: data.senderName,
+				            position: data.senderPosition,
+				            departmentName: data.senderDepartment,
+				            profileImg: data.senderProfileImg,
+				            employeeId: data.senderId
+				          }]
+				        : []
+				    },
 						{name: '참조', empList: []},
 						{name: '숨은참조', empList: []}
 					]);
