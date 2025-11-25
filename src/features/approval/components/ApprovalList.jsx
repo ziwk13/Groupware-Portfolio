@@ -260,18 +260,7 @@ export default function ApprovalList({ status }) {
           <Grid>
             <Typography variant="h3">{titleMapping[status]}</Typography>
           </Grid>
-          <Grid>
-            <OutlinedInput
-              id="input-search-list-style1"
-              placeholder="Search"
-              startAdornment={
-                <InputAdornment position="start">
-                  <IconSearch stroke={1.5} size="16px" />
-                </InputAdornment>
-              }
-              size="small"
-            />
-          </Grid>
+
         </Grid>
       }
       content={false}
