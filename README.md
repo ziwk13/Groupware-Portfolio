@@ -1,8 +1,9 @@
 
+<img src="https://github.com/user-attachments/assets/fd211198-6bd7-4d53-9f72-abc2aea19922" width="30%"/>
+
+
 # [프로젝트 명: StartUp]
 > **한 줄 소개:** 기업의 효율적인 업무 처리를 위한 웹 기반 그룹웨어 서비스
-
-<img src="https://github.com/user-attachments/assets/fd211198-6bd7-4d53-9f72-abc2aea19922" width="100%"/>
 
 <a href="#"><img src="https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=openjdk&logoColor=white"/></a>
 <a href="#"><img src="https://img.shields.io/badge/Spring-6DB33F?style=flat-square&logo=spring&logoColor=white"/></a>
@@ -81,10 +82,13 @@
   - 결재, 일정 등 각 모듈별 이벤트 발생 시 실시간 알림(Notification) 발송 로직 구현
 
 <br/>
+실시간 알림 시연 영상
 <img src="https://github.com/user-attachments/assets/c214d9f5-4a55-4ab6-8774-edcd6990193f" width="80%" alt="실시간 알림 시연 영상"/>
 <br/>
+실시간 채팅 메시지 전송
 <img src="https://github.com/user-attachments/assets/fff39083-f61b-474a-9b6d-b62b79bec531" width="80%" alt="실시간 채팅 메시지 전송 영상"/>
 <br/>
+실시간 메시지 읽음 처리
 <img src="https://github.com/user-attachments/assets/29bbbe73-2dda-42ae-9207-3ddfd243b7bf" width="80%" alt="실시간 메시지 읽음 처리 영상"/>
 
 ## 6. 트러블 슈팅 (Trouble Shooting)
